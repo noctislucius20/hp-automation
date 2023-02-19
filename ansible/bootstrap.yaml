@@ -1,0 +1,37 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+    - name: install updates
+      apt:
+        upgrade: dist
+        update_cache: yes
+
+- hosts: all
+  become: true
+  tasks:
+    - name: create ansigent user
+      user:
+        name: ansigent
+        groups: root
+    
+    - name: add ssh key for ansigent
+      authorized_key:
+        user: ansigent
+        key: "{{ item }}"
+      with_file:
+        - ~/.ssh/ansible.pub
+
+    - name: add sudoers file for ansigent
+      copy:
+        src: sudoer_ansigent
+        dest: /etc/sudoers.d/ansigent
+        owner: root
+        group: root
+        mode: 0440
+
+- hosts: all
+  become: true
+  roles:
+    - base

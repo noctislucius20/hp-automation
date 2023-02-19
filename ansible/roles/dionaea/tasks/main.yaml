@@ -1,0 +1,41 @@
+- name: clone git dionaea honeypot
+  git:
+    repo: https://github.com/yevonnaelandrew/dionaea.git
+    dest: /home/ansigent/dionaea
+
+- name: build dionaea docker image
+  docker_image:
+    name: isif/dionaea
+    tag: dionaea_hp
+    build:
+      path: /home/ansigent/dionaea
+    source: build
+
+- name: run dionaea docker image
+  docker_container:
+    name: dionaea
+    image: isif/dionaea:dionaea_hp
+    ports: 
+      - "21:21"
+      - "42:42"
+      - "69:69/udp"
+      - "80:80"
+      - "135:135"
+      - "443:443"
+      - "445:445"
+      - "1433:1433"
+      - "1723:1723"
+      - "1883:1883"
+      - "1900:1900/udp"
+      - "3306:3306"
+      - "5060:5060"
+      - "5060:5060/udp"
+      - "5061:5061"
+      - "11211:11211"
+    volumes:
+      - dionaea:/opt/dionaea
+    auto_remove: true
+    state: started
+    tty: true
+    interactive: true
+    detach: true
