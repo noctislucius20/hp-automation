@@ -43,7 +43,10 @@
     - containerd.io
   notify: restart_docker
 
-
+- name: install docker-python module
+  pip:
+    name: docker
+    
 # install mongodb
 - name: install mongodb docker
   docker_container:
