@@ -18,6 +18,7 @@
     tag: cowrie_hp
     build:
       path: /home/ansigent/cowrie
+      pull: yes
     source: build
 
 - name: run cowrie docker image
