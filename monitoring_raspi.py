@@ -3,7 +3,6 @@ import os
 import time
 import json
 import schedule
-import humanize
 
 #Fungsi Penggunaan Setiap CPU
 # def cpu_usage_percpu():

@@ -1,3 +1,4 @@
+import socket
 import psutil
 import numpy as np
 from datetime import datetime
@@ -5,28 +6,25 @@ import schedule
 import time
 import json
 
+def hostname():
+    hostname = socket.gethostname()
+    ip_address = socket.gethostbyname(hostname)
+    print(hostname)
+    print(ip_address)
+
 def checkHoneypotRunning(processName, status):
     for proc in psutil.process_iter():
         try:
-            if (processName.lower() in proc.name().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
+            if (processName.lower() in proc.name().lower() and status.lower() in proc.status().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
                 return True
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
     return False
 
-# def checkHoneypotRunningCMD(processCMD, status):
-#     for proc in psutil.process_iter():
-#         try:
-#             if (processCMD in proc.cmdline() and status.lower() in proc.status().lower()):
-#                 return True
-#         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-#             pass
-#     return False
-
 def checkIfProcessRunning(processName, status):
     for proc in psutil.process_iter():
         try:
-            if (processName.lower() in proc.name().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
+            if (processName.lower() in proc.name().lower() and status.lower() in proc.status().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
                 return(proc.status().capitalize())
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
@@ -35,7 +33,7 @@ def checkIfProcessRunning(processName, status):
 def checkResidentMemoryRunning(processName, status):
     for proc in psutil.process_iter():
         try:
-            if (processName.lower() in proc.name().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
+            if (processName.lower() in proc.name().lower() and status.lower() in proc.status().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
                 return((proc.memory_info().rss) / 1024)
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
@@ -44,7 +42,7 @@ def checkResidentMemoryRunning(processName, status):
 def checkVirtualMemoryRunning(processName, status):
     for proc in psutil.process_iter():
         try:
-            if (processName.lower() in proc.name().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
+            if (processName.lower() in proc.name().lower() and status.lower() in proc.status().lower()) or processName in proc.cmdline() and status.lower() in proc.status().lower():
                 return((proc.memory_info().vms) / 1024)
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
@@ -53,7 +51,7 @@ def checkVirtualMemoryRunning(processName, status):
 def checkTextMemoryRunning(processName, status):
     for proc in psutil.process_iter():
         try:
-            if (processName.lower() in proc.name().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
+            if (processName.lower() in proc.name().lower() and status.lower() in proc.status().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
                 return((proc.memory_info().text) / 1024)
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
@@ -62,28 +60,37 @@ def checkTextMemoryRunning(processName, status):
 def checkDataMemoryRunning(processName, status):
     for proc in psutil.process_iter():
         try:
-            if (processName.lower() in proc.name().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
+            if (processName.lower() in proc.name().lower() and status.lower() in proc.status().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
                 return((proc.memory_info().data) / 1024)
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
     return False
 
-def checkMemoryPercentRunning(processName, status):
+def checkRMSPercentRunning(processName, status):
     for proc in psutil.process_iter():
         try:
-            if (processName.lower() in proc.name().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
-                return((proc.memory_percent(memtype='rss')) / 1024)
+            if (processName.lower() in proc.name().lower() and status.lower() in proc.status().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
+                return((proc.memory_percent(memtype='rss')))
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
     return False
 
-def checking():
-    for proc in psutil.process_iter(['cmdline', 'status']):
+def checkVMSPercentRunning(processName, status):
+    for proc in psutil.process_iter():
         try:
-            print(proc.info)
+            if (processName.lower() in proc.name().lower() and status.lower() in proc.status().lower() or processName in proc.cmdline() and status.lower() in proc.status().lower()):
+                return((proc.memory_percent(memtype='vms')))
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
-    return False   
+    return False
+
+# def checking():
+#     for proc in psutil.process_iter(['cmdline', 'status']):
+#         try:
+#             print(proc.info)
+#         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+#             pass
+#     return False   
 
 
 # CHECK HONEYPOT RUNNING
@@ -106,11 +113,7 @@ def totalHoneypotRunning():
 
     if True in list_honeypot_running:
         return(np.count_nonzero(list_honeypot_running == True))
-    elif False in list_honeypot_running:
-        return(np.count_nonzero(list_honeypot_running == True))
     elif True in list_honeypot_sleeping:
-        return(np.count_nonzero(list_honeypot_sleeping == True))
-    elif False in list_honeypot_sleeping:
         return(np.count_nonzero(list_honeypot_sleeping == True))
     else:
         return(0)
@@ -365,52 +368,101 @@ def checkDataMemoryRDPY():
     else:
         return(0)
 
-# CHECK HONEYPOT MEMORY PERCENTAGE    
-def checkMemoryPercentDionaea():
-    if checkMemoryPercentRunning('dionaea', 'running'):
-        return checkMemoryPercentRunning('dionaea', 'running')
-    elif checkMemoryPercentRunning('dionaea', 'sleeping'):
-        return checkMemoryPercentRunning('dionaea', 'sleeping')
+# CHECK HONEYPOT RMS PERCENTAGE    
+def checkRMSPercentDionaea():
+    if checkRMSPercentRunning('dionaea', 'running'):
+        return checkRMSPercentRunning('dionaea', 'running')
+    elif checkRMSPercentRunning('dionaea', 'sleeping'):
+        return checkRMSPercentRunning('dionaea', 'sleeping')
     else:
         return(0)
 
-def checkMemoryPercentHoneytrap():
-    if checkMemoryPercentRunning('honeytrap', 'running'):
-        return checkMemoryPercentRunning('honeytrap', 'running')
-    elif checkMemoryPercentRunning('honeytrap', 'sleeping'):
-        return checkMemoryPercentRunning('honeytrap', 'sleeping')
+def checkRMSPercentHoneytrap():
+    if checkRMSPercentRunning('honeytrap', 'running'):
+        return checkRMSPercentRunning('honeytrap', 'running')
+    elif checkRMSPercentRunning('honeytrap', 'sleeping'):
+        return checkRMSPercentRunning('honeytrap', 'sleeping')
     else:
         return(0)
 
-def checkMemoryPercentGridpot():
-    if checkMemoryPercentRunning('conpot', 'running'):
-        return checkMemoryPercentRunning('conpot', 'running')
-    elif checkMemoryPercentRunning('conpot', 'sleeping'):
-        return checkMemoryPercentRunning('conpot', 'sleeping')
+def checkRMSPercentGridpot():
+    if checkRMSPercentRunning('conpot', 'running'):
+        return checkRMSPercentRunning('conpot', 'running')
+    elif checkRMSPercentRunning('conpot', 'sleeping'):
+        return checkRMSPercentRunning('conpot', 'sleeping')
     else:
         return(0)
 
-def checkMemoryPercentCowrie():
-    if checkMemoryPercentRunning('/cowrie/cowrie-env/bin/python3', 'running'):
-        return checkMemoryPercentRunning('/cowrie/cowrie-env/bin/python3', 'running')
-    elif checkMemoryPercentRunning('/cowrie/cowrie-env/bin/python3', 'sleeping'):
-        return checkMemoryPercentRunning('/cowrie/cowrie-env/bin/python3', 'sleeping')
+def checkRMSPercentCowrie():
+    if checkRMSPercentRunning('/cowrie/cowrie-env/bin/python3', 'running'):
+        return checkRMSPercentRunning('/cowrie/cowrie-env/bin/python3', 'running')
+    elif checkRMSPercentRunning('/cowrie/cowrie-env/bin/python3', 'sleeping'):
+        return checkRMSPercentRunning('/cowrie/cowrie-env/bin/python3', 'sleeping')
     else:
         return(0)
 
-def checkMemoryPercentElasticpot():
-    if checkMemoryPercentRunning('elasticpot.py', 'running'):
-        return checkMemoryPercentRunning('elasticpot.py', 'running')
-    elif checkMemoryPercentRunning('elasticpot.py', 'sleeping'):
-        return checkMemoryPercentRunning('elasticpot.py', 'sleeping')
+def checkRMSPercentElasticpot():
+    if checkRMSPercentRunning('elasticpot.py', 'running'):
+        return checkRMSPercentRunning('elasticpot.py', 'running')
+    elif checkRMSPercentRunning('elasticpot.py', 'sleeping'):
+        return checkRMSPercentRunning('elasticpot.py', 'sleeping')
     else:
         return(0)
 
-def checkMemoryPercentRDPY():
-    if checkMemoryPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'running'):
-        return checkMemoryPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'running')
-    elif checkMemoryPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'sleeping'):
-        return checkMemoryPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'sleeping')
+def checkRMSPercentRDPY():
+    if checkRMSPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'running'):
+        return checkRMSPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'running')
+    elif checkRMSPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'sleeping'):
+        return checkRMSPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'sleeping')
+    else:
+        return(0)
+
+# CHECK HONEYPOT VMS PERCENTAGE    
+def checkVMSPercentDionaea():
+    if checkVMSPercentRunning('dionaea', 'running'):
+        return checkVMSPercentRunning('dionaea', 'running')
+    elif checkVMSPercentRunning('dionaea', 'sleeping'):
+        return checkVMSPercentRunning('dionaea', 'sleeping')
+    else:
+        return(0)
+
+def checkVMSPercentHoneytrap():
+    if checkVMSPercentRunning('honeytrap', 'running'):
+        return checkVMSPercentRunning('honeytrap', 'running')
+    elif checkVMSPercentRunning('honeytrap', 'sleeping'):
+        return checkVMSPercentRunning('honeytrap', 'sleeping')
+    else:
+        return(0)
+
+def checkVMSPercentGridpot():
+    if checkVMSPercentRunning('conpot', 'running'):
+        return checkVMSPercentRunning('conpot', 'running')
+    elif checkVMSPercentRunning('conpot', 'sleeping'):
+        return checkVMSPercentRunning('conpot', 'sleeping')
+    else:
+        return(0)
+
+def checkVMSPercentCowrie():
+    if checkVMSPercentRunning('/cowrie/cowrie-env/bin/python3', 'running'):
+        return checkVMSPercentRunning('/cowrie/cowrie-env/bin/python3', 'running')
+    elif checkVMSPercentRunning('/cowrie/cowrie-env/bin/python3', 'sleeping'):
+        return checkVMSPercentRunning('/cowrie/cowrie-env/bin/python3', 'sleeping')
+    else:
+        return(0)
+
+def checkVMSPercentElasticpot():
+    if checkVMSPercentRunning('elasticpot.py', 'running'):
+        return checkVMSPercentRunning('elasticpot.py', 'running')
+    elif checkVMSPercentRunning('elasticpot.py', 'sleeping'):
+        return checkVMSPercentRunning('elasticpot.py', 'sleeping')
+    else:
+        return(0)
+
+def checkVMSPercentRDPY():
+    if checkVMSPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'running'):
+        return checkVMSPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'running')
+    elif checkVMSPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'sleeping'):
+        return checkVMSPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'sleeping')
     else:
         return(0)
         
@@ -423,37 +475,43 @@ def main():
         "dionaea_resident_memory": float("{:.2f}".format(checkResidentMemoryDionaea())),
         "dionaea_text_memory": float("{:.2f}".format(checkTextMemoryDionaea())),
         "dionaea_data_memory": float("{:.2f}".format(checkDataMemoryDionaea())),
-        "dionaea_memory_percentage": float("{:.2f}".format(checkMemoryPercentDionaea())),
+        "dionaea_rms_percentage": float("{:.2f}".format(checkRMSPercentDionaea())),
+        "dionaea_vms_percentage": float("{:.2f}".format(checkVMSPercentDionaea())),
         "honeytrap": checkHoneytrap(),
         "honeytrap_virtual_memory": float("{:.2f}".format(checkVirtualMemoryHoneytrap())),
         "honeytrap_resident_memory": float("{:.2f}".format(checkResidentMemoryHoneytrap())),
         "honeytrap_text_memory": float("{:.2f}".format(checkTextMemoryHoneytrap())),
         "honeytrap_data_memory": float("{:.2f}".format(checkDataMemoryHoneytrap())),
-        "honeytrap_memory_percentage": float("{:.2f}".format(checkMemoryPercentHoneytrap())),
+        "honeytrap_rms_percentage": float("{:.2f}".format(checkRMSPercentHoneytrap())),
+        "honeytrap_vms_percentage": float("{:.2f}".format(checkVMSPercentHoneytrap())),
         "gridpot": checkGridpot(),
         "gridpot_virtual_memory": float("{:.2f}".format(checkVirtualMemoryGridpot())),
         "gridpot_resident_memory": float("{:.2f}".format(checkResidentMemoryGridpot())),
         "gridpot_text_memory": float("{:.2f}".format(checkTextMemoryGridpot())),
         "gridpot_data_memory": float("{:.2f}".format(checkDataMemoryGridpot())),
-        "gridpot_memory_percentage": float("{:.2f}".format(checkMemoryPercentGridpot())),
+        "gridpot_rms_percentage": float("{:.2f}".format(checkRMSPercentGridpot())),
+        "gridpot_vms_percentage": float("{:.2f}".format(checkVMSPercentGridpot())),
         "cowrie": checkCowrie(),
         "cowrie_virtual_memory": float("{:.2f}".format(checkVirtualMemoryCowrie())),
         "cowrie_resident_memory": float("{:.2f}".format(checkResidentMemoryCowrie())),
         "cowrie_text_memory": float("{:.2f}".format(checkTextMemoryCowrie())),
         "cowrie_data_memory": float("{:.2f}".format(checkDataMemoryCowrie())),
-        "cowrie_memory_percentage": float("{:.2f}".format(checkMemoryPercentCowrie())),
+        "cowrie_rms_percentage": float("{:.2f}".format(checkRMSPercentCowrie())),
+        "cowrie_vms_percentage": float("{:.2f}".format(checkVMSPercentCowrie())),
         "elasticpot": checkElasticpot(),
         "elasticpot_virtual_memory": float("{:.2f}".format(checkVirtualMemoryElasticpot())),
         "elasticpot_resident_memory": float("{:.2f}".format(checkResidentMemoryElasticpot())),
         "elasticpot_text_memory": float("{:.2f}".format(checkTextMemoryElasticpot())),
         "elasticpot_data_memory": float("{:.2f}".format(checkDataMemoryElasticpot())),
-        "elasticpot_memory_percentage": float("{:.2f}".format(checkMemoryPercentElasticpot())),
+        "elasticpot_rms_percentage": float("{:.2f}".format(checkRMSPercentElasticpot())),
+        "elasticpot_vms_percentage": float("{:.2f}".format(checkVMSPercentElasticpot())),
         "rdpy": checkRDPY(),
         "rdpy_virtual_memory": float("{:.2f}".format(checkVirtualMemoryRDPY())),
         "rdpy_resident_memory": float("{:.2f}".format(checkResidentMemoryRDPY())),
         "rdpy_text_memory": float("{:.2f}".format(checkTextMemoryRDPY())),
         "rdpy_data_memory": float("{:.2f}".format(checkDataMemoryRDPY())),
-        "rdpy_memory_percentage": float("{:.2f}".format(checkMemoryPercentRDPY())),
+        "rdpy_rms_percentage": float("{:.2f}".format(checkRMSPercentRDPY())),
+        "rdpy_vms_percentage": float("{:.2f}".format(checkVMSPercentRDPY())),
         "datetime": datetime.now().isoformat()
     }
 
@@ -465,7 +523,6 @@ def main():
 
 # checking()
 main()
-
 schedule.every(30).seconds.do(main)
 
 while True:
