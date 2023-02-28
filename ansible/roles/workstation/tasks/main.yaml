@@ -1,11 +1,13 @@
+- name: create ansiadmin user
+  user:
+    name: ansiadmin
+    password: $1$SomeSalt$d3heDLqN0l.9QW2PgDOXH/
+    shell: /bin/bash
+
 - name: install packages
   apt: 
-    name: "{{ item }}"
+    name: ['net-tools', 'lynx', 'docker.io']
     state: latest
-  with_items:
-    - net-tools
-    - lynx
-    - docker.io
 
 - name: install kubectl
   get_url:
@@ -19,16 +21,16 @@
     dest: /usr/local/bin/minikube
     mode: "755"
 
+- name: Ensure group "docker" exists
+  ansible.builtin.group:
+    name: docker
+    state: present
+    
 - name: add user to docker group
   user:
-    name: "{{ ansible_env.USER }}"
+    name: ansiadmin
     group: docker
 
 - name: start minikube
-  command: minikube start
-  args:
-    - addons: ingress
-    - cpus: 2
-    - install-addons: true
-    - kubernetes-version: stable
-    - memory: 6g
+  command: runuser -l ansiadmin -c 'minikube start --addons=ingress --cpus=2 --install-addons=true --kubernetes-version=stable'
+
