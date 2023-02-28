@@ -8,7 +8,7 @@
         upgrade: dist
         update_cache: yes
 
-- hosts: all
+- hosts: honeypot_servers
   become: true
   tasks:
     - name: create ansigent user
@@ -31,7 +31,9 @@
         group: root
         mode: 0440
 
-- hosts: all
+- hosts: honeypot_servers
   become: true
   roles:
     - base
+  tags: [ honeypot ]
+  
