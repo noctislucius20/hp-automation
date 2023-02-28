@@ -37,3 +37,8 @@
     - base
   tags: [ honeypot ]
   
+- hosts: workstation_servers
+  become: true
+  roles:
+    - workstation
+  tags: [ workstation ]
