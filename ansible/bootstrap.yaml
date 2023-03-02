@@ -36,9 +36,17 @@
   roles:
     - base
   tags: [ honeypot ]
-  
+
 - hosts: workstation_servers
   become: true
   roles:
     - workstation
+  tags: [ workstation ]
+
+- hosts: workstation_servers
+  remote_user: ansiadmin
+  roles:
+    - minikube
+    - awx
+    - postgres
   tags: [ workstation ]

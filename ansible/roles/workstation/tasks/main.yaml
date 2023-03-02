@@ -6,23 +6,11 @@
 
 - name: install packages
   apt: 
-    name: ['net-tools', 'lynx', 'docker.io']
-    state: latest
-
-- name: install kubectl
-  get_url:
-    url: https://storage.googleapis.com/kubernetes-release/release/v1.18.0/bin/linux/amd64/kubectl
-    dest: /usr/local/bin/kubectl
-    mode: "755"
-
-- name: install minikube
-  get_url:
-    url: https://github.com/kubernetes/minikube/releases/download/v1.21.0/minikube-linux-amd64
-    dest: /usr/local/bin/minikube
-    mode: "755"
+    name: ['net-tools', 'lynx', 'docker.io', 'acl', 'python3-pip']
+    state: present
 
 - name: Ensure group "docker" exists
-  ansible.builtin.group:
+  group:
     name: docker
     state: present
     
@@ -31,6 +19,8 @@
     name: ansiadmin
     group: docker
 
-- name: start minikube
-  command: runuser -l ansiadmin -c 'minikube start --addons=ingress --cpus=2 --install-addons=true --kubernetes-version=stable'
-
+- name: git clone
+  git:
+    repo: https://github.com/noctislucius20/hp-automation.git
+    dest: /home/ansiadmin/hp-automation
+    version: dev-autodeploy
