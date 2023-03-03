@@ -4,10 +4,27 @@
     password: $1$SomeSalt$d3heDLqN0l.9QW2PgDOXH/
     shell: /bin/bash
 
+- name: add ssh key for ansiadmin
+  authorized_key:
+    user: ansiadmin
+    key: "{{ item }}"
+  with_file:
+    - ~/.ssh/ansible.pub
+
+- name: change /usr/local/bin permission
+  file:
+    path: /usr/local/bin/
+    owner: ansiadmin
+    # group: ansiadmin
+    mode: '0766'
+
 - name: install packages
   apt: 
     name: ['net-tools', 'lynx', 'docker.io', 'acl', 'python3-pip']
     state: present
+  notify: 
+    - restart_docker
+    - restart_containerd
 
 - name: Ensure group "docker" exists
   group:

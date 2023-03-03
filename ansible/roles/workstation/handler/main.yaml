@@ -1,0 +1,11 @@
+- name: restart_docker
+  systemd:
+    name: docker
+    state: started
+    daemon_reload: true
+
+- name: restart_containerd
+  systemd:
+    name: containerd
+    state: started
+    daemon_reload: true
