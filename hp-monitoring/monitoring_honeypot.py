@@ -6,11 +6,11 @@ import schedule
 import time
 import json
 
-def hostname():
-    hostname = socket.gethostname()
-    ip_address = socket.gethostbyname(hostname)
-    print(hostname)
-    print(ip_address)
+# def hostname():
+#     hostname = socket.gethostname()
+#     ip_address = socket.gethostbyname(hostname)
+#     print(hostname)
+#     print(ip_address)
 
 def checkHoneypotRunning(processName, status):
     for proc in psutil.process_iter():
