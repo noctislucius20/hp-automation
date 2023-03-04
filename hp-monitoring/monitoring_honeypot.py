@@ -517,7 +517,7 @@ def main():
 
     # print(logs_json)
 
-    with open('logs_honeypot.json', 'a+') as json_file:
+    with open('hp-monitoring/logs_honeypot.json', 'a+') as json_file:
         json.dump(logs_json, json_file)
         json_file.write("\n")
 
