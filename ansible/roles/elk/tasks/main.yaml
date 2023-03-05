@@ -1,0 +1,36 @@
+- name: create elk directory
+  file:
+    path: ~/elk
+    state: directory
+
+- name: clone git elk
+  git:
+    repo: https://github.com/noctislucius20/hp-automation.git
+    dest: ~/elk
+    version: dev-monitoring
+
+- name: build elk docker image
+  docker_image:
+    name: elk
+    tag: latest
+    build:
+      path: ~/elk/elk/elk_config
+      pull: yes
+    source: build
+    state: present
+
+- name: load elk image to minikube
+  command: minikube image load hello-world
+
+- name: create elk namespace
+  k8s:
+    name: elk
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: install elk
+  k8s:
+    src: ~/elk.yaml
+    namespace: elk
+    state: present
