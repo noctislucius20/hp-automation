@@ -18,6 +18,12 @@
     # group: ansiadmin
     mode: '0766'
 
+- name: change sysctl vm.max_map_count
+  sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    state: present
+
 - name: install packages
   apt: 
     name: ['net-tools', 'lynx', 'docker.io', 'acl', 'python3-pip']
@@ -25,6 +31,10 @@
   notify: 
     - restart_docker
     - restart_containerd
+
+- name: install docker module
+  pip:
+    name: docker
 
 - name: Ensure group "docker" exists
   group:

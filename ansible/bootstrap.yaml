@@ -49,4 +49,5 @@
     - minikube
     - awx
     - postgres
+    - elk
   tags: [ workstation ]
