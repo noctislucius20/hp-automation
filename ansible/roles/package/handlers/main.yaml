@@ -1,9 +1,0 @@
-- name: restart_docker
-  service:
-    name: docker
-    state: restarted
-
-- name: restart_mongodb
-  service:
-    name: mongod
-    state: restarted
