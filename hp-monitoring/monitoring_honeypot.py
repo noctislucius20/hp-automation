@@ -1,16 +1,16 @@
-import socket
 import psutil
+import paho.mqtt.client as mqtt
 import numpy as np
 from datetime import datetime
 import schedule
 import time
 import json
 
-def hostname():
-    hostname = socket.gethostname()
-    ip_address = socket.gethostbyname(hostname)
-    print(hostname)
-    print(ip_address)
+# def hostname():
+#     hostname = socket.gethostname()
+#     ip_address = socket.gethostbyname(hostname)
+#     print(hostname)
+#     print(ip_address)
 
 def checkHoneypotRunning(processName, status):
     for proc in psutil.process_iter():
@@ -467,7 +467,10 @@ def checkVMSPercentRDPY():
         return(0)
         
 # MAIN FUNCTION
+
+logs_json = None
 def main():
+    global logs_json
     logs_json = {
         "honeypot_running": totalHoneypotRunning(),
         "dionaea": checkDionaea(),
@@ -516,15 +519,68 @@ def main():
     }
 
     # print(logs_json)
+    # print ('Running Log...')
 
-    with open('logs_honeypot.json', 'a+') as json_file:
-        json.dump(logs_json, json_file)
-        json_file.write("\n")
+    # with open('hp-monitoring/logs_honeypot.json', 'a+') as json_file:
+    #     json.dump(logs_json, json_file)
+    #     json_file.write("\n")
 
-# checking()
-main()
-schedule.every(30).seconds.do(main)
+# ==== START MQTT CONNECTION & PUBLISH ====
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+config_file = open('hp-monitoring/config.txt')
+config_dict = {}
+for lines in config_file:
+    items = lines.split(': ', 1)
+    config_dict[items[0]] = eval(items[1])
+
+def connect_mqtt():
+    def on_connect(client, userdata, flags, rc):
+        if rc == 0:
+            print("Connected to MQTT Broker!")
+        else:
+            print("Failed to connect, return code %d\n", rc)
+
+    client = mqtt.Client(config_dict['MQTT_CLIENT_HONEYPOT'])
+    # client.username_pw_set(username, password)
+    client.on_connect = on_connect
+    client.connect(config_dict['MQTT_BROKER'], config_dict['MQTT_PORT'])
+    return client
+
+
+def publish(client):
+    # msg_count = 0
+    try:
+        while True:
+            time.sleep(10)
+            msg = json.dumps(logs_json)
+            result = client.publish(config_dict['MQTT_TOPIC_HONEYPOT'], msg)
+            # result: [0, 1]
+            # print(result)
+            status = result[0]
+            if status == 0:
+                # print(f"Send `{msg}` to topic `{config_dict['MQTT_TOPIC_HONEYPOT']}`")
+                print(msg)
+            else:
+                print(f"Failed to send message to topic {config_dict['MQTT_TOPIC_HONEYPOT']}")
+    except:
+        print("Failed to parse data")
+
+
+def run():
+    client = connect_mqtt()
+    client.loop_start()
+    main()
+    publish(client)
+
+if __name__ == '__main__': 
+    # checking()
+    # main()
+    # publish()
+    run()
+    # schedule.every(10).seconds.do(run)
+    # schedule.every(1).seconds.do(publish)
+    # print(logs_json)
+
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
