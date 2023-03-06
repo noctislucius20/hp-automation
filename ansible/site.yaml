@@ -3,19 +3,10 @@
 - hosts: honeypot_servers
   become: true
   gather_facts: false
-  vars:
-    refused: "port 22: Connection refused"
-    new_port: 22888
   pre_tasks:
-    # - name: check ssh port
-    #   command: /bin/true
-    #   ignore_unreachable: true
-    #   register: result
-
     - name: set ansible_port
       set_fact:
-        ansible_port: "{{ new_port }}"
-      # when: result.msg is defined and refused in result.msg
+        ansible_port: 22888
 
     - name: update repo cache
       apt:
