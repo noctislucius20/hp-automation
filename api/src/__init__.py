@@ -4,6 +4,8 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from sqlalchemy_utils.functions import database_exists, create_database
 from dotenv import load_dotenv
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.wrappers import Response
 
 import os
 
@@ -24,12 +26,12 @@ def create_app():
     pg_pass = os.getenv('PGPASSWORD')
 
     # flask app configuration
-    app.config = {
-        'SECRET_KEY': os.getenv('SECRET_KEY'),
-        'JSON_SORT_KEYS': False,
-        'SQLALCHEMY_DATABASE_URI': f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}',
-        'TEMPLATES_AUTO_RELOAD' : True
-    }
+    app.config.update(
+        SECRET_KEY = os.getenv('SECRET_KEY'),
+        SQLALCHEMY_DATABASE_URI = f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}',
+        JSON_SORT_KEYS = False,
+    )
+    app.wsgi_app = DispatcherMiddleware(Response('{"resource not found"}', status=404, content_type='application/json'), {'/api/v1':app.wsgi_app})
 
     # checking database existence
     if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
@@ -39,5 +41,21 @@ def create_app():
     cors.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
+
+    # import all models for migrations
+    from src.models.UsersModel import Users
+    from src.models.HoneypotsModel import Honeypots
+    from src.models.SensorsModel import Sensors
+    from src.models.AuthenticationsModel import Authentications
+    from src.models.HoneypotSensorModel import HoneypotSensor
+    from src.models.HoneypotDetailsModel import HoneypotDetails
+    from src.models.SensorDetailsModel import SensorDetails
+
+    # register blueprints for route
+    from src.controllers.UsersController import user
+    from src.controllers.ApiController import api
+
+    app.register_blueprint(user)
+    app.register_blueprint(api)
 
     return app
