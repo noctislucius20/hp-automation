@@ -10,3 +10,5 @@ pyjwt
 waitress
 flask-cors
 pyopenssl
+flask-marshmallow
+marshmallow-sqlalchemy

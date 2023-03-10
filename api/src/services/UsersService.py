@@ -1,30 +1,23 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from src.models.UsersModel import Users as UsersModel
+from src.schemas.UsersSchema import Users as UsersSchema
 from src import db
 from src.exceptions.InvariantError import InvariantError
 
-import datetime
+import datetime as dt
 
 class UsersService:
     def add_user(self, username, password, first_name, last_name):
         self.check_user_existed(username)
         hashed_password = generate_password_hash(password, method='sha256')
-        new_user = UsersModel(username = username, password = hashed_password, first_name = first_name, last_name = last_name, roles = 'user', status = True, created_at = datetime.datetime.now(), updated_at = datetime.datetime.now())
+        new_user = UsersModel(username = username, password = hashed_password, first_name = first_name, last_name = last_name, roles = 'user', status = True, created_at = dt.datetime.now(), updated_at = dt.datetime.now())
 
         db.session.add(new_user)
         db.session.commit()
 
-        result = {
-            'username' : new_user.username,
-            'first_name' : new_user.first_name,
-            'last_name' : new_user.last_name,
-            'roles': new_user.roles.value,
-            'status': new_user.status,
-            'created_at': new_user.created_at,
-            'updated_at': new_user.updated_at
-        }
+        user_schema = UsersSchema()
 
-        return result
+        return user_schema.dump(new_user)
     
     def check_user_existed(self, username):
         user = UsersModel.query.filter_by(username=username, status=True).first()
@@ -34,40 +27,19 @@ class UsersService:
         
     def list_all_users(self):
         users = UsersModel.query.filter_by(status=True).all()
-        result = []
-
-        for u in users:
-            user = {
-                'username' : u.username,
-                'first_name' : u.first_name,
-                'last_name' : u.last_name,
-                'roles': u.roles.value,
-                'status': u.status,
-                'created_at': u.created_at,
-                'updated_at': u.updated_at
-            }
-            result.append(user)
+        users_schema = UsersSchema(many=True)
         
-        return result
+        return users_schema.dump(users)
     
     def get_one_user(self, username):
         user = UsersModel.query.filter_by(username=username, status=True).first()
+        user_schema = UsersSchema()
 
         if not user:
             raise InvariantError(message="user not exist")
 
-        result = {
-            'username' : user.username,
-            'first_name' : user.first_name,
-            'last_name' : user.last_name,
-            'roles': user.roles.value,
-            'status': user.status,
-            'created_at': user.created_at,
-            'updated_at': user.updated_at
-        }
+        return user_schema.dump(user)
 
-        return result
-        
     def edit_user(self, username, first_name, last_name, password, new_password, new_username):
         user = UsersModel.query.filter_by(username=username, status=True).first()
 
@@ -86,7 +58,7 @@ class UsersService:
         user.first_name = first_name if first_name != None and first_name != '' else user.first_name
         user.last_name = last_name if last_name != None and last_name != '' else user.last_name
         user.password = generate_password_hash(new_password, method='sha256') if new_password != None and new_password != '' else user.password
-        user.updated_at = datetime.datetime.now() 
+        user.updated_at = dt.dt.now() 
 
         db.session.commit()
 

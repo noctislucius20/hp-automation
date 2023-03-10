@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
+from flask_marshmallow import Marshmallow
 from sqlalchemy_utils.functions import database_exists, create_database
 from dotenv import load_dotenv
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
@@ -14,6 +15,7 @@ load_dotenv()
 db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
+ma = Marshmallow()
 
 def create_app():
     app = Flask(__name__)
@@ -30,6 +32,7 @@ def create_app():
         SECRET_KEY = os.getenv('SECRET_KEY'),
         SQLALCHEMY_DATABASE_URI = f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}',
         JSON_SORT_KEYS = False,
+        SQLALCHEMY_TRACK_MODIFICATIONS = False
     )
     app.wsgi_app = DispatcherMiddleware(Response('{"resource not found"}', status=404, content_type='application/json'), {'/api/v1':app.wsgi_app})
 
@@ -41,6 +44,7 @@ def create_app():
     cors.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
+    ma.init_app(app)
 
     # import all models for migrations
     from src.models.UsersModel import Users
