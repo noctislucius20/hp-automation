@@ -1,5 +1,5 @@
 from flask import Blueprint, request, make_response
-from src.exceptions.ClientError import ClientError
+from src.errors.ClientError import ClientError
 from src.services.UsersService import UsersService
 # from src.controllers.AuthController import token_required
 

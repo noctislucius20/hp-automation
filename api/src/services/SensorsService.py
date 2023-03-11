@@ -1,7 +1,7 @@
 from src.models.SensorsModel import Sensors as SensorsModel
 from src.schemas.SensorsSchema import Sensors as SensorsSchema
 from src import db
-from src.exceptions.InvariantError import InvariantError
+from src.errors.InvariantError import InvariantError
 
 import datetime as dt
 
@@ -49,9 +49,3 @@ class SensorsService:
         sensor.status = False
 
         db.session.commit()
-
-    # def check_sensor_existed(self, name):
-    #     sensor = SensorsModel.query.filter_by(sensorname=name, status=True).first()
-
-    #     if sensor:
-    #         raise InvariantError(message="sensor already exists")

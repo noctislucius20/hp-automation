@@ -2,7 +2,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from src.models.UsersModel import Users as UsersModel
 from src.schemas.UsersSchema import Users as UsersSchema
 from src import db
-from src.exceptions.InvariantError import InvariantError
+from src.errors.InvariantError import InvariantError
 
 import datetime as dt
 
