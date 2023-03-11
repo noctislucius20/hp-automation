@@ -58,8 +58,10 @@ def create_app():
     # register blueprints for route
     from src.controllers.UsersController import user
     from src.controllers.ApiController import api
+    from src.controllers.SensorsController import sensor
 
     app.register_blueprint(user)
     app.register_blueprint(api)
+    app.register_blueprint(sensor)
 
     return app
