@@ -65,7 +65,7 @@ def get_user_by_username(username):
 def update_user_by_username(username):
     data = request.get_json()
     try:
-        UsersService().edit_user(username=username, first_name=data.get('first_name'), last_name=data.get('last_name'), password=data.get('password'), new_username=data.get('new_username'), new_password=data.get('new_password'))
+        UsersService().edit_user(username=username, first_name=data.get('first_name'), last_name=data.get('last_name'), new_username=data.get('new_username'))
 
         response = make_response({'status': 'success', 'message': 'user successfully updated'})
         response.headers['Content-Type'] = 'application/json'

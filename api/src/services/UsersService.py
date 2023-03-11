@@ -18,12 +18,6 @@ class UsersService:
         user_schema = UsersSchema()
 
         return user_schema.dump(new_user)
-    
-    def check_user_existed(self, username):
-        user = UsersModel.query.filter_by(username=username, status=True).first()
-
-        if user:
-            raise InvariantError(message="user already exists")
         
     def list_all_users(self):
         users = UsersModel.query.filter_by(status=True).all()
@@ -40,26 +34,16 @@ class UsersService:
 
         return user_schema.dump(user)
 
-    def edit_user(self, username, first_name, last_name, password, new_password, new_username):
+    def edit_user(self, username, first_name, last_name, new_username):
         user = UsersModel.query.filter_by(username=username, status=True).first()
 
         if not user:
             raise InvariantError(message="user not exist")
-        
-        check_pass = check_password_hash(user.password, password)
-
-        if not check_pass:
-            raise InvariantError(message='password invalid')
-        
+                
         if user.username != new_username:
             self.check_user_existed(new_username)
 
-        user.username = new_username if new_username != None and new_username != '' else user.username
-        user.first_name = first_name if first_name != None and first_name != '' else user.first_name
-        user.last_name = last_name if last_name != None and last_name != '' else user.last_name
-        user.password = generate_password_hash(new_password, method='sha256') if new_password != None and new_password != '' else user.password
-        user.updated_at = dt.dt.now() 
-
+        db.session.execute(db.update(UsersModel), {'id': user.id, 'username': new_username, 'first_name': first_name, 'last_name': last_name, 'updated_at': dt.datetime.now()})
         db.session.commit()
 
     def delete_user(self, username):
@@ -72,3 +56,8 @@ class UsersService:
 
         db.session.commit()
 
+    def check_user_existed(self, username):
+        user = UsersModel.query.filter_by(username=username, status=True).first()
+
+        if user:
+            raise InvariantError(message="user already exists")
