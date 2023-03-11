@@ -9,3 +9,6 @@ sqlalchemy_utils
 pyjwt
 waitress
 flask-cors
+pyopenssl
+flask-marshmallow
+marshmallow-sqlalchemy

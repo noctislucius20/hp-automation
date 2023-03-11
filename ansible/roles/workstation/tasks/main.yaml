@@ -50,4 +50,4 @@
   git:
     repo: https://github.com/noctislucius20/hp-automation.git
     dest: /home/ansiadmin/hp-automation
-    version: dev-autodeploy
+    version: master
