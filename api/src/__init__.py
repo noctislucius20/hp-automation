@@ -59,9 +59,11 @@ def create_app():
     from src.controllers.UsersController import user
     from src.controllers.ApiController import api
     from src.controllers.SensorsController import sensor
+    from src.controllers.HoneypotsController import honeypot
 
     app.register_blueprint(user)
     app.register_blueprint(api)
     app.register_blueprint(sensor)
+    app.register_blueprint(honeypot)
 
     return app
