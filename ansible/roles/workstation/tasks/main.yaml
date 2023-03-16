@@ -5,13 +5,13 @@
       shell: /bin/bash
 
 - name: get home directory
-  command: pwd
-  register: HOME
+  command: cat ~/.ssh/ansible.pub
+  register: pub_key
 
 - name: add ssh key for ansiadmin
   authorized_key:
       user: ansiadmin
-      key: "{{ lookup('file', '{{ HOME.stdout }}/.ssh/ansible.pub') }}"
+      key: "{{ pub_key }}"
 
 - name: change /usr/local/bin permission
   file:
