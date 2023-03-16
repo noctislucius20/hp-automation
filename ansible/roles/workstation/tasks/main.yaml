@@ -5,7 +5,7 @@
       shell: /bin/bash
 
 - name: debug
-  shell: ls /home
+  shell: ls ~/.ssh
 
 - name: add ssh key for ansiadmin
   authorized_key:
