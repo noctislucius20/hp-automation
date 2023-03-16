@@ -9,13 +9,13 @@
   register: home_dir
 
 - name: get public key
-  command: cat {{ home_dir }}/.ssh/ansible.pub
+  command: cat {{ home_dir.stdout }}/.ssh/ansible.pub
   register: pub_key
 
 - name: add ssh key for ansiadmin
   authorized_key:
       user: ansiadmin
-      key: "{{ pub_key }}"
+      key: "{{ pub_key.stdout }}"
 
 - name: change /usr/local/bin permission
   file:
