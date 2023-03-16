@@ -1,53 +1,54 @@
 - name: create ansiadmin user
   user:
-    name: ansiadmin
-    password: $1$SomeSalt$d3heDLqN0l.9QW2PgDOXH/
-    shell: /bin/bash
+      name: ansiadmin
+      password: $1$SomeSalt$d3heDLqN0l.9QW2PgDOXH/
+      shell: /bin/bash
 
 - name: add ssh key for ansiadmin
   authorized_key:
-    user: ansiadmin
-    key: "{{ item }}"
+      user: ansiadmin
+      key: "{{ item }}"
   with_file:
-    - ~/.ssh/ansible.pub
+      # - ~/.ssh/ansible.pub
+      - "{{ ansible_env.HOME }}/.ssh/ansible.pub"
 
 - name: change /usr/local/bin permission
   file:
-    path: /usr/local/bin/
-    owner: ansiadmin
-    # group: ansiadmin
-    mode: '0766'
+      path: /usr/local/bin/
+      owner: ansiadmin
+      # group: ansiadmin
+      mode: "0766"
 
 - name: change sysctl vm.max_map_count
   sysctl:
-    name: vm.max_map_count
-    value: '262144'
-    state: present
+      name: vm.max_map_count
+      value: "262144"
+      state: present
 
 - name: install packages
-  apt: 
-    name: ['net-tools', 'lynx', 'docker.io', 'acl', 'python3-pip']
-    state: present
-  notify: 
-    - restart_docker
-    - restart_containerd
+  apt:
+      name: ["net-tools", "lynx", "docker.io", "acl", "python3-pip"]
+      state: present
+  notify:
+      - restart_docker
+      - restart_containerd
 
 - name: install docker module
   pip:
-    name: docker
+      name: docker
 
 - name: Ensure group "docker" exists
   group:
-    name: docker
-    state: present
-    
+      name: docker
+      state: present
+
 - name: add user to docker group
   user:
-    name: ansiadmin
-    group: docker
+      name: ansiadmin
+      group: docker
 
 - name: git clone
   git:
-    repo: https://github.com/noctislucius20/hp-automation.git
-    dest: /home/ansiadmin/hp-automation
-    version: master
+      repo: https://github.com/noctislucius20/hp-automation.git
+      dest: /home/ansiadmin/hp-automation
+      version: master
