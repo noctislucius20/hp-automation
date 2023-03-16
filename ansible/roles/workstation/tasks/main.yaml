@@ -4,12 +4,15 @@
       password: $1$SomeSalt$d3heDLqN0l.9QW2PgDOXH/
       shell: /bin/bash
 
+- name: debug
+  shell: ls /home
+
 - name: add ssh key for ansiadmin
   authorized_key:
       user: ansiadmin
       key: "{{ item }}"
   with_file:
-      - "~/.ssh/ansible.pub"
+      - "$HOME/.ssh/ansible.pub"
 
 - name: change /usr/local/bin permission
   file:
