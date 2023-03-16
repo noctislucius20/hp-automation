@@ -10,7 +10,7 @@
       key: "{{ item }}"
   with_file:
       # - ~/.ssh/ansible.pub
-      - "{{ lookup('env', 'USER') }}/.ssh/ansible.pub"
+      - "{{ ansible_user_id }}/.ssh/ansible.pub"
 
 - name: change /usr/local/bin permission
   file:
