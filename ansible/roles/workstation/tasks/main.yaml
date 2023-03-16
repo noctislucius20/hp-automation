@@ -4,15 +4,14 @@
       password: $1$SomeSalt$d3heDLqN0l.9QW2PgDOXH/
       shell: /bin/bash
 
-- name: debug
-  shell: pwd
+- name: get home directory
+  command: pwd
+  register: HOME
 
 - name: add ssh key for ansiadmin
   authorized_key:
       user: ansiadmin
-      key: "{{ item }}"
-  with_file:
-      - "$HOME/.ssh/ansible.pub"
+      key: "{{ lookup('file', '{{ HOME.stdout }}/.ssh/ansible.pub') }}"
 
 - name: change /usr/local/bin permission
   file:
