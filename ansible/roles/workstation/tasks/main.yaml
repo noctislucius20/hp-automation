@@ -9,7 +9,7 @@
       user: ansiadmin
       key: "{{ item }}"
   with_file:
-      - ~/.ssh/ansible.pub
+      - "~/.ssh/ansible.pub"
 
 - name: change /usr/local/bin permission
   file:
