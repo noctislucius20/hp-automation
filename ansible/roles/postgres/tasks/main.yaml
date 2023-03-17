@@ -1,4 +1,4 @@
-- name: create AWX namespace
+- name: create postgres namespace
   k8s:
     name: postgres
     api_version: v1
@@ -7,12 +7,12 @@
 
 - name: install postgres configmap
   k8s:
-    definition: "{{ lookup('template', '~/hp-automation/ansible/roles/postgres/templates/postgres-config.j2') | from_yaml }}"
+    definition: "{{ lookup('template', '/home/ansiadmin/hp-automation/ansible/roles/postgres/templates/postgres-config.j2') | from_yaml }}"
     namespace: postgres
     state: present
 
 - name: install postgres
   k8s:
-    src: ~/hp-automation/ansible/files/postgres.yaml
+    src: /home/ansiadmin/hp-automation/ansible/files/postgres.yaml
     namespace: postgres
     state: present
