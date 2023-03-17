@@ -5,10 +5,6 @@
     kind: Namespace
     state: present 
 
-- name: get home directory
-  command: pwd
-  register: ansiadmin_home_dir
-
 - name: install postgres configmap
   k8s:
     definition:

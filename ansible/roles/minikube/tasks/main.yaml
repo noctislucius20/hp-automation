@@ -18,3 +18,7 @@
 - name: start minikube
   command: minikube start --addons=ingress --cpus=4 --install-addons=true --memory=6g --kubernetes-version=stable
 
+- name: get home directory
+  command: pwd
+  register: ansiadmin_home_dir
+

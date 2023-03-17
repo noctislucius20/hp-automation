@@ -7,6 +7,6 @@
 
 - name: install filebeat
   k8s:
-    src: ~/hp-automation/elk/elk_config/filebeat-kubernetes.yaml
+    src: "{{ ansiadmin_home_dir.stdout }}/hp-automation/elk/elk_config/filebeat-kubernetes.yaml"
     namespace: filebeat
     state: present
