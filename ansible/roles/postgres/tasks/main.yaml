@@ -5,6 +5,9 @@
     kind: Namespace
     state: present 
 
+- name: get home directory
+  command: pwd
+  
 - name: install postgres configmap
   k8s:
     definition: "{{ lookup('template', '/home/ansiadmin/hp-automation/ansible/roles/postgres/templates/postgres-config.j2') | from_yaml }}"
