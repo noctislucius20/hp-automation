@@ -50,4 +50,5 @@
     - awx
     - postgres
     - elk
+    - filebeat
   tags: [ workstation ]
