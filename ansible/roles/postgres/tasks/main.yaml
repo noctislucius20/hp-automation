@@ -6,7 +6,7 @@
     state: present 
 
 - name: get home directory
-  command: ls /home
+  command: /home/ansiadmin/hp-automation/ansible/files
 
 - name: install postgres configmap
   k8s:
