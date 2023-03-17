@@ -6,16 +6,26 @@
     state: present 
 
 - name: get home directory
-  command: /home/ansiadmin/hp-automation/ansible/files
+  command: pwd
+  register: ansiadmin_home_dir
 
 - name: install postgres configmap
   k8s:
-    definition: "{{ lookup('template', '/home/ansiadmin/hp-automation/ansible/roles/postgres/templates/postgres-config.j2') | from_yaml }}"
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: postgres-config
+        labels:
+          app: postgres
+      data:
+        POSTGRES_USER: "{{ postgres_user }}"
+        POSTGRES_PASSWORD: "{{ postgres_pass }}"
     namespace: postgres
     state: present
 
 - name: install postgres
   k8s:
-    src: /home/ansiadmin/hp-automation/ansible/files/postgres.yaml
+    src: "{{ ansiadmin_home_dir.stdout }}/hp-automation/ansible/files/postgres.yaml"
     namespace: postgres
     state: present
