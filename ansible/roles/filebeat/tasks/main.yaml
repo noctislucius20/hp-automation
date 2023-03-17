@@ -1,0 +1,12 @@
+- name: create filebeat namespace
+  k8s:
+    name: filebeat
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: install filebeat
+  k8s:
+    src: ~/hp-automation/elk/elk_config/filebeat-kubernetes.yaml
+    namespace: filebeat
+    state: present
