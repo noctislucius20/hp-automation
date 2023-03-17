@@ -21,7 +21,6 @@
   file:
       path: /usr/local/bin/
       owner: ansiadmin
-      # group: ansiadmin
       mode: "0766"
 
 - name: change sysctl vm.max_map_count
@@ -32,7 +31,7 @@
 
 - name: install packages
   apt:
-      name: ["net-tools", "lynx", "docker.io", "acl", "python3-pip"]
+      name: ["net-tools", "lynx", "docker.io", "acl", "python3-pip", "ansible"]
       state: present
   notify:
       - restart_docker

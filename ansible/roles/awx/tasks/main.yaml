@@ -7,7 +7,7 @@
 
 - name: install AWX
   k8s:
-    src: ~/hp-automation/ansible/files/awx-operator.yaml
+    src: "{{ ansiadmin_home_dir.stdout }}/hp-automation/ansible/files/awx-operator.yaml"
     namespace: awx
     state: present
 
@@ -24,17 +24,4 @@
         hostname: awx.example.com
     namespace: awx
     state: present
-
-# - name: expose AWX service
-#   become_user: ansiadmin
-#   k8s_service:
-#     name: awx
-#     namespace: awx
-#     ports:
-#     - port: 8080
-#       protocol: TCP
-#     type: LoadBalancer
-#     selector:
-#       name: awx
-#     state: absent
 
