@@ -16,18 +16,18 @@
         name: ansigent
         groups: root
     
-    - name: get home directory
-      command: pwd
-      register: home_dir
+    # - name: get home directory
+    #   command: pwd
+    #   register: home_dir
     
-    - name: get public key
-      command: cat {{ home_dir.stdout }}/.ssh/ansible.pub
-      register: pub_key
+    # - name: get public key
+    #   command: cat {{ home_dir.stdout }}/.ssh/ansible.pub
+    #   register: pub_key
 
     - name: add ssh key for ansigent
       authorized_key:
         user: ansigent
-        key: "{{ pub_key.stdout }}"
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/ansible.pub') }}"
 
     - name: add sudoers file for ansigent
       copy:
