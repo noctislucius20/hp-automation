@@ -2,6 +2,7 @@
 
 - hosts: honeypot_servers
   become: true
+  remote_user: ansigent
   gather_facts: false
   pre_tasks:
     - name: set ansible_port
@@ -14,12 +15,14 @@
       changed_when: false
   
 - hosts: honeypot_servers
+  remote_user: ansigent
   become: true
   roles:
     - base
   tags: [ honeypot ]
 
 - hosts: honeypot_servers
+  remote_user: ansigent
   become: true
   roles:
     - package

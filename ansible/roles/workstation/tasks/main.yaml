@@ -9,7 +9,6 @@
       user: ansiadmin
       key: "{{ lookup('file', './files/ansible.pub') }}"
 
-
 - name: change /usr/local/bin permission
   file:
       path: /usr/local/bin/
