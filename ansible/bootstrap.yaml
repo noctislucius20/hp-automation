@@ -19,7 +19,7 @@
     - name: add ssh key for ansigent
       authorized_key:
         user: ansigent
-        key: "{{ lookup('file', '/runner/project/ansible/files/ansible.pub') }}"
+        key: "{{ lookup('file', './ansible/files/ansible.pub') }}"
 
     - name: add sudoers file for ansigent
       copy:
