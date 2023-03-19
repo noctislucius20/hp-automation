@@ -7,7 +7,7 @@
     
 - name: install AWX
   k8s:
-    src: ./ansible/roles/awx/files/awx-operator.yaml
+    src: awx-operator.yaml
     namespace: awx
     state: present
 
