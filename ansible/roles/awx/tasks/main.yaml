@@ -7,7 +7,7 @@
     
 - name: install AWX
   k8s:
-    definition: "{{ lookup('file', '../files/awx-operator.yaml') | from_yaml }}"
+    template: "{{ lookup('file', '../files/awx-operator.yaml') | from_yaml }}"
     namespace: awx
     state: present
 
