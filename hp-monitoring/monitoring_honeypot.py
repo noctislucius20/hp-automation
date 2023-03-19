@@ -541,24 +541,19 @@ def connect_mqtt():
             print("Failed to connect, return code %d\n", rc)
 
     client = mqtt.Client(config_dict['MQTT_CLIENT_HONEYPOT'])
-    # client.username_pw_set(username, password)
     client.on_connect = on_connect
     client.connect(config_dict['MQTT_BROKER'], config_dict['MQTT_PORT'])
     return client
 
 
 def publish(client):
-    # msg_count = 0
     try:
         while True:
-            time.sleep(10)
+            time.sleep(30)
             msg = json.dumps(logs_json)
-            result = client.publish(config_dict['MQTT_TOPIC_HONEYPOT'], msg)
-            # result: [0, 1]
-            # print(result)
+            result = client.publish(config_dict['MQTT_TOPIC_HONEYPOT'], msg, qos=2)
             status = result[0]
             if status == 0:
-                # print(f"Send `{msg}` to topic `{config_dict['MQTT_TOPIC_HONEYPOT']}`")
                 print(msg)
             else:
                 print(f"Failed to send message to topic {config_dict['MQTT_TOPIC_HONEYPOT']}")
@@ -572,11 +567,9 @@ def run():
     main()
     publish(client)
 
-if __name__ == '__main__': 
-    # checking()
-    # main()
-    # publish()
+if __name__ == '__main__':
     run()
+    # main()
     # schedule.every(10).seconds.do(run)
     # schedule.every(1).seconds.do(publish)
     # print(logs_json)
