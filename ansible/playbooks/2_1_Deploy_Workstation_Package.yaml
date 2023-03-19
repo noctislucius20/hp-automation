@@ -1,5 +1,5 @@
 ---
-- hosts: workstation_servers
+- hosts: workstation_deploy
   become: true
   tasks:
   - name: update repo cache
@@ -7,7 +7,7 @@
       update_cache: yes
     changed_when: false
       
-- hosts: workstation_servers
+- hosts: workstation_deploy
   roles:
     - minikube
     - awx

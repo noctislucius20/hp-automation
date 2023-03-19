@@ -1,5 +1,5 @@
 ---
-- hosts: honeypot_servers
+- hosts: honeypot_deploy
   become: true
   pre_tasks:
     - name: set ansible_port
@@ -11,13 +11,13 @@
         update_cache: yes
       changed_when: false
   
-- hosts: honeypot_servers
+- hosts: honeypot_deploy
   become: true
   roles:
     - base
   tags: [ honeypot ]
 
-- hosts: honeypot_servers
+- hosts: honeypot_deploy
   become: true
   roles:
     - package
