@@ -1,8 +1,21 @@
 - name: create ansiadmin user
   user:
-      name: ansiadmin
-      password: $1$SomeSalt$d3heDLqN0l.9QW2PgDOXH/
-      shell: /bin/bash
+    name: ansiadmin
+    groups: root
+
+- name: add sudoers file for ansiadmin
+  copy:
+    src: ../files/sudoer_ansiadmin
+    dest: /etc/sudoers.d/ansiadmin
+    owner: root
+    group: root
+    mode: 0440
+
+# - name: create ansiadmin user
+#   user:
+#       name: ansiadmin
+#       password: $1$SomeSalt$d3heDLqN0l.9QW2PgDOXH/
+#       shell: /bin/bash
 
 - name: add ssh key for ansiadmin
   authorized_key:
