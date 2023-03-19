@@ -22,6 +22,6 @@
 
 - name: install postgres
   k8s:
-    src: ./files/postgres.yaml
+    src: ../files/postgres.yaml
     namespace: postgres
     state: present
