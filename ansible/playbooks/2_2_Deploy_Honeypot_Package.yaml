@@ -1,0 +1,25 @@
+---
+- hosts: honeypot_servers
+  become: true
+  pre_tasks:
+    - name: set ansible_port
+      set_fact:
+        ansible_port: 22888
+
+    - name: update repo cache
+      apt:
+        update_cache: yes
+      changed_when: false
+  
+- hosts: honeypot_servers
+  become: true
+  roles:
+    - base
+  tags: [ honeypot ]
+
+- hosts: honeypot_servers
+  become: true
+  roles:
+    - package
+    - ewsposter
+  tags: [ honeypot ]

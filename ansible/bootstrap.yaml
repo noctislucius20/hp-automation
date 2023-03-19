@@ -14,36 +14,36 @@
     - workstation
   tags: [ workstation ]
 
-- hosts: workstation_servers
-  remote_user: ansiadmin
-  roles:
-    - minikube
-    - awx
-    - postgres
-    - elk
-    - filebeat
-  tags: [ workstation ]
+# - hosts: workstation_servers
+#   remote_user: ansiadmin
+#   roles:
+#     - minikube
+#     - awx
+#     - postgres
+#     - elk
+#     - filebeat
+#   tags: [ workstation ]
 
-- hosts: honeypot_servers
-  become: true
-  tasks:
-    - name: create ansigent user
-      user:
-        name: ansigent
-        groups: root
+# - hosts: honeypot_servers
+#   become: true
+#   tasks:
+#     - name: create ansigent user
+#       user:
+#         name: ansigent
+#         groups: root
 
-    - name: add ssh key for ansigent
-      authorized_key:
-        user: ansigent
-        key: "{{ lookup('file', './files/ansible.pub') }}"
+#     - name: add ssh key for ansigent
+#       authorized_key:
+#         user: ansigent
+#         key: "{{ lookup('file', './files/ansible.pub') }}"
 
-    - name: add sudoers file for ansigent
-      copy:
-        src: sudoer_ansigent
-        dest: /etc/sudoers.d/ansigent
-        owner: root
-        group: root
-        mode: 0440
+#     - name: add sudoers file for ansigent
+#       copy:
+#         src: sudoer_ansigent
+#         dest: /etc/sudoers.d/ansigent
+#         owner: root
+#         group: root
+#         mode: 0440
 
 - hosts: honeypot_servers
   become: true

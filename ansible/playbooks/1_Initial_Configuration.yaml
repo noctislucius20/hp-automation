@@ -1,0 +1,20 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+    - name: install updates
+      apt:
+        upgrade: dist
+        update_cache: yes
+
+- hosts: workstation_servers
+  become: true
+  roles:
+    - workstation
+  tags: [ workstation ]
+
+- hosts: honeypot_servers
+  become: true
+  roles:
+    - base
+  tags: [ honeypot ]
