@@ -1,0 +1,17 @@
+---
+- hosts: workstation_servers
+  become: true
+  tasks:
+  - name: update repo cache
+    apt:
+      update_cache: yes
+    changed_when: false
+      
+- hosts: workstation_servers
+  roles:
+    - minikube
+    - awx
+    - postgres
+    - elk
+    - filebeat
+  tags: [ workstation ]

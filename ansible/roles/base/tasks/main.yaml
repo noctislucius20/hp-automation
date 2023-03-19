@@ -1,12 +1,25 @@
+- name: create ansigent user
+  user:
+    name: ansigent
+    groups: root
+
+- name: add sudoers file for ansigent
+  copy:
+    src: ../files/sudoer_ansigent
+    dest: /etc/sudoers.d/ansigent
+    owner: root
+    group: root
+    mode: 0440
+
 - name: add ssh key for ansi client
   authorized_key:
     user: ansigent
-    key: "{{ lookup('file', './files/ansible.pub') }}"
+    key: "{{ lookup('file', '../files/ansible.pub') }}"
 
 - name: generate sshd_config file from template
   tags: ssh
   template:
-    src: ./roles/base/templates/sshd_config.j2
+    src: sshd_config.j2
     dest: /etc/ssh/sshd_config
     owner: root
     group: root
