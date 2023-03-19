@@ -7,13 +7,13 @@
         upgrade: dist
         update_cache: yes
 
-- hosts: workstation_servers
+- hosts: workstation_init
   become: true
   roles:
     - workstation
   tags: [ workstation ]
 
-- hosts: honeypot_servers
+- hosts: honeypot_init
   become: true
   roles:
     - base
