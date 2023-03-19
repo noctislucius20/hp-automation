@@ -1,52 +1,55 @@
----
+# ---
 
-- hosts: all
-  become: true
-  pre_tasks:
-    - name: install updates
-      apt:
-        upgrade: dist
-        update_cache: yes
-
-- hosts: workstation_servers
-  become: true
-  roles:
-    - workstation
-  tags: [ workstation ]
+# - hosts: all
+#   become: true
+#   pre_tasks:
+#     - name: install updates
+#       apt:
+#         upgrade: dist
+#         update_cache: yes
 
 # - hosts: workstation_servers
-#   remote_user: ansiadmin
+#   become: true
 #   roles:
-#     - minikube
-#     - awx
-#     - postgres
-#     - elk
-#     - filebeat
+#     - workstation
 #   tags: [ workstation ]
+
+# # - hosts: workstation_servers
+# #   remote_user: ansiadmin
+# #   roles:
+# #     - minikube
+# #     - awx
+# #     - postgres
+# #     - elk
+# #     - filebeat
+# #   tags: [ workstation ]
+
+# # - hosts: honeypot_servers
+# #   become: true
+# #   tasks:
+# #     - name: create ansigent user
+# #       user:
+# #         name: ansigent
+# #         groups: root
+
+# #     - name: add ssh key for ansigent
+# #       authorized_key:
+# #         user: ansigent
+# #         key: "{{ lookup('file', './files/ansible.pub') }}"
+
+# #     - name: add sudoers file for ansigent
+# #       copy:
+# #         src: sudoer_ansigent
+# #         dest: /etc/sudoers.d/ansigent
+# #         owner: root
+# #         group: root
+# #         mode: 0440
 
 # - hosts: honeypot_servers
 #   become: true
-#   tasks:
-#     - name: create ansigent user
-#       user:
-#         name: ansigent
-#         groups: root
+#   roles:
+#     - base
+#   tags: [ honeypot ]
 
-#     - name: add ssh key for ansigent
-#       authorized_key:
-#         user: ansigent
-#         key: "{{ lookup('file', './files/ansible.pub') }}"
-
-#     - name: add sudoers file for ansigent
-#       copy:
-#         src: sudoer_ansigent
-#         dest: /etc/sudoers.d/ansigent
-#         owner: root
-#         group: root
-#         mode: 0440
-
-- hosts: honeypot_servers
-  become: true
-  roles:
-    - base
-  tags: [ honeypot ]
+---
+- import_playbook: playbooks/1_Initial_Configuration.yaml    
