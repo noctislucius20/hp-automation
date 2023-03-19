@@ -7,7 +7,7 @@
 
 - name: install AWX
   k8s:
-    src: ../files/awx-operator.yaml
+    src: awx-operator.yaml
     namespace: awx
     state: present
 
