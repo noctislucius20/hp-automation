@@ -3,7 +3,7 @@
     name: elk
     tag: latest
     build:
-      path: /home/ansiadmin/hp-automation/elk/elk/elk_config
+      path: /home/ansiadmin/hp-automation/elk/elk_config
       pull: yes
     source: build
     state: present
