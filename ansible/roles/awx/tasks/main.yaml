@@ -7,7 +7,7 @@
     
 - name: install AWX
   k8s:
-    template: "{{ lookup('file', '../files/awx-operator.yaml') | from_yaml }}"
+    src: /home/ansiadmin/test.yaml
     namespace: awx
     state: present
 
