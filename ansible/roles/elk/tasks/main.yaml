@@ -7,9 +7,11 @@
       pull: yes
     source: build
     state: present
+  register: elk_build
 
 - name: load elk image to minikube
   command: minikube image load elk
+  when: elk_build.changed
 
 - name: create elk namespace
   k8s:
