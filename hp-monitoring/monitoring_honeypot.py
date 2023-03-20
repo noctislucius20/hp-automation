@@ -521,9 +521,9 @@ def main():
     # print(logs_json)
     # print ('Running Log...')
 
-    # with open('hp-monitoring/logs_honeypot.json', 'a+') as json_file:
-    #     json.dump(logs_json, json_file)
-    #     json_file.write("\n")
+    with open('hp-monitoring/logs_honeypot.json', 'a+') as json_file:
+        json.dump(logs_json, json_file)
+        json_file.write("\n")
 
 # ==== START MQTT CONNECTION & PUBLISH ====
 
@@ -568,12 +568,12 @@ def run():
     publish(client)
 
 if __name__ == '__main__':
-    run()
-    # main()
-    # schedule.every(10).seconds.do(run)
+    # run()
+    main()
+    schedule.every(10).seconds.do(main)
     # schedule.every(1).seconds.do(publish)
     # print(logs_json)
 
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
