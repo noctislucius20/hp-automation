@@ -1,6 +1,7 @@
 ---
 - hosts: honeypot_deploy
   become: true
+  gather_facts: false
   pre_tasks:
     - name: set ansible_port
       set_fact:
