@@ -22,6 +22,6 @@
 
 - name: install postgres
   k8s:
-    src: ../files/postgres.yaml
+    src: /home/ansiadmin/hp-automation/ansible/files/postgres.yaml
     namespace: postgres
     state: present
