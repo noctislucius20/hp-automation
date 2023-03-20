@@ -6,6 +6,12 @@
     apt:
       update_cache: yes
     changed_when: false
+
+  - name: git clone
+    git:
+        repo: https://github.com/noctislucius20/hp-automation.git
+        dest: /home/ansiadmin/hp-automation
+        version: master
       
 - hosts: workstation_deploy
   roles:
