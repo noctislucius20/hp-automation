@@ -12,6 +12,9 @@
         repo: https://github.com/noctislucius20/hp-automation.git
         dest: /home/ansiadmin/hp-automation
         version: master
+  
+  - name: disable swap
+    command: swapoff -a
       
 - hosts: workstation_deploy
   roles:
