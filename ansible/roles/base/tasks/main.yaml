@@ -5,7 +5,7 @@
 
 - name: add sudoers file for ansigent
   copy:
-    src: /home/ansiadmin/hp-automation/ansible/roles/base/files/sudoer_ansigent
+    src: ../roles/base/files/sudoer_ansigent
     dest: /etc/sudoers.d/ansigent
     owner: root
     group: root
