@@ -3,7 +3,7 @@
     name: elk
     tag: latest
     build:
-      path: ../../elk/elk/elk_config
+      path: /home/ansiadmin/elk/elk/elk_config
       pull: yes
     source: build
     state: present
@@ -20,6 +20,6 @@
 
 - name: install elk
   k8s:
-    src: ../files/elk.yaml
+    src: /home/ansiadmin/hp-automation/ansible/roles/elk/files/elk.yaml
     namespace: elk
     state: present
