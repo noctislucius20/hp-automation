@@ -7,7 +7,7 @@
     
 - name: install AWX
   k8s:
-    src: /home/ansiadmin/hp-automation/ansible/files/awx-operator.yaml
+    src: /home/ansiadmin/hp-automation/ansible/roles/awx/files/awx-operator.yaml
     namespace: awx
     state: present
 
