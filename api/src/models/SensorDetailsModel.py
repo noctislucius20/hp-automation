@@ -4,6 +4,7 @@ class SensorDetails(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     sensor_id = db.Column(db.Integer, db.ForeignKey('sensors.id'), nullable=False)
     sensor_name = db.Column(db.String, nullable=False)
+    state = db.Column(db.Boolean, nullable=False)
     honeypot_running = db.Column(db.Integer, nullable=False)
     cpu_usage = db.Column(db.Float, nullable=False)
     cpu_frequency = db.Column(db.Float, nullable=False)
