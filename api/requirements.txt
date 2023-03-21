@@ -12,3 +12,4 @@ flask-cors
 pyopenssl
 flask-marshmallow
 marshmallow-sqlalchemy
+requests
