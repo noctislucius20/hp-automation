@@ -4,6 +4,7 @@ from datetime import datetime
 import time
 import json
 import psycopg2
+import uuid
 
 class Monitoring:
     #Fungsi Penggunaan Setiap CPU
@@ -80,6 +81,7 @@ class Raspi(Monitoring):
     def main():
         global logs_json
         logs_json = {
+            "id": str(uuid.uuid4()),
     #        "CPU_usage_percpu": cpu_usage_cpu,
             "CPU_usage": Monitoring.cpu_usage(),
             "CPU_frequency": float("{:.2f}".format(Monitoring.cpu_frequency())),
@@ -138,19 +140,6 @@ class MQTT(Raspi):
         except:
             print("Failed to parse data")
 
-    def message():
-        try:
-            connection = psycopg2.connect(user="postgres",
-                                        password="scipio",
-                                        host="10.33.102.212",
-                                        port=54321,
-                                        database="hp_automation")
-            
-            cursor = connection.cursor()
-            print('Connected to PostgreSQL')
-
-        except (Exception, psycopg2.Error) as error:
-            print("Failed to insert record into mobile table", error)
 
     def run():
         client = MQTT.connect_mqtt()

@@ -2,7 +2,7 @@ import psutil
 import paho.mqtt.client as mqtt
 import numpy as np
 from datetime import datetime
-import schedule
+import uuid
 import time
 import json
 
@@ -475,43 +475,44 @@ class Honeypot(Monitoring):
     def main():
         global logs_json
         logs_json = {
+            "id": str(uuid.uuid4()),
             "honeypot_running": Honeypot.totalHoneypotRunning(),
-            "dionaea": Honeypot.checkDionaea(),
+            "dionaea_state": Honeypot.checkDionaea(),
             "dionaea_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryDionaea())),
             "dionaea_resident_memory": float("{:.2f}".format(Honeypot.checkResidentMemoryDionaea())),
             "dionaea_text_memory": float("{:.2f}".format(Honeypot.checkTextMemoryDionaea())),
             "dionaea_data_memory": float("{:.2f}".format(Honeypot.checkDataMemoryDionaea())),
             "dionaea_rms_percentage": float("{:.2f}".format(Honeypot.checkRMSPercentDionaea())),
             "dionaea_vms_percentage": float("{:.2f}".format(Honeypot.checkVMSPercentDionaea())),
-            "honeytrap": Honeypot.checkHoneytrap(),
+            "honeytrap_state": Honeypot.checkHoneytrap(),
             "honeytrap_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryHoneytrap())),
             "honeytrap_resident_memory": float("{:.2f}".format(Honeypot.checkResidentMemoryHoneytrap())),
             "honeytrap_text_memory": float("{:.2f}".format(Honeypot.checkTextMemoryHoneytrap())),
             "honeytrap_data_memory": float("{:.2f}".format(Honeypot.checkDataMemoryHoneytrap())),
             "honeytrap_rms_percentage": float("{:.2f}".format(Honeypot.checkRMSPercentHoneytrap())),
             "honeytrap_vms_percentage": float("{:.2f}".format(Honeypot.checkVMSPercentHoneytrap())),
-            "gridpot": Honeypot.checkGridpot(),
+            "gridpot_state": Honeypot.checkGridpot(),
             "gridpot_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryGridpot())),
             "gridpot_resident_memory": float("{:.2f}".format(Honeypot.checkResidentMemoryGridpot())),
             "gridpot_text_memory": float("{:.2f}".format(Honeypot.checkTextMemoryGridpot())),
             "gridpot_data_memory": float("{:.2f}".format(Honeypot.checkDataMemoryGridpot())),
             "gridpot_rms_percentage": float("{:.2f}".format(Honeypot.checkRMSPercentGridpot())),
             "gridpot_vms_percentage": float("{:.2f}".format(Honeypot.checkVMSPercentGridpot())),
-            "cowrie": Honeypot.checkCowrie(),
+            "cowrie_state": Honeypot.checkCowrie(),
             "cowrie_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryCowrie())),
             "cowrie_resident_memory": float("{:.2f}".format(Honeypot.checkResidentMemoryCowrie())),
             "cowrie_text_memory": float("{:.2f}".format(Honeypot.checkTextMemoryCowrie())),
             "cowrie_data_memory": float("{:.2f}".format(Honeypot.checkDataMemoryCowrie())),
             "cowrie_rms_percentage": float("{:.2f}".format(Honeypot.checkRMSPercentCowrie())),
             "cowrie_vms_percentage": float("{:.2f}".format(Honeypot.checkVMSPercentCowrie())),
-            "elasticpot": Honeypot.checkElasticpot(),
+            "elasticpot_state": Honeypot.checkElasticpot(),
             "elasticpot_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryElasticpot())),
             "elasticpot_resident_memory": float("{:.2f}".format(Honeypot.checkResidentMemoryElasticpot())),
             "elasticpot_text_memory": float("{:.2f}".format(Honeypot.checkTextMemoryElasticpot())),
             "elasticpot_data_memory": float("{:.2f}".format(Honeypot.checkDataMemoryElasticpot())),
             "elasticpot_rms_percentage": float("{:.2f}".format(Honeypot.checkRMSPercentElasticpot())),
             "elasticpot_vms_percentage": float("{:.2f}".format(Honeypot.checkVMSPercentElasticpot())),
-            "rdpy": Honeypot.checkRDPY(),
+            "rdpy_state": Honeypot.checkRDPY(),
             "rdpy_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryRDPY())),
             "rdpy_resident_memory": float("{:.2f}".format(Honeypot.checkResidentMemoryRDPY())),
             "rdpy_text_memory": float("{:.2f}".format(Honeypot.checkTextMemoryRDPY())),

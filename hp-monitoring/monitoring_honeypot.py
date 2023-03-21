@@ -5,6 +5,7 @@ from datetime import datetime
 import schedule
 import time
 import json
+import uuid
 
 # def hostname():
 #     hostname = socket.gethostname()
@@ -465,7 +466,8 @@ def checkVMSPercentRDPY():
         return checkVMSPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'sleeping')
     else:
         return(0)
-        
+
+
 # MAIN FUNCTION
 
 logs_json = None
@@ -568,12 +570,11 @@ def run():
     publish(client)
 
 if __name__ == '__main__':
-    # run()
-    main()
-    schedule.every(10).seconds.do(main)
-    # schedule.every(1).seconds.do(publish)
-    # print(logs_json)
+    run()
+    # schedule.every(10).seconds.do(id)
+    # # schedule.every(1).seconds.do(publish)
+    # # print(logs_json)
 
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
