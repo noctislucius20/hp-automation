@@ -17,7 +17,7 @@
                                         "name": "Honeypot Automation",
                                         "type": "organization"
                                    },
-                                   "name": "1. Initial Configuration",
+                                   "name": "1.1 Initial Configuration Workstation",
                                    "type": "job_template"
                               }
                          },
@@ -29,7 +29,7 @@
                                         "name": "Honeypot Automation",
                                         "type": "organization"
                                    },
-                                   "name": "2. Package Installation",
+                                   "name": "2.1 Package Installation Workstation",
                                    "type": "job_template"
                               }
                          },
@@ -102,6 +102,30 @@
                                         "type": "organization"
                                    },
                                    "name": "3.6. Deploy Honeypot: RDPY",
+                                   "type": "job_template"
+                              }
+                         },
+                         {
+                              "name": "Admin",
+                              "type": "role",
+                              "content_object": {
+                                   "organization": {
+                                        "name": "Honeypot Automation",
+                                        "type": "organization"
+                                   },
+                                   "name": "1.2 Initial Configuration Honeypot",
+                                   "type": "job_template"
+                              }
+                         },
+                         {
+                              "name": "Admin",
+                              "type": "role",
+                              "content_object": {
+                                   "organization": {
+                                        "name": "Honeypot Automation",
+                                        "type": "organization"
+                                   },
+                                   "name": "2.2 Package Installation Honeypot",
                                    "type": "job_template"
                               }
                          },
@@ -1876,7 +1900,50 @@
                "related": {
                     "hosts": [
                          {
-                              "name": "10.70.128.21",
+                              "name": "10.70.128.23",
+                              "description": "honeypot",
+                              "enabled": true,
+                              "instance_id": "",
+                              "variables": "---",
+                              "inventory": {
+                                   "organization": {
+                                        "name": "Honeypot Automation",
+                                        "type": "organization"
+                                   },
+                                   "name": "Automation",
+                                   "type": "inventory"
+                              },
+                              "related": {
+                                   "groups": [
+                                        {
+                                             "name": "honeypot_deploy",
+                                             "inventory": {
+                                                  "organization": {
+                                                       "name": "Honeypot Automation",
+                                                       "type": "organization"
+                                                  },
+                                                  "name": "Automation",
+                                                  "type": "inventory"
+                                             },
+                                             "type": "group"
+                                        }
+                                   ]
+                              },
+                              "natural_key": {
+                                   "name": "10.70.128.23",
+                                   "inventory": {
+                                        "organization": {
+                                             "name": "Honeypot Automation",
+                                             "type": "organization"
+                                        },
+                                        "name": "Automation",
+                                        "type": "inventory"
+                                   },
+                                   "type": "host"
+                              }
+                         },
+                         {
+                              "name": "10.70.132.12",
                               "description": "workstation",
                               "enabled": true,
                               "instance_id": "",
@@ -1918,7 +1985,7 @@
                                    ]
                               },
                               "natural_key": {
-                                   "name": "10.70.128.21",
+                                   "name": "10.70.132.12",
                                    "inventory": {
                                         "organization": {
                                              "name": "Honeypot Automation",
@@ -1931,11 +1998,11 @@
                               }
                          },
                          {
-                              "name": "10.70.132.23",
+                              "name": "10.70.136.8",
                               "description": "honeypot",
                               "enabled": true,
                               "instance_id": "",
-                              "variables": "---",
+                              "variables": "{'ansible_user': '{{ honeypot_user }}', 'ansible_become_pass': '{{ honeypot_pass }}'}",
                               "inventory": {
                                    "organization": {
                                         "name": "Honeypot Automation",
@@ -1945,35 +2012,10 @@
                                    "type": "inventory"
                               },
                               "related": {
-                                   "groups": [
-                                        {
-                                             "name": "honeypot_deploy",
-                                             "inventory": {
-                                                  "organization": {
-                                                       "name": "Honeypot Automation",
-                                                       "type": "organization"
-                                                  },
-                                                  "name": "Automation",
-                                                  "type": "inventory"
-                                             },
-                                             "type": "group"
-                                        },
-                                        {
-                                             "name": "honeypot_init",
-                                             "inventory": {
-                                                  "organization": {
-                                                       "name": "Honeypot Automation",
-                                                       "type": "organization"
-                                                  },
-                                                  "name": "Automation",
-                                                  "type": "inventory"
-                                             },
-                                             "type": "group"
-                                        }
-                                   ]
+                                   "groups": []
                               },
                               "natural_key": {
-                                   "name": "10.70.132.23",
+                                   "name": "10.70.136.8",
                                    "inventory": {
                                         "organization": {
                                              "name": "Honeypot Automation",
@@ -1990,7 +2032,7 @@
                          {
                               "name": "honeypot_deploy",
                               "description": "",
-                              "variables": "---\nansible_user: \"{{ honeypot_user }}\"\nansible_become_pass: \"{{ honeypot_pass }}\"\nansible_port: 22888",
+                              "variables": "---\nansible_user: \"{{ honeypot_user }}\"\nansible_become_pass: \"{{ honeypot_pass }}\"",
                               "inventory": {
                                    "organization": {
                                         "name": "Honeypot Automation",
@@ -2002,7 +2044,7 @@
                               "related": {
                                    "hosts": [
                                         {
-                                             "name": "10.70.132.23",
+                                             "name": "10.70.128.23",
                                              "inventory": {
                                                   "organization": {
                                                        "name": "Honeypot Automation",
@@ -2030,48 +2072,6 @@
                               }
                          },
                          {
-                              "name": "honeypot_init",
-                              "description": "",
-                              "variables": "---\nansible_user: \"{{ honeypot_user }}\"\nansible_become_pass: \"{{ honeypot_pass }}\"",
-                              "inventory": {
-                                   "organization": {
-                                        "name": "Honeypot Automation",
-                                        "type": "organization"
-                                   },
-                                   "name": "Automation",
-                                   "type": "inventory"
-                              },
-                              "related": {
-                                   "hosts": [
-                                        {
-                                             "name": "10.70.132.23",
-                                             "inventory": {
-                                                  "organization": {
-                                                       "name": "Honeypot Automation",
-                                                       "type": "organization"
-                                                  },
-                                                  "name": "Automation",
-                                                  "type": "inventory"
-                                             },
-                                             "type": "host"
-                                        }
-                                   ],
-                                   "children": []
-                              },
-                              "natural_key": {
-                                   "name": "honeypot_init",
-                                   "inventory": {
-                                        "organization": {
-                                             "name": "Honeypot Automation",
-                                             "type": "organization"
-                                        },
-                                        "name": "Automation",
-                                        "type": "inventory"
-                                   },
-                                   "type": "group"
-                              }
-                         },
-                         {
                               "name": "workstation_deploy",
                               "description": "",
                               "variables": "---\nansible_user: \"{{ workstation_user }}\"\nansible_become_pass: \"{{ workstation_pass }}\"",
@@ -2086,7 +2086,7 @@
                               "related": {
                                    "hosts": [
                                         {
-                                             "name": "10.70.128.21",
+                                             "name": "10.70.132.12",
                                              "inventory": {
                                                   "organization": {
                                                        "name": "Honeypot Automation",
@@ -2128,7 +2128,7 @@
                               "related": {
                                    "hosts": [
                                         {
-                                             "name": "10.70.128.21",
+                                             "name": "10.70.132.12",
                                              "inventory": {
                                                   "organization": {
                                                        "name": "Honeypot Automation",
@@ -2170,10 +2170,10 @@
      "inventory_sources": [],
      "job_templates": [
           {
-               "name": "1. Initial Configuration",
-               "description": "Initial configuration for workstation & honeypot",
+               "name": "1.1 Initial Configuration Workstation",
+               "description": "Initial configuration for workstation",
                "job_type": "run",
-               "playbook": "ansible/bootstrap.yaml",
+               "playbook": "ansible/playbooks/1_1_Initial_Config_Workstation.yaml",
                "scm_branch": "",
                "forks": 0,
                "limit": "",
@@ -2244,19 +2244,6 @@
                                    "name": "Honeypot Automation",
                                    "type": "organization"
                               },
-                              "name": "honeypot_init",
-                              "credential_type": {
-                                   "name": "Honeypot Credential",
-                                   "kind": "cloud",
-                                   "type": "credential_type"
-                              },
-                              "type": "credential"
-                         },
-                         {
-                              "organization": {
-                                   "name": "Honeypot Automation",
-                                   "type": "organization"
-                              },
                               "name": "workstation_init",
                               "credential_type": {
                                    "name": "Workstation Credential",
@@ -2277,15 +2264,114 @@
                          "name": "Honeypot Automation",
                          "type": "organization"
                     },
-                    "name": "1. Initial Configuration",
+                    "name": "1.1 Initial Configuration Workstation",
                     "type": "job_template"
                }
           },
           {
-               "name": "2. Package Installation",
+               "name": "1.2 Initial Configuration Honeypot",
+               "description": "Initial configuration for honeypot",
+               "job_type": "run",
+               "playbook": "ansible/playbooks/1_2_Initial_Config_Honeypot.yaml",
+               "scm_branch": "",
+               "forks": 0,
+               "limit": "",
+               "verbosity": 0,
+               "extra_vars": "---",
+               "job_tags": "",
+               "force_handlers": false,
+               "skip_tags": "",
+               "start_at_task": "",
+               "timeout": 0,
+               "use_fact_cache": true,
+               "host_config_key": "",
+               "ask_scm_branch_on_launch": false,
+               "ask_diff_mode_on_launch": false,
+               "ask_variables_on_launch": true,
+               "ask_limit_on_launch": false,
+               "ask_tags_on_launch": false,
+               "ask_skip_tags_on_launch": false,
+               "ask_job_type_on_launch": false,
+               "ask_verbosity_on_launch": false,
+               "ask_inventory_on_launch": false,
+               "ask_credential_on_launch": false,
+               "survey_enabled": false,
+               "become_enabled": false,
+               "diff_mode": false,
+               "allow_simultaneous": false,
+               "job_slice_count": 1,
+               "webhook_service": "",
+               "webhook_credential": null,
+               "inventory": {
+                    "organization": {
+                         "name": "Honeypot Automation",
+                         "type": "organization"
+                    },
+                    "name": "Automation",
+                    "type": "inventory"
+               },
+               "project": {
+                    "organization": {
+                         "name": "Honeypot Automation",
+                         "type": "organization"
+                    },
+                    "name": "honeypot project",
+                    "type": "project"
+               },
+               "execution_environment": {
+                    "name": "andreichnla/awx-ee",
+                    "type": "execution_environment"
+               },
+               "related": {
+                    "labels": [],
+                    "credentials": [
+                         {
+                              "organization": {
+                                   "name": "Honeypot Automation",
+                                   "type": "organization"
+                              },
+                              "name": "ansible",
+                              "credential_type": {
+                                   "name": "Machine",
+                                   "kind": "ssh",
+                                   "type": "credential_type"
+                              },
+                              "type": "credential"
+                         },
+                         {
+                              "organization": {
+                                   "name": "Honeypot Automation",
+                                   "type": "organization"
+                              },
+                              "name": "honeypot_init",
+                              "credential_type": {
+                                   "name": "Honeypot Credential",
+                                   "kind": "cloud",
+                                   "type": "credential_type"
+                              },
+                              "type": "credential"
+                         }
+                    ],
+                    "schedules": [],
+                    "notification_templates_started": [],
+                    "notification_templates_success": [],
+                    "notification_templates_error": [],
+                    "survey_spec": {}
+               },
+               "natural_key": {
+                    "organization": {
+                         "name": "Honeypot Automation",
+                         "type": "organization"
+                    },
+                    "name": "1.2 Initial Configuration Honeypot",
+                    "type": "job_template"
+               }
+          },
+          {
+               "name": "2.1 Package Installation Workstation",
                "description": "",
                "job_type": "run",
-               "playbook": "ansible/site.yaml",
+               "playbook": "ansible/playbooks/2_1_Deploy_Workstation_Package.yaml",
                "scm_branch": "",
                "forks": 0,
                "limit": "",
@@ -2369,19 +2455,6 @@
                                    "name": "Honeypot Automation",
                                    "type": "organization"
                               },
-                              "name": "ansigent",
-                              "credential_type": {
-                                   "name": "Honeypot Credential",
-                                   "kind": "cloud",
-                                   "type": "credential_type"
-                              },
-                              "type": "credential"
-                         },
-                         {
-                              "organization": {
-                                   "name": "Honeypot Automation",
-                                   "type": "organization"
-                              },
                               "name": "postgres",
                               "credential_type": {
                                    "name": "Postgres Credential",
@@ -2402,7 +2475,106 @@
                          "name": "Honeypot Automation",
                          "type": "organization"
                     },
-                    "name": "2. Package Installation",
+                    "name": "2.1 Package Installation Workstation",
+                    "type": "job_template"
+               }
+          },
+          {
+               "name": "2.2 Package Installation Honeypot",
+               "description": "",
+               "job_type": "run",
+               "playbook": "ansible/playbooks/2_2_Deploy_Honeypot_Package.yaml",
+               "scm_branch": "",
+               "forks": 0,
+               "limit": "",
+               "verbosity": 0,
+               "extra_vars": "---",
+               "job_tags": "",
+               "force_handlers": false,
+               "skip_tags": "",
+               "start_at_task": "",
+               "timeout": 0,
+               "use_fact_cache": true,
+               "host_config_key": "",
+               "ask_scm_branch_on_launch": false,
+               "ask_diff_mode_on_launch": false,
+               "ask_variables_on_launch": false,
+               "ask_limit_on_launch": false,
+               "ask_tags_on_launch": false,
+               "ask_skip_tags_on_launch": false,
+               "ask_job_type_on_launch": false,
+               "ask_verbosity_on_launch": false,
+               "ask_inventory_on_launch": false,
+               "ask_credential_on_launch": false,
+               "survey_enabled": false,
+               "become_enabled": false,
+               "diff_mode": false,
+               "allow_simultaneous": false,
+               "job_slice_count": 1,
+               "webhook_service": "",
+               "webhook_credential": null,
+               "inventory": {
+                    "organization": {
+                         "name": "Honeypot Automation",
+                         "type": "organization"
+                    },
+                    "name": "Automation",
+                    "type": "inventory"
+               },
+               "project": {
+                    "organization": {
+                         "name": "Honeypot Automation",
+                         "type": "organization"
+                    },
+                    "name": "honeypot project",
+                    "type": "project"
+               },
+               "execution_environment": {
+                    "name": "andreichnla/awx-ee",
+                    "type": "execution_environment"
+               },
+               "related": {
+                    "labels": [],
+                    "credentials": [
+                         {
+                              "organization": {
+                                   "name": "Honeypot Automation",
+                                   "type": "organization"
+                              },
+                              "name": "ansible",
+                              "credential_type": {
+                                   "name": "Machine",
+                                   "kind": "ssh",
+                                   "type": "credential_type"
+                              },
+                              "type": "credential"
+                         },
+                         {
+                              "organization": {
+                                   "name": "Honeypot Automation",
+                                   "type": "organization"
+                              },
+                              "name": "ansigent",
+                              "credential_type": {
+                                   "name": "Honeypot Credential",
+                                   "kind": "cloud",
+                                   "type": "credential_type"
+                              },
+                              "type": "credential"
+                         }
+                    ],
+                    "schedules": [],
+                    "notification_templates_started": [],
+                    "notification_templates_success": [],
+                    "notification_templates_error": [],
+                    "survey_spec": {}
+               },
+               "natural_key": {
+                    "organization": {
+                         "name": "Honeypot Automation",
+                         "type": "organization"
+                    },
+                    "name": "2.2 Package Installation Honeypot",
                     "type": "job_template"
                }
           },
@@ -3049,38 +3221,6 @@
      ],
      "schedules": [
           {
-               "rrule": "DTSTART:20230303T151621Z RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU",
-               "name": "Cleanup Job Schedule",
-               "description": "Automatically Generated Schedule",
-               "extra_data": {
-                    "days": "120"
-               },
-               "inventory": null,
-               "scm_branch": null,
-               "job_type": null,
-               "job_tags": null,
-               "skip_tags": null,
-               "limit": null,
-               "diff_mode": null,
-               "verbosity": null,
-               "enabled": true,
-               "unified_job_template": {
-                    "name": "Cleanup Job Details",
-                    "type": "system_job_template"
-               },
-               "related": {
-                    "credentials": []
-               },
-               "natural_key": {
-                    "unified_job_template": {
-                         "name": "Cleanup Job Details",
-                         "type": "system_job_template"
-                    },
-                    "name": "Cleanup Job Schedule",
-                    "type": "schedule"
-               }
-          },
-          {
                "rrule": "DTSTART:20230303T151621Z RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=TU",
                "name": "Cleanup Activity Schedule",
                "description": "Automatically Generated Schedule",
@@ -3109,6 +3249,38 @@
                          "type": "system_job_template"
                     },
                     "name": "Cleanup Activity Schedule",
+                    "type": "schedule"
+               }
+          },
+          {
+               "rrule": "DTSTART:20230303T151621Z RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU",
+               "name": "Cleanup Job Schedule",
+               "description": "Automatically Generated Schedule",
+               "extra_data": {
+                    "days": "120"
+               },
+               "inventory": null,
+               "scm_branch": null,
+               "job_type": null,
+               "job_tags": null,
+               "skip_tags": null,
+               "limit": null,
+               "diff_mode": null,
+               "verbosity": null,
+               "enabled": true,
+               "unified_job_template": {
+                    "name": "Cleanup Job Details",
+                    "type": "system_job_template"
+               },
+               "related": {
+                    "credentials": []
+               },
+               "natural_key": {
+                    "unified_job_template": {
+                         "name": "Cleanup Job Details",
+                         "type": "system_job_template"
+                    },
+                    "name": "Cleanup Job Schedule",
                     "type": "schedule"
                }
           },
