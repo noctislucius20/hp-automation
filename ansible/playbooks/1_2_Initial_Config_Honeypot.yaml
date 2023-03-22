@@ -1,5 +1,5 @@
 ---
-- hosts: honeypot_init
+- hosts: "{{ ip_address }}"
   become: true
   pre_tasks:
       - name: install updates
@@ -7,7 +7,7 @@
             upgrade: dist
             update_cache: yes
 
-- hosts: honeypot_init
+- hosts: " {{ ip_address }}"
   become: true
   roles:
       - base
