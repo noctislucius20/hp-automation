@@ -1,0 +1,14 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+      - name: install updates
+        apt:
+            upgrade: dist
+            update_cache: yes
+
+- hosts: workstation_init
+  become: true
+  roles:
+      - workstation
+  tags: [workstation]

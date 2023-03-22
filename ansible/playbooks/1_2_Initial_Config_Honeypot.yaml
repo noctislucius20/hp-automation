@@ -1,0 +1,14 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+      - name: install updates
+        apt:
+            upgrade: dist
+            update_cache: yes
+
+- hosts: honeypot_init
+  become: true
+  roles:
+      - base
+  tags: [honeypot]
