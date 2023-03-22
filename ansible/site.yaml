@@ -1,3 +1,0 @@
----
-- import_playbook: playbooks/2_1_Deploy_Workstation_Package.yaml    
-- import_playbook: playbooks/2_2_Deploy_Honeypot_Package.yaml    

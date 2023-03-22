@@ -57,13 +57,17 @@ def create_app():
 
     # register blueprints for route
     from src.controllers.UsersController import user
-    from src.controllers.ApiController import api
+    from src.controllers.ApiInfoController import api
     from src.controllers.SensorsController import sensor
     from src.controllers.HoneypotsController import honeypot
+    from src.controllers.HoneypotSensorController import honeypotsensor
+    from src.controllers.JobsController import jobs
 
     app.register_blueprint(user)
     app.register_blueprint(api)
     app.register_blueprint(sensor)
     app.register_blueprint(honeypot)
+    app.register_blueprint(honeypotsensor)
+    app.register_blueprint(jobs, url_prefix='/ansible')
 
     return app

@@ -23,7 +23,7 @@ def upgrade():
     sa.Column('honeypot_sensor_id', sa.Integer(), nullable=False),
     sa.Column('sensor_name', sa.String(), nullable=False),
     sa.Column('honeypot_name', sa.String(), nullable=False),
-    sa.Column('state', sa.Enum('sleeping', 'not_running', 'running', name='honeypotdetail_state_enum'), nullable=False),
+    sa.Column('state', sa.Enum('sleeping', 'not running', 'running', name='honeypotdetail_state_enum'), nullable=False),
     sa.Column('virtual_memory', sa.Float(), nullable=False),
     sa.Column('resident_memory', sa.Float(), nullable=False),
     sa.Column('text_memory', sa.Float(), nullable=False),
