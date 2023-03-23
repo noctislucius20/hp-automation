@@ -1,26 +1,26 @@
 ---
-- hosts: honeypot_deploy
+- hosts: "{{ ip_address }}"
   become: true
   gather_facts: false
   pre_tasks:
-    - name: set ansible_port
-      set_fact:
-        ansible_port: 22888
+      - name: set ansible_port
+        set_fact:
+            ansible_port: 22888
 
-    - name: update repo cache
-      apt:
-        update_cache: yes
-      changed_when: false
-  
-- hosts: honeypot_deploy
+      - name: update repo cache
+        apt:
+            update_cache: yes
+        changed_when: false
+
+- hosts: "{{ ip_address }}"
   become: true
   roles:
-    - base
-  tags: [ honeypot ]
+      - base
+  tags: [honeypot]
 
-- hosts: honeypot_deploy
+- hosts: "{{ ip_address }}"
   become: true
   roles:
-    - package
-    - ewsposter
-  tags: [ honeypot ]
+      - package
+      - ewsposter
+  tags: [honeypot]
