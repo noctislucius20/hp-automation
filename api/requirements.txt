@@ -13,3 +13,4 @@ pyopenssl
 flask-marshmallow
 marshmallow-sqlalchemy
 requests
+flask[async]

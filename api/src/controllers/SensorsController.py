@@ -1,6 +1,10 @@
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request, make_response, jsonify
 from src.errors.ClientError import ClientError
 from src.services.SensorsService import SensorsService
+import requests
+import json
+
+import os
 # from src.controllers.AuthController import token_required
 
 sensor = Blueprint('sensor', __name__)
@@ -9,7 +13,8 @@ sensor = Blueprint('sensor', __name__)
 def create_sensor():
     data = request.get_json()
     try:
-        new_sensor = SensorsService().add_sensor(name=data.get('name'), ip_address=data.get('ip_address'), state=data.get('state'))
+        new_sensor = SensorsService().add_sensor(ip_address=data.get('ip_address'), description=data.get('description'))
+        # new_job = requests.post(url=f'{os.getenv("SERVER_URL")}/ansible/jobs', data=json.dumps(new_sensor), headers={'Content-Type': 'application/json'})
 
         response = make_response({'status': 'success', 'message': 'new sensor created', 'data': new_sensor})
         response.headers['Content-Type'] = 'application/json'
@@ -38,10 +43,10 @@ def get_all_sensors():
     response.status_code = 200
     return response
 
-@sensor.route('/sensors/<name>', methods=['GET'])
-def get_sensor_by_sensorname(name):
+@sensor.route('/sensors/<id>', methods=['GET'])
+def get_sensor_by_id(id):
     try:
-        sensor = SensorsService().get_one_sensor(name)
+        sensor = SensorsService().get_one_sensor(id)
 
         response = make_response({'status': 'success', 'data': sensor})
         response.headers['Content-Type'] = 'application/json'
@@ -61,11 +66,11 @@ def get_sensor_by_sensorname(name):
         response.headers['Content-Type'] = 'application/json'
         return response
     
-@sensor.route('/sensors/<name>', methods=['PUT'])
-def update_sensor_by_sensorname(name):
+@sensor.route('/sensors/<id>', methods=['PUT'])
+def update_sensor_by_id(id):
     data = request.get_json()
     try:
-        SensorsService().edit_sensor(name=name, new_name=data.get('new_name'), ip_address=data.get('ip_address'), state=data.get('state'))
+        SensorsService().edit_sensor(id=id, ip_address=data.get('ip_address'), description=data.get('description'))
 
         response = make_response({'status': 'success', 'message': 'sensor successfully updated'})
         response.headers['Content-Type'] = 'application/json'
@@ -85,14 +90,13 @@ def update_sensor_by_sensorname(name):
         response.headers['Content-Type'] = 'application/json'
         return response
 
-@sensor.route('/sensors', methods=['DELETE'])
-def delete_sensor_by_sensorname():
-    data = request.get_json()
+@sensor.route('/sensors/<id>', methods=['DELETE'])
+def delete_sensor_by_id(id):
     try:
-        SensorsService().delete_sensor(name=data.get('name'))
+        SensorsService().delete_sensor(id=id)
         response = make_response({'status': 'success', 'message': 'sensor deleted successfully'})
         response.headers['Content-Type'] = 'application/json'
-        response.status_code = 200
+        response.status_code = 204
         return response
 
     except ClientError as e:
