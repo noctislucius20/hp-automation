@@ -1,9 +1,11 @@
 import psutil
+import socket
 import paho.mqtt.client as mqtt
 import numpy as np
 from datetime import datetime
 import uuid
 import time
+import schedule
 import json
 
 class Monitoring:
@@ -476,6 +478,7 @@ class Honeypot(Monitoring):
         global logs_json
         logs_json = {
             "id": str(uuid.uuid4()),
+            "hostname": socket.gethostname(),
             "honeypot_running": Honeypot.totalHoneypotRunning(),
             "dionaea_state": Honeypot.checkDionaea(),
             "dionaea_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryDionaea())),
@@ -550,25 +553,30 @@ class MQTT(Honeypot):
 
     def publish(client):
         try:
-            while True:
-                time.sleep(30)
-                msg = json.dumps(logs_json)
-                result = client.publish(MQTT.config_dict['MQTT_TOPIC_HONEYPOT'], msg, qos=2)
-                status = result[0]
-                if status == 0:
-                    print(msg)
-                else:
-                    print(f"Failed to send message to topic {MQTT.config_dict['MQTT_TOPIC_HONEYPOT']}")
+                
+            msg = json.dumps(logs_json)
+            result = client.publish(MQTT.config_dict['MQTT_TOPIC_HONEYPOT'], msg, qos=2)
+            status = result[0]
+            if status == 0:
+                print(msg)
+            else:
+                print(f"Failed to send message to topic {MQTT.config_dict['MQTT_TOPIC_HONEYPOT']}")
         except:
             print("Failed to parse data")
 
     # ==== RUN MQTT ====
 
     def run():
-        client = MQTT.connect_mqtt()
-        client.loop_start()
         Honeypot.main()
         MQTT.publish(client)
 
 if __name__ == '__main__':
-    MQTT.run()
+    client = MQTT.connect_mqtt()
+    client.loop_start()
+
+    # MQTT.run()
+    schedule.every(30).seconds.do(MQTT.run)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
