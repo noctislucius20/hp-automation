@@ -1,14 +1,14 @@
 ---
-- hosts: honeypot_deploy
+- hosts: "{{ ip_address }}"
   become: true
   gather_facts: false
   pre_tasks:
-    - name: set ansible_port
-      set_fact:
-        ansible_port: 22888
+      - name: set ansible_port
+        set_fact:
+            ansible_port: 22888
 
-- hosts: honeypot_deploy
+- hosts: "{{ ip_address }}"
   become: true
   roles:
-    - cowrie
-  tags: [ honeypot ]
+      - cowrie
+  tags: [honeypot]
