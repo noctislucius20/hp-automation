@@ -1,9 +1,11 @@
 from flask import Blueprint, request, make_response, jsonify
 from src.errors.ClientError import ClientError
 from src.services.SensorsService import SensorsService
+from src.schemas.SensorsSchema import Sensors as SensorsSchema
+from flask_marshmallow import exceptions
+
 import requests
 import json
-
 import os
 # from src.controllers.AuthController import token_required
 
@@ -13,6 +15,7 @@ sensor = Blueprint('sensor', __name__)
 def create_sensor():
     data = request.get_json()
     try:
+        SensorsSchema().load(data=data)
         new_sensor = SensorsService().add_sensor(ip_address=data.get('ip_address'), description=data.get('description'))
         # new_job = requests.post(url=f'{os.getenv("SERVER_URL")}/ansible/jobs', data=json.dumps(new_sensor), headers={'Content-Type': 'application/json'})
 
@@ -21,6 +24,12 @@ def create_sensor():
         response.status_code = 201
         return response
 
+    except exceptions.ValidationError as e:
+        response = make_response({'status': 'error', 'message': e.messages})
+        response.status_code = 400
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    
     except ClientError as e:
         response = make_response({'status': 'error', 'message': e.message})
         response.status_code = e.statusCode
@@ -70,6 +79,7 @@ def get_sensor_by_id(id):
 def update_sensor_by_id(id):
     data = request.get_json()
     try:
+        SensorsSchema().load(data=data)
         SensorsService().edit_sensor(id=id, ip_address=data.get('ip_address'), description=data.get('description'))
 
         response = make_response({'status': 'success', 'message': 'sensor successfully updated'})

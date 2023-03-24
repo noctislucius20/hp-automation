@@ -4,6 +4,7 @@ from src import db
 from src.errors.InvariantError import InvariantError
 
 import datetime as dt
+import json
 
 class SensorsService:
     def add_sensor(self, description, ip_address):
@@ -16,7 +17,6 @@ class SensorsService:
 
             db.session.add(new_sensor)
             db.session.commit()
-
             return sensor_schema.dump(new_sensor)
 
         if check_sensor.status == False:
@@ -25,7 +25,6 @@ class SensorsService:
             check_sensor.updated_at = dt.datetime.now()
 
             db.session.commit()
-
             return sensor_schema.dump(check_sensor)
       
         else:

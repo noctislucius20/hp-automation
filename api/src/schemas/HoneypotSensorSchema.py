@@ -3,6 +3,10 @@ from src import ma
 class HoneypotSensor(ma.SQLAlchemySchema):
     class Meta:
         ordered = True
-        fields = ('honeypot_id', 'sensor_id', 'status', 'created_at', 'updated_at')
   
-    
+    id = ma.Integer(required=False)
+    honeypot_id = ma.Integer(required=True)
+    sensor_id = ma.Integer(required=True)
+    status = ma.Boolean(required=False)
+    created_at = ma.DateTime(required=False)
+    updated_at = ma.DateTime(required=False)
