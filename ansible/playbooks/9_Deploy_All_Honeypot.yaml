@@ -6,8 +6,8 @@
       - name: set ansible_port
         set_fact:
             ansible_port: 22888
-            ansible_run_tags: "{{ hp_list }}"
-  tags: [honeypot]
+            hostvars['ansible_run_tags']: "{{ hp_list }}"
+  # tags: [honeypot]
 
 - hosts: "{{ ip_address }}"
   become: true
