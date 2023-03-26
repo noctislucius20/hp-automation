@@ -12,15 +12,15 @@
 - hosts: "{{ ip_address }}"
   become: true
   roles:
-      - cowrie
-  when: hp_list is search("cowrie")
+      - role: cowrie
+        when: hp_list is search("cowrie")
   # tags: [cowrie]
 
 - hosts: "{{ ip_address }}"
   become: true
   roles:
-      - dionaea
-  when: hp_list is search("dionaea")
+      - role: dionaea
+        when: hp_list is search("dionaea")
   # tags: [dionaea]
 
 - hosts: "{{ ip_address }}"
