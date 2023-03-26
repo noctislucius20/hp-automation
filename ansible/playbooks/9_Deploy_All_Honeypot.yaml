@@ -7,21 +7,21 @@
         set_fact:
             ansible_port: 22888
             ansible_run_tags: "{{ hp_list }}"
-  # tags: [honeypot]
+  tags: [honeypot]
 
 - hosts: "{{ ip_address }}"
   become: true
   roles:
       - role: cowrie
         # when: ansible_run_tags is search("cowrie")
-  # tags: [cowrie]
+  tags: [cowrie]
 
 - hosts: "{{ ip_address }}"
   become: true
   roles:
       - role: dionaea
         # when: "{{ hp_list }}" is search("dionaea")
-  # tags: [dionaea]
+  tags: [dionaea]
 
 - hosts: "{{ ip_address }}"
   become: true
