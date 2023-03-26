@@ -1,0 +1,44 @@
+---
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  pre_tasks:
+      - name: set ansible_port
+        set_fact:
+            ansible_port: 22888
+
+- hosts: "{{ ip_address }}"
+  become: true
+  roles:
+      - cowrie
+  tags: [honeypot, cowrie]
+
+- hosts: "{{ ip_address }}"
+  become: true
+  roles:
+      - dionaea
+  tags: [honeypot, dionaea]
+
+- hosts: "{{ ip_address }}"
+  become: true
+  roles:
+      - elasticpot
+  tags: [honeypot, elasticpot]
+
+- hosts: "{{ ip_address }}"
+  become: true
+  roles:
+      - gridpot
+  tags: [honeypot, gridpot]
+
+- hosts: "{{ ip_address }}"
+  become: true
+  roles:
+      - honeytrap
+  tags: [honeypot, honeytrap]
+
+- hosts: "{{ ip_address }}"
+  become: true
+  roles:
+      - rdpy
+  tags: [honeypot, rdpy]
