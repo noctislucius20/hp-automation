@@ -6,21 +6,20 @@
       - name: set ansible_port
         set_fact:
             ansible_port: 22888
-            hp_list: "{{ hp_list }}"
   # tags: [honeypot]
 
 - hosts: "{{ ip_address }}"
   become: true
   roles:
       - role: cowrie
-        when: hp_list is search("cowrie")
+        when: "{{ hp_list }}" is search("cowrie")
   # tags: [cowrie]
 
 - hosts: "{{ ip_address }}"
   become: true
   roles:
       - role: dionaea
-        when: hp_list is search("dionaea")
+        when: "{{ hp_list }}" is search("dionaea")
   # tags: [dionaea]
 
 - hosts: "{{ ip_address }}"
