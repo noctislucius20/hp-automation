@@ -12,34 +12,34 @@
   become: true
   roles:
       - cowrie
-  tags: [honeypot, cowrie]
+  tags: [cowrie]
 
 - hosts: "{{ ip_address }}"
   become: true
   roles:
       - dionaea
-  tags: [honeypot, dionaea]
+  tags: [dionaea]
 
 - hosts: "{{ ip_address }}"
   become: true
   roles:
       - elasticpot
-  tags: [honeypot, elasticpot]
+  tags: [elasticpot]
 
 - hosts: "{{ ip_address }}"
   become: true
   roles:
       - gridpot
-  tags: [honeypot, gridpot]
+  tags: [gridpot]
 
 - hosts: "{{ ip_address }}"
   become: true
   roles:
       - honeytrap
-  tags: [honeypot, honeytrap]
+  tags: [honeytrap]
 
 - hosts: "{{ ip_address }}"
   become: true
   roles:
       - rdpy
-  tags: [honeypot, rdpy]
+  tags: [rdpy]
