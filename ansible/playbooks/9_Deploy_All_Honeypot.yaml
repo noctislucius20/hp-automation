@@ -12,14 +12,14 @@
   become: true
   roles:
       - cowrie
-  when: "{{ hp_list }}" | regex_search('^cowrie$')
+  when: "{{ hp_list }}" is search("cowrie")
   # tags: [cowrie]
 
 - hosts: "{{ ip_address }}"
   become: true
   roles:
       - dionaea
-  when: "{{ hp_list }}" | regex_search('^dionaea$')
+  when: "{{ hp_list }}" is search("dionaea")
   # tags: [dionaea]
 
 - hosts: "{{ ip_address }}"
