@@ -10,7 +10,6 @@
   # tags: [honeypot]
 
 - hosts: "{{ ip_address }}"
-  extra_vars:
   become: true
   roles:
       - cowrie
