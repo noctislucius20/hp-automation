@@ -11,8 +11,9 @@
         set_fact:
             honeypot_list: "{{ hp_list }}"
 
-      - name: gather facts
-        gather_facts: true
+      - name: show facts
+        debug:
+            msg: "{{ ansible_facts }}"
 
 - hosts: "{{ ip_address }}"
   become: true
