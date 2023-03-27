@@ -11,8 +11,12 @@
         set_fact:
             honeypot_list: "{{ hp_list }}"
 
+      - name: gather facts
+        gather_facts: true
+
 - hosts: "{{ ip_address }}"
   become: true
+  gather_facts: false
   roles:
       - role: cowrie
         when: honeypot_list is search("cowrie")
@@ -20,6 +24,7 @@
 
 - hosts: "{{ ip_address }}"
   become: true
+  gather_facts: false
   roles:
       - role: dionaea
         when: honeypot_list is search("dionaea")
@@ -27,6 +32,7 @@
 
 - hosts: "{{ ip_address }}"
   become: true
+  gather_facts: false
   roles:
       - role: elasticpot
         when: honeypot_list is search("elasticpot")
@@ -34,6 +40,7 @@
 
 - hosts: "{{ ip_address }}"
   become: true
+  gather_facts: false
   roles:
       - role: gridpot
         when: honeypot_list is search("gridpot")
@@ -41,6 +48,7 @@
 
 - hosts: "{{ ip_address }}"
   become: true
+  gather_facts: false
   roles:
       - role: honeytrap
         when: honeypot_list is search("honeytrap")
@@ -48,6 +56,7 @@
 
 - hosts: "{{ ip_address }}"
   become: true
+  gather_facts: false
   roles:
       - role: rdpy
         when: honeypot_list is search("rdpy")
