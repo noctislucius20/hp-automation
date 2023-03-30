@@ -32,6 +32,7 @@
       - update-binfmts --enable qemu-mips
       - update-binfmts --enable qemu-mipsel
       - update-binfmts --enable qemu-s390x
+  ignore_errors: true
 
 # install docker engine
 - name: install dependencies (Docker)
