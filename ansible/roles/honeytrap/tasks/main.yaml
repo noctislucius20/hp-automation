@@ -21,7 +21,7 @@
           - "6379:6379"
       volumes:
           - honeytrap:/home
-      platform: linux/arm64/v8
+      platform: linux
       state: started
       tty: true
       interactive: true
