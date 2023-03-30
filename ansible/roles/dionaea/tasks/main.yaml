@@ -9,7 +9,6 @@
       tag: dionaea_hp
       build:
           path: /home/ansigent/dionaea
-          platform: linux
       source: build
 
 - name: run dionaea docker image

@@ -9,7 +9,6 @@
           - 502:502
       volumes:
           - gridpot:/gridpot
-      platform: linux
       tty: true
       interactive: true
       state: started

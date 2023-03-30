@@ -19,7 +19,6 @@
       build:
           path: /home/ansigent/cowrie
           pull: yes
-          platform: linux
       source: build
 
 - name: run cowrie docker image
