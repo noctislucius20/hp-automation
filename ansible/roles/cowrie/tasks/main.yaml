@@ -19,6 +19,7 @@
       build:
           path: /home/ansigent/cowrie
           pull: yes
+          platform: linux/amd64
       source: build
 
 - name: run cowrie docker image
@@ -31,7 +32,6 @@
       volumes:
           - cowrie-etc:/cowrie/cowrie-git/etc
           - cowrie-var:/cowrie/cowrie-git/var
-      platform: linux/amd64
       cap_drop:
           - all
       read_only: true

@@ -9,6 +9,7 @@
       tag: dionaea_hp
       build:
           path: /home/ansigent/dionaea
+          platform: linux/amd64
       source: build
 
 - name: run dionaea docker image
@@ -34,7 +35,6 @@
           - "11211:11211"
       volumes:
           - dionaea:/opt/dionaea
-      platform: linux/amd64
       auto_remove: true
       state: started
       tty: true
