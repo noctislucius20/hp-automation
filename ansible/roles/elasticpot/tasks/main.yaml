@@ -6,7 +6,7 @@
           - 9200:9200/tcp
       volumes:
           - elasticpot:/elasticpot/log
-      platform: linux/amd64
+      platform: linux/arm64/v8
       tty: true
       interactive: true
       state: started

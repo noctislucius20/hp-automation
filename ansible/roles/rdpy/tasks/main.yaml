@@ -6,7 +6,7 @@
           - 3389:3389
       volumes:
           - rdpy:/var/log
-      platform: linux/amd64
+      platform: linux/arm64/v8
       tty: true
       interactive: true
       detach: true
