@@ -1,27 +1,28 @@
 - name: clone git honeytrap honeypot
   git:
-    repo: https://github.com/yevonnaelandrew/honeytrap.git
-    dest: /home/ansigent/honeytrap
+      repo: https://github.com/yevonnaelandrew/honeytrap.git
+      dest: /home/ansigent/honeytrap
 
 - name: build honeytrap docker image
   shell: cd /home/ansigent/honeytrap && bash /home/ansigent/honeytrap/dockerize.sh
 
 - name: run honeytrap docker image
   docker_container:
-    name: honeytrap
-    image: honeytrap_test:latest
-    ports: 
-      - "2222:2222"
-      - "8545:8545"
-      - "5900:5900"
-      - "25:25"
-      - "5037:5037"
-      - "631:631"
-      - "389:389"
-      - "6379:6379"
-    volumes:
-      - honeytrap:/home
-    state: started
-    tty: true
-    interactive: true
-    detach: true
+      name: honeytrap
+      image: honeytrap_test:latest
+      ports:
+          - "2222:2222"
+          - "8545:8545"
+          - "5900:5900"
+          - "25:25"
+          - "5037:5037"
+          - "631:631"
+          - "389:389"
+          - "6379:6379"
+      volumes:
+          - honeytrap:/home
+      platform: linux/amd64
+      state: started
+      tty: true
+      interactive: true
+      detach: true
