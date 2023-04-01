@@ -9,16 +9,16 @@ user = Blueprint('user', __name__)
 def create_user():
     data = request.get_json()
     try:
-        new_user = UsersService().add_user(username=data.get('username'), password=data.get('password'), first_name=data.get('first_name'), last_name=data.get('last_name'))
+        user = UsersService().add_user(username=data.get('username'), password=data.get('password'), first_name=data.get('first_name'), last_name=data.get('last_name'))
 
-        response = make_response({'status': 'success', 'message': 'new user created', 'data': new_user})
+        response = make_response({'status': 'success', 'message': 'new user created', 'data': user})
         response.headers['Content-Type'] = 'application/json'
         response.status_code = 201
         return response
 
     except ClientError as e:
-        response = make_response({'status': 'error', 'message': e.message})
-        response.status_code = e.statusCode
+        response = make_response({'status': 'error', 'message': e.args[0]})
+        response.status_code = e.status_code
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -49,8 +49,8 @@ def get_user_by_username(username):
         return response
 
     except ClientError as e:
-        response = make_response({'status': 'error', 'message': e.message})
-        response.status_code = e.statusCode
+        response = make_response({'status': 'error', 'message': e.args[0]})
+        response.status_code = e.status_code
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -73,8 +73,8 @@ def update_user_by_username(username):
         return response
 
     except ClientError as e:
-        response = make_response({'status': 'error', 'message': e.message})
-        response.status_code = e.statusCode
+        response = make_response({'status': 'error', 'message': e.args[0]})
+        response.status_code = e.status_code
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -96,8 +96,8 @@ def delete_user_by_username():
         return response
 
     except ClientError as e:
-        response = make_response({'status': 'error', 'message': e.message})
-        response.status_code = e.statusCode
+        response = make_response({'status': 'error', 'message': e.args[0]})
+        response.status_code = e.status_code
         response.headers['Content-Type'] = 'application/json'
         return response
 

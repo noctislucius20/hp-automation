@@ -1,8 +1,9 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from src.models.UsersModel import Users as UsersModel
 from src.schemas.UsersSchema import Users as UsersSchema
-from src import db
 from src.errors.InvariantError import InvariantError
+from src.errors.AuthenticationError import AuthenticationError
+from src import db
 
 import datetime as dt
 
@@ -10,14 +11,14 @@ class UsersService:
     def add_user(self, username, password, first_name, last_name):
         self.check_user_existed(username)
         hashed_password = generate_password_hash(password, method='sha256')
-        new_user = UsersModel(username = username, password = hashed_password, first_name = first_name, last_name = last_name, roles = 'user', status = True, created_at = dt.datetime.now(), updated_at = dt.datetime.now())
+        user = UsersModel(username = username, password = hashed_password, first_name = first_name, last_name = last_name, roles = 'user', status = True, created_at = dt.datetime.now(), updated_at = dt.datetime.now())
 
-        db.session.add(new_user)
+        db.session.add(user)
         db.session.commit()
 
         user_schema = UsersSchema()
 
-        return user_schema.dump(new_user)
+        return user_schema.dump(user)
         
     def list_all_users(self):
         users = UsersModel.query.filter_by(status=True).all()
@@ -61,3 +62,16 @@ class UsersService:
 
         if user:
             raise InvariantError(message="user already exists")
+        
+    def verify_user_credential(self, username, password):
+        user = UsersModel.query.filter_by(username=username, status=True).first()
+
+        if not user:
+            raise AuthenticationError(message = 'credential invalid')
+
+        match = check_password_hash(user.password, password)
+
+        if not match:
+            raise AuthenticationError(message = 'credential invalid')
+        
+        return user.id

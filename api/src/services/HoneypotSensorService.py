@@ -3,44 +3,37 @@ from src.schemas.HoneypotSensorSchema import HoneypotSensor as HoneypotSensorSch
 from src import db
 from src.errors.InvariantError import InvariantError
 
+
 import os
 import requests
 import datetime as dt
+import json
 
 class HoneypotSensorService:
-    def add_honeypotsensor(self, honeypot_id, sensor_id, honeypot_list):
-        check_honeypotsensor = HoneypotSensorModel.query.filter_by(honeypot_id = honeypot_id, sensor_id = sensor_id).first()
+    def add_honeypotsensor(self, honeypot, sensor_id):
+        check_honeypotsensor = HoneypotSensorModel.query.filter_by(sensor_id = sensor_id).all()
 
-        honeypotsensor_schema = HoneypotSensorSchema()
-
-        return 0
-        if not check_honeypotsensor:
-            new_honeypotsensor = HoneypotSensorModel(honeypot_id = honeypot_id, sensor_id = sensor_id, status = True, created_at = dt.datetime.now(), updated_at = dt.datetime.now())
-    
-            db.session.add(new_honeypotsensor)
-            db.session.commit()
-
-            return honeypotsensor_schema.dump(new_honeypotsensor)
-        
-        if check_honeypotsensor.status == False:
-            check_honeypotsensor.status = True
-            check_honeypotsensor.created_at = dt.datetime.now()
-            check_honeypotsensor.updated_at = dt.datetime.now()
-
-            db.session.commit()
-
-            return honeypotsensor_schema.dump(check_honeypotsensor)
-
-        else:
+        if check_honeypotsensor:
             raise InvariantError(message='honeypotsensor already exist')
+        
+        honeypot_sensor = []
+        for hp in honeypot:
+            honeypot_sensor.append(HoneypotSensorModel(honeypot_id = hp['id'], sensor_id = sensor_id, status = hp['status'], created_at = dt.datetime.now(), updated_at = dt.datetime.now()))
 
-    def delete_honeypotsensor(self, honeypot_id, sensor_id):
-        honeypotsensor = HoneypotSensorModel.query.filter_by(honeypot_id = honeypot_id, sensor_id = sensor_id, status=True).first()
+        db.session.bulk_save_objects(honeypot_sensor)
+        db.session.commit()
+
+        result = HoneypotSensorModel.query.filter_by(sensor_id = sensor_id).all()
+        
+        return json.dumps({'data': result})
+
+    def delete_honeypotsensor(self, id):
+        honeypotsensor = HoneypotSensorModel.query.filter_by(id = id).first()
 
         if not honeypotsensor:
             raise InvariantError(message="honeypotsensor not exist")
-        
-        honeypotsensor.status = False
+
+        HoneypotSensorModel.query.filter_by(honeypot_id = honeypotsensor.honeypot_id).delete()
 
         db.session.commit()
 
