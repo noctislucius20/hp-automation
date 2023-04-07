@@ -62,12 +62,14 @@ def create_app():
     from src.controllers.HoneypotsController import honeypot
     from src.controllers.HoneypotSensorController import honeypotsensor
     from src.controllers.JobsController import jobs
+    from src.controllers.AuthenticationsController import auth
 
     app.register_blueprint(user)
     app.register_blueprint(api)
     app.register_blueprint(sensor)
     app.register_blueprint(honeypot)
     app.register_blueprint(honeypotsensor)
+    app.register_blueprint(auth)
     app.register_blueprint(jobs, url_prefix='/ansible')
 
     return app

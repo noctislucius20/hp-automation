@@ -5,9 +5,12 @@ from src.errors.InvariantError import InvariantError
 
 import datetime as dt
 import json
+import aiohttp
+import os
+import asyncio
 
 class SensorsService:
-    def add_sensor(self, description, ip_address):
+    def add_sensor(self, description, ip_address, honeypot, callback):
         check_sensor = SensorsModel.query.filter_by(ip_address = ip_address).first()
 
         sensor_schema = SensorsSchema()
@@ -17,14 +20,24 @@ class SensorsService:
 
             db.session.add(new_sensor)
             db.session.commit()
-            return sensor_schema.dump(new_sensor)
+    
+            result = sensor_schema.dump(new_sensor)
+
+            asyncio.run(callback(honeypot = honeypot, sensor_id = new_sensor.id, ip_address = ip_address))
+
+            return result
 
         if check_sensor.status == False:
             check_sensor.status = True
+            check_sensor.description = description
             check_sensor.created_at = dt.datetime.now()
             check_sensor.updated_at = dt.datetime.now()
 
             db.session.commit()
+
+
+            asyncio.run(callback(honeypot, check_sensor.id, ip_address))
+
             return sensor_schema.dump(check_sensor)
       
         else:
@@ -73,3 +86,13 @@ class SensorsService:
             raise InvariantError(message="sensor not exist")
         
         return sensor
+    
+    async def call_api(self, honeypot, sensor_id, ip_address):
+        honeypotsensor_payload = {'sensor_id': sensor_id, 'honeypot': honeypot}
+        job_payload = {'ip_address': ip_address, 'honeypot': honeypot}
+    
+        async with aiohttp.ClientSession() as session:
+            headers = {'Content-Type': 'application/json'}
+            url = os.getenv("SERVER_URL")
+            await session.post(url=f'{url}/ansible/jobs', json=job_payload, headers=headers)
+            await session.post(url=f'{url}/honeypotsensor', json=honeypotsensor_payload, headers=headers)
