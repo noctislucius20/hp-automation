@@ -12,7 +12,7 @@
 
 - name: install python module
   pip:
-      name: ["openshift==0.11", "kubernetes==11.0.0", "pyyaml"]
+      name: ["openshift==0.11", "kubernetes==11.0.0", "pyyaml>=3.11"]
 
 - name: start minikube
   command: minikube start --addons=ingress --cpus=4 --install-addons=true --memory=6g --kubernetes-version=stable
