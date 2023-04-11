@@ -7,6 +7,8 @@ import uuid
 import time
 import schedule
 import json
+import os
+from pathlib import Path
 
 class Monitoring:
     def __init__(self, processName, status):
@@ -531,7 +533,9 @@ class MQTT(Honeypot):
 
     # ==== START MQTT CONNECTION ====
 
-    config_file = open('hp-monitoring/config.txt')
+    home = str(Path.home())
+    os.chdir(f'{home}/Documents/tugas_akhir/hp-automation/hp-monitoring')
+    config_file = open('config.txt')
     config_dict = {}
     for lines in config_file:
         items = lines.split(': ', 1)
@@ -574,9 +578,10 @@ if __name__ == '__main__':
     client = MQTT.connect_mqtt()
     client.loop_start()
 
-    # MQTT.run()
-    schedule.every(30).seconds.do(MQTT.run)
+    MQTT.run()
+    # schedule.every(30).seconds.do(MQTT.run)
 
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
+ 

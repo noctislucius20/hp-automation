@@ -45,7 +45,24 @@ class Collector(Connect):
                 data = json.loads(logs_json)
 
                 if "CPU_usage" in data:
-                    array = (1, data['hostname'], data['honeypot_running'], data['CPU_usage'], data['CPU_frequency'], data['CPU_count'], data['RAM_total'], data['RAM_usage'], data['RAM_available'], data['RAM_percentage'], data['swap_memory_total'], data['swap_memory_usage'], data['swap_memory_free'], data['swap_memory_percentage'], data['network_packet_recv'], data['network_packet_sent'], data['datetime'], True)
+                    ip_address = data['ip_address']
+                    ip_addr = ''
+                    id_sensor = 0
+                    
+                    if ip_address[0].find('en') != -1 or ip_address[0].find('eth') != -1:
+                        ip_addr = str(data['ip_address'][1])
+                    else:
+                        ip_addr = str(0)
+
+                    cursor.execute(f"SELECT id FROM sensors WHERE ip_address = '{ip_addr}'")
+                    row = cursor.fetchone()
+
+                    if row:
+                        id_sensor = row[0]
+                    else:
+                        id_sensor = 1
+
+                    array = (id_sensor, data['hostname'], data['honeypot_running'], data['CPU_usage'], data['CPU_frequency'], data['CPU_count'], data['RAM_total'], data['RAM_usage'], data['RAM_available'], data['RAM_percentage'], data['swap_memory_total'], data['swap_memory_usage'], data['swap_memory_free'], data['swap_memory_percentage'], data['network_packet_recv'], data['network_packet_sent'], data['datetime'], True)
                     sql_insert_query = """ INSERT INTO sensor_details (sensor_id, sensor_name, honeypot_running, cpu_usage, cpu_frequency, cpu_count, ram_total, ram_usage, ram_available, ram_percentage, swap_memory_total, swap_memory_usage, swap_memory_free, swap_memory_percentage, network_packet_received, network_packet_sent, created_at, state) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
 
                     cursor.execute(sql_insert_query, array)

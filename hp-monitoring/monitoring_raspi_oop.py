@@ -1,5 +1,6 @@
 import psutil
 import socket
+import netifaces as ni
 import paho.mqtt.client as mqtt
 from datetime import datetime
 import time
@@ -7,6 +8,9 @@ import schedule
 import json
 import numpy as np
 import uuid
+import os
+from pathlib import Path
+
 
 class Monitoring:
     def __init__(self, processName, status):
@@ -74,6 +78,19 @@ class Monitoring:
                 pass
         return False
 
+    def ipAddress():
+        ipAddress = []
+        interfaces = ni.interfaces()
+        
+        for interface in interfaces:
+            if 'eth' in interface or 'en' in interface:
+                addresses = ni.ifaddresses(interface)
+                if ni.AF_INET in addresses:
+                    ipAddress.append(interface)
+                    ipAddress.append(addresses[ni.AF_INET][0]['addr'])
+
+        return ipAddress
+
 class Raspi(Monitoring):
     def totalHoneypotRunning():
         dionaea_running = Monitoring('dionaea', 'running').checkHoneypotRunning()
@@ -103,6 +120,7 @@ class Raspi(Monitoring):
         global logs_json
         logs_json = {
             "id": str(uuid.uuid4()),
+            "ip_address": Monitoring.ipAddress(),
             "hostname": socket.gethostname(),
             "honeypot_running": Raspi.totalHoneypotRunning(),
             "CPU_usage": Monitoring.cpu_usage(),
@@ -127,7 +145,9 @@ class MQTT(Raspi):
 
     # ==== START MQTT CONNECTION & PUBLISH ====
 
-    config_file = open('hp-monitoring/config.txt')
+    home = str(Path.home())
+    os.chdir(f'{home}/Documents/tugas_akhir/hp-automation/hp-monitoring')
+    config_file = open('config.txt')
     config_dict = {}
     for lines in config_file:
         items = lines.split(': ', 1)
@@ -167,9 +187,11 @@ if __name__ == '__main__':
     client = MQTT.connect_mqtt()
     client.loop_start()
 
-    # MQTT.run()
-    schedule.every(30).seconds.do(MQTT.run)
+    MQTT.run()
+    # schedule.every(30).seconds.do(MQTT.run)
 
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
+
+    # Monitoring.ipAddress()
