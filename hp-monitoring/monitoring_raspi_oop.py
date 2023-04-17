@@ -119,7 +119,7 @@ class Raspi(Monitoring):
     def main():
         global logs_json
         logs_json = {
-            "id": str(uuid.uuid4()),
+            "id_raspi": str(uuid.uuid4()),
             "ip_address": Monitoring.ipAddress(),
             "hostname": socket.gethostname(),
             "honeypot_running": Raspi.totalHoneypotRunning(),

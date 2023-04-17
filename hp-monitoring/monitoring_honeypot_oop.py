@@ -1,5 +1,6 @@
 import psutil
 import socket
+import netifaces as ni
 import paho.mqtt.client as mqtt
 import numpy as np
 from datetime import datetime
@@ -14,6 +15,19 @@ class Monitoring:
     def __init__(self, processName, status):
         self.processName = processName
         self.status = status
+
+    def ipAddress():
+        ipAddress = []
+        interfaces = ni.interfaces()
+        
+        for interface in interfaces:
+            if 'eth' in interface or 'en' in interface:
+                addresses = ni.ifaddresses(interface)
+                if ni.AF_INET in addresses:
+                    ipAddress.append(interface)
+                    ipAddress.append(addresses[ni.AF_INET][0]['addr'])
+
+        return ipAddress
 
     def checkHoneypotRunning(self):
         for proc in psutil.process_iter():
@@ -479,7 +493,8 @@ class Honeypot(Monitoring):
     def main():
         global logs_json
         logs_json = {
-            "id": str(uuid.uuid4()),
+            "id_honeypot": str(uuid.uuid4()),
+            "ip_address": Honeypot.ipAddress(),
             "hostname": socket.gethostname(),
             "honeypot_running": Honeypot.totalHoneypotRunning(),
             "dionaea_state": Honeypot.checkDionaea(),

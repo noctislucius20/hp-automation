@@ -1,5 +1,6 @@
-MQTT_BROKER: 'broker.emqx.io'
+MQTT_BROKER: 'broker.hivemq.com'
 MQTT_PORT: 1883
+MQTT_BROKER_CADANGAN: 'broker.emqx.io'
 MQTT_IP_BROKER: '151.106.125.153'
 MQTT_PORT_BROKER: 9999
 MQTT_CLIENT_SENSOR: 'client/sensor'
