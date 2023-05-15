@@ -16,41 +16,81 @@ class JobsService:
             'Content-Type': 'application/json'
         }
  
-    def add_host(self, ip_address):      
-        host_var = {
-            'ansible_user': '{{ honeypot_user }}',
-            'ansible_become_pass': '{{ honeypot_pass }}'
-        }
-
-        payload = {
-            'name': ip_address,
-            'description': 'honeypot',
-            'variables': str(host_var)
-        }
-
-        response = requests.post(url=(self.awx_url + f'/inventories/{self.awx_inventory_id}/hosts/'), headers=self.awx_url_header, data=json.dumps(payload))
-
-        print(json.dumps(response.json()))
+    def add_host(self, ip_address):   
+        try:
+            host_var = {
+                'ansible_user': '{{ honeypot_user }}',
+                'ansible_become_pass': '{{ honeypot_pass }}'
+            }
+    
+            payload = {
+                'name': ip_address,
+                'description': 'honeypot',
+                'variables': str(host_var)
+            }
+    
+            response = requests.post(url=(self.awx_url + f'/inventories/{self.awx_inventory_id}/hosts/'), headers=self.awx_url_header, data=json.dumps(payload))
+    
+            print(json.dumps(response.json()))
+        
+        except Exception as e:
+            raise e
 
         # if response.status_code != 201:
         #     raise InvariantError(message=str(response.json()))
         
-    def run_starter_job(self, ip_address, honeypot):
-        hp_list = [hp['name'].lower() for hp in honeypot if hp['status']]
-
-        extra_vars = {
-            'ip_address': ip_address,
-            'hp_list': ', '.join(hp_list)
-        }
-
-        payload = {
-            'extra_vars': str(extra_vars)
-        }
-
-        response = requests.post(url=(self.awx_url + f'/workflow_job_templates/{self.awx_workflow_job_id}/launch/'), headers=self.awx_url_header, data=json.dumps(payload))
-        
-        print(json.dumps(response.json()))     
+    def update_host(self, ip_address, old_ip_address):
+        try:
+            host_var = {
+                'ansible_user': '{{ honeypot_user }}',
+                'ansible_become_pass': '{{ honeypot_pass }}'
+            }
     
+            payload = {
+                'name': ip_address,
+                'description': 'honeypot',
+                'variables': str(host_var)
+            }
+            
+            host_id = requests.get(url=(self.awx_url + f'/inventories/{self.awx_inventory_id}/hosts/?name={old_ip_address}'), headers=self.awx_url_header)
+
+            r = requests.put(url=(self.awx_url + f'/hosts/{host_id.json()["results"][0]["id"]}/'), headers=self.awx_url_header, json=payload)
+            print(json.dumps(r.json()))
+        
+        except Exception as e:
+            raise e
+
+    def run_job(self, ip_address, honeypot):
+        try:
+            hp_list = [hp['name'].lower() for hp in honeypot]
+
+            extra_vars = {
+                'ip_address': ip_address,
+                'hp_list': ', '.join(hp_list)
+            }
+    
+            payload = {
+                'extra_vars': str(extra_vars)
+            }
+    
+            response = requests.post(url=(self.awx_url + f'/workflow_job_templates/{self.awx_workflow_job_id}/launch/'), headers=self.awx_url_header, data=json.dumps(payload))
+            
+            print(json.dumps(response.json()))  
+            
+        except Exception as e:
+            raise e
+
+    def get_log(self, ip_address):
+        try:
+            host_id = requests.get(url=(self.awx_url + f'/inventories/{self.awx_inventory_id}/hosts/?name={ip_address}'), headers=self.awx_url_header)
+            job_id = requests.get(url=(self.awx_url + f'/hosts/{host_id.json()["results"][0]["id"]}/'), headers=self.awx_url_header).json()["last_job"]
+            response = requests.get(url=(self.awx_url + f'/jobs/{job_id}/stdout/?format=html'), headers=self.awx_url_header)
+
+            return response.text.replace("#161b1f", "#BEBEBE")
+        
+        except Exception as e:
+            raise e
+
     # async def run_deploy_honeypot_job(self, honeypot):
     #     try:
     #         job_map = {
