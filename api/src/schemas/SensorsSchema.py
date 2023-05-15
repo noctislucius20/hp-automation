@@ -15,6 +15,7 @@ class Sensors(ma.SQLAlchemySchema):
         
     id = ma.Integer(required = False)
     ip_address = ma.String(validate = validate_ipv4, required=True)
+    name = ma.String(required=False)
     description = ma.String(required=False)
     status = ma.Boolean(required=False)
     created_at = ma.DateTime(required=False)
