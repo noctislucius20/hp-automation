@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
+from flask_socketio import SocketIO
 from flask_marshmallow import Marshmallow
 from sqlalchemy_utils.functions import database_exists, create_database
 from dotenv import load_dotenv
@@ -16,6 +17,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
 ma = Marshmallow()
+socketio = SocketIO()
 
 def create_app():
     app = Flask(__name__)
@@ -45,6 +47,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     ma.init_app(app)
+    socketio.init_app(app, cors_allowed_origins="*")
 
     # import all models for migrations
     from src.models.UsersModel import Users
@@ -56,7 +59,6 @@ def create_app():
     from src.models.SensorDetailsModel import SensorDetails
     from src.models.HistoryModel import History
     from src.models.StatusCodesModel import StatusCodes
-    from src.models.HistoryStatusCodeModel import HistoryStatusCode
 
     # register blueprints for route
     from src.controllers.UsersController import user
