@@ -5,6 +5,7 @@ from datetime import datetime
 import schedule
 import time
 import json
+import uuid
 
 # def hostname():
 #     hostname = socket.gethostname()
@@ -465,7 +466,8 @@ def checkVMSPercentRDPY():
         return checkVMSPercentRunning('/rdpy/bin/rdpy-rdphoneypot.py', 'sleeping')
     else:
         return(0)
-        
+
+
 # MAIN FUNCTION
 
 logs_json = None
@@ -521,9 +523,9 @@ def main():
     # print(logs_json)
     # print ('Running Log...')
 
-    # with open('hp-monitoring/logs_honeypot.json', 'a+') as json_file:
-    #     json.dump(logs_json, json_file)
-    #     json_file.write("\n")
+    with open('hp-monitoring/logs_honeypot.json', 'a+') as json_file:
+        json.dump(logs_json, json_file)
+        json_file.write("\n")
 
 # ==== START MQTT CONNECTION & PUBLISH ====
 
@@ -569,10 +571,9 @@ def run():
 
 if __name__ == '__main__':
     run()
-    # main()
-    # schedule.every(10).seconds.do(run)
-    # schedule.every(1).seconds.do(publish)
-    # print(logs_json)
+    # schedule.every(10).seconds.do(id)
+    # # schedule.every(1).seconds.do(publish)
+    # # print(logs_json)
 
     # while True:
     #     schedule.run_pending()
