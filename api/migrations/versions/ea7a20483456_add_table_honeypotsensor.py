@@ -22,7 +22,6 @@ def upgrade():
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('honeypot_id', sa.Integer(), nullable=True),
     sa.Column('sensor_id', sa.Integer(), nullable=True),
-    sa.Column('status', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['honeypot_id'], ['honeypots.id'], ),

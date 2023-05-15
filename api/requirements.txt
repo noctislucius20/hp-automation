@@ -15,3 +15,5 @@ marshmallow-sqlalchemy
 requests
 flask[async]
 aiohttp
+flask-socketio
+simple-websocket
