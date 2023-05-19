@@ -47,7 +47,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     ma.init_app(app)
-    socketio.init_app(app, cors_allowed_origins="*")
+    socketio.init_app(app, cors_allowed_origins="*", ping_interval=50, allow_upgrades=True, logger=True, engineio_logger=True)
 
     # import all models for migrations
     from src.models.UsersModel import Users
@@ -59,6 +59,7 @@ def create_app():
     from src.models.SensorDetailsModel import SensorDetails
     from src.models.HistoryModel import History
     from src.models.StatusCodesModel import StatusCodes
+    from src.models.JobLogsModel import JobLogs
 
     # register blueprints for route
     from src.controllers.UsersController import user
