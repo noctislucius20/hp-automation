@@ -26,36 +26,44 @@ class HoneypotSensorService:
 
     def update_honeypotsensor(self, honeypot, sensor_id):
         # Get existing honeypot sensors for this sensor_id
-        existing_sensors = HoneypotSensorModel.query.filter_by(sensor_id=sensor_id).all()
+        existing_sensors = HoneypotSensorModel.query.filter_by(sensor_id=sensor_id).all() 
         
         # Keep track of ids that should remain after updating
-        new_ids = set(hp['id'] for hp in honeypot)
-        existing_ids = set(hs.honeypot_id for hs in existing_sensors)
-        ids_to_keep = new_ids.intersection(existing_ids)
-        
+        new_ids = set(hp['id'] for hp in honeypot) 
+        existing_ids = set(hs.honeypot_id for hs in existing_sensors) 
+
+        ids_to_keep = new_ids.intersection(existing_ids) 
+
         # Remove instances that are no longer needed
         for sensor in existing_sensors:
-            if sensor.honeypot_id not in ids_to_keep:
-                db.session.delete(sensor)
+            if sensor.honeypot_id not in ids_to_keep: 
+                db.session.delete(sensor) 
         
         # Add new sensors
-        honeypot_sensor = [HoneypotSensorModel(honeypot_id=hp['id'], sensor_id=sensor_id, created_at=dt.datetime.now(), updated_at=dt.datetime.now()) for hp in honeypot]
+        honeypot_sensor = [HoneypotSensorModel(honeypot_id=hp['id'], sensor_id=sensor_id, created_at=dt.datetime.now(), updated_at=dt.datetime.now()) for hp in honeypot if hp['id'] not in existing_ids]
         
         try:
-            db.session.bulk_save_objects(honeypot_sensor)
+            if honeypot_sensor:
+                db.session.bulk_save_objects(honeypot_sensor)
             db.session.commit()
         except:
             db.session.rollback()
             raise Exception("Failed to save honeypot sensors.")
 
-    def delete_honeypotsensor(self, id):
-        honeypotsensor = HoneypotSensorModel.query.filter_by(id = id).first()
+    def delete_honeypotsensor(self, sensor_id):
+        honeypotsensor = HoneypotSensorModel.query.filter_by(sensor_id = sensor_id).all()
 
         if not honeypotsensor:
             raise InvariantError(message="honeypotsensor not exist")
+        try:
+            for sensor in honeypotsensor:
+                db.session.delete(sensor)
+                
+            db.session.commit()
 
-        HoneypotSensorModel.query.filter_by(honeypot_id = honeypotsensor.honeypot_id).delete()
-
-        db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
+        
 
         

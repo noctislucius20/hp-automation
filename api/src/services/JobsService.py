@@ -1,9 +1,13 @@
 from src.errors.InvariantError import InvariantError
+from src.models.JobLogsModel import JobLogs as JobLogsModel
+from src import db
+from src import socketio
 
 import os
 import json
 import requests
 import asyncio
+import datetime as dt
 
 class JobsService:    
     def __init__(self):
@@ -29,16 +33,15 @@ class JobsService:
                 'variables': str(host_var)
             }
     
-            response = requests.post(url=(self.awx_url + f'/inventories/{self.awx_inventory_id}/hosts/'), headers=self.awx_url_header, data=json.dumps(payload))
+            requests.post(url=(self.awx_url + f'/inventories/{self.awx_inventory_id}/hosts/'), headers=self.awx_url_header, data=json.dumps(payload))
     
-            print(json.dumps(response.json()))
-        
         except Exception as e:
             raise e
 
         # if response.status_code != 201:
         #     raise InvariantError(message=str(response.json()))
         
+
     def update_host(self, ip_address, old_ip_address):
         try:
             host_var = {
@@ -54,13 +57,12 @@ class JobsService:
             
             host_id = requests.get(url=(self.awx_url + f'/inventories/{self.awx_inventory_id}/hosts/?name={old_ip_address}'), headers=self.awx_url_header)
 
-            r = requests.put(url=(self.awx_url + f'/hosts/{host_id.json()["results"][0]["id"]}/'), headers=self.awx_url_header, json=payload)
-            print(json.dumps(r.json()))
+            requests.put(url=(self.awx_url + f'/hosts/{host_id.json()["results"][0]["id"]}/'), headers=self.awx_url_header, json=payload)
         
         except Exception as e:
             raise e
 
-    def run_job(self, ip_address, honeypot):
+    def run_job(self, ip_address, honeypot, sensor_id):
         try:
             hp_list = [hp['name'].lower() for hp in honeypot]
 
@@ -75,43 +77,56 @@ class JobsService:
     
             response = requests.post(url=(self.awx_url + f'/workflow_job_templates/{self.awx_workflow_job_id}/launch/'), headers=self.awx_url_header, data=json.dumps(payload))
             
+            job_logs = JobLogsModel(sensor_id=sensor_id, job_id=response.json()['workflow_job'], job_url=(self.awx_url + (f'{response.json()["url"]}').replace('api/v2/', '')), created_at=dt.datetime.now()) 
+            db.session.add(job_logs)
+            db.session.commit()
+
             print(json.dumps(response.json()))  
             
         except Exception as e:
             raise e
 
-    def get_log(self, ip_address):
+    def relaunch_job(self, workflow_job_id, sensor_id):
         try:
-            host_id = requests.get(url=(self.awx_url + f'/inventories/{self.awx_inventory_id}/hosts/?name={ip_address}'), headers=self.awx_url_header)
-            job_id = requests.get(url=(self.awx_url + f'/hosts/{host_id.json()["results"][0]["id"]}/'), headers=self.awx_url_header).json()["last_job"]
-            response = requests.get(url=(self.awx_url + f'/jobs/{job_id}/stdout/?format=html'), headers=self.awx_url_header)
+            response = requests.post(url=(self.awx_url + f'/workflow_jobs/{workflow_job_id}/relaunch/'), headers=self.awx_url_header)
 
-            return response.text.replace("#161b1f", "#BEBEBE")
+            job_logs = JobLogsModel(sensor_id=sensor_id, job_id=response.json()['id'], job_url=(self.awx_url + (f'{response.json()["url"]}').replace('api/v2/', '')), created_at=dt.datetime.now())
+            db.session.add(job_logs)
+            db.session.commit()
+
+            print(json.dumps(response.json()))
+            
+        except Exception as e:
+            raise e
         
+    def cancel_job(self, workflow_job_id):
+        try:
+            response = requests.post(url=(self.awx_url + f'/workflow_jobs/{workflow_job_id}/cancel/'), headers=self.awx_url_header)
+            
+            print(json.dumps(response.json()))
+            
         except Exception as e:
             raise e
 
-    # async def run_deploy_honeypot_job(self, honeypot):
-    #     try:
-    #         job_map = {
-    #             'cowrie': 'AWX_JOB_TEMPLATE_COWRIE_ID',
-    #             'dionaea': 'AWX_JOB_TEMPLATE_DIONAEA_ID',
-    #             'honeytrap': 'AWX_JOB_TEMPLATE_HONEYTRAP_ID',
-    #             'rdpy': 'AWX_JOB_TEMPLATE_RDPY_ID',
-    #             'elasticpot': 'AWX_JOB_TEMPLATE_ELASTICPOT_ID',
-    #             'gridpot': 'AWX_JOB_TEMPLATE_GRIDPOT_ID'
-    #         }
-
-    #         for hp in honeypot:
-    #             hp_lower = hp['name'].lower()
-    #             if hp_lower in job_map and hp['status'] == True:
-    #                 job_template = os.getenv(job_map[hp_lower])
-    #                 response = requests.post(url=(self.awx_url + f'/job_templates/{job_template}/launch/'), headers=self.awx_url_header)
-
-    #                 print(response.json())
-
-    #     except Exception as e:
-    #         raise e
+    def get_job_status(self, latest_job):
+        try:
+            response = requests.get(url=(self.awx_url + f'/workflow_jobs/{latest_job}/'), headers=self.awx_url_header)
+            return response.json()['status']
         
+        except Exception as e:
+            raise e
+        
+    def get_log(self, workflow_job_id):
+        try:
+            check_running = requests.get(url=(self.awx_url + f'/workflow_jobs/{workflow_job_id}/'), headers=self.awx_url_header).json()
 
+            job_list = requests.get(url=(self.awx_url + f'/workflow_jobs/{workflow_job_id}/workflow_nodes/'), headers=self.awx_url_header).json()
 
+            job_id = sorted([str(job["summary_fields"]["job"]["id"]) for job in job_list['results'] if 'job' in job["summary_fields"]], key=int)
+
+            response = requests.get(url=(self.awx_url + f'/jobs/{job_id[-1]}/stdout/?format=html'), headers=self.awx_url_header)
+
+            return {'finished': True if check_running['finished'] is not None else False, 'logs': response.text.replace("#161b1f", "#BEBEBE")}
+        
+        except Exception as e:
+            raise e

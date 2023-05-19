@@ -60,12 +60,12 @@ def update_honeypotsensor():
         response = make_response({'status': 'error', 'message': 'server fail'}, 500)
         return response
 
-@honeypotsensor.route('/honeypotsensor/<id>', methods=['DELETE'])
-def delete_honeypotsensor_by_id(id):
+@honeypotsensor.route('/honeypotsensor/<sensor_id>', methods=['DELETE'])
+def delete_honeypotsensor_by_id(sensor_id):
     try:
         token_required()
 
-        HoneypotSensorService().delete_honeypotsensor(id=id)
+        HoneypotSensorService().delete_honeypotsensor(sensor_id=sensor_id)
         response = make_response({'status': 'success', 'message': 'honeypotsensor deleted successfully'}, 204)
         return response
 

@@ -106,15 +106,54 @@ def update_sensor_by_id(id):
         response = make_response({'status': 'error', 'message': 'server fail'}, 500)
         return response
 
+@sensor.route('/sensors/<id>', methods=['DELETE'])
+def delete_sensor_by_id(id):
+    try:
+        SensorsService().delete_sensor(id=id)
+        response = make_response({'status': 'success', 'message': 'sensor deleted successfully'}, 204)
+        return response
+
+    except ClientError as e:
+        response = make_response({'status': 'error', 'message': e.args[0]}, e.status_code)
+        return response
+
+    except:
+        #server error 
+        response = make_response({'status': 'error', 'message': 'server fail'}, 500)
+        return response
+    
 @sensor.route('/sensors/<id>/logs', methods=['GET'])
 def get_logs_by_sensor_id(id):
     try:
         token_required()
         
         logs = SensorsService().get_logs(id)
-        socketio.emit('logs', logs)
+
+        if logs['finished'] == False:
+            socketio.emit('logs', logs['data'])
+            socketio.sleep(1)
+            return {'status': 'success'} 
+
+        return make_response({'status': 'success', 'data': logs['data']}, 200)
         
-        return jsonify({'status': 'success'}), 200
+    except ClientError as e:
+        response = make_response({'status': 'error', 'message': e.args[0]}, e.status_code)
+        return response
+
+    except:
+        #server error 
+        response = make_response({'status': 'error', 'message': 'server fail'}, 500)
+        return response
+
+@sensor.route('/sensors/<id>/relaunch', methods=['POST'])
+def relaunch_sensor_job(id):
+    try:
+        token_required()
+
+        SensorsService().relaunch_job(id)
+
+        response = make_response({'status': 'success', 'message': 'job relaunched'}, 200)
+        return response
 
     except ClientError as e:
         response = make_response({'status': 'error', 'message': e.args[0]}, e.status_code)
@@ -125,11 +164,14 @@ def get_logs_by_sensor_id(id):
         response = make_response({'status': 'error', 'message': 'server fail'}, 500)
         return response
 
-@sensor.route('/sensors/<id>', methods=['DELETE'])
-def delete_sensor_by_id(id):
+@sensor.route('/sensors/<id>/cancel', methods=['POST'])
+def cancel_sensor_job(id):
     try:
-        SensorsService().delete_sensor(id=id)
-        response = make_response({'status': 'success', 'message': 'sensor deleted successfully'}, 204)
+        token_required()
+
+        SensorsService().cancel_job(id)
+
+        response = make_response({'status': 'success', 'message': 'job cancelled'}, 200)
         return response
 
     except ClientError as e:

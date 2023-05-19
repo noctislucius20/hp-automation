@@ -17,6 +17,7 @@ class Sensors(ma.SQLAlchemySchema):
     ip_address = ma.String(validate = validate_ipv4, required=True)
     name = ma.String(required=False)
     description = ma.String(required=False)
+    latest_job = ma.String(required=False)
     status = ma.Boolean(required=False)
     created_at = ma.DateTime(required=False)
     updated_at = ma.DateTime(required=False)
