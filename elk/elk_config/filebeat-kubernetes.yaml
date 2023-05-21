@@ -10,16 +10,17 @@ data:
   filebeat.yml: |-
     filebeat.inputs:
     - type: mqtt
-      id: ubuntu_1_honeypot
-      hosts:
-        - tcp://broker.emqx.io:1883
+      id: ubuntu_honeypot
+      hosts: ["tcp://broker.hivemq.com:1883"]
       topics:
         - topic/monitoring/#
+      client_id: "client/subscriber"
       qos: 2
       enabled: true
       tags: ["ubuntu_2"]
       paths:
         - /var/log/containers/*.log
+      clean_session: false
       #processors:
       #  - add_kubernetes_metadata:
       #      host: ${NODE_NAME}
