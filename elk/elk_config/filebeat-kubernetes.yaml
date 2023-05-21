@@ -17,7 +17,7 @@ data:
       client_id: "client/subscriber"
       qos: 2
       enabled: true
-      tags: ["ubuntu_1"]
+      tags: ["ubuntu_2"]
       paths:
         - /var/log/containers/*.log
       clean_session: false
