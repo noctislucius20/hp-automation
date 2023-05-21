@@ -10,14 +10,14 @@ data:
   filebeat.yml: |-
     filebeat.inputs:
     - type: mqtt
-      id: ubuntu_1
+      id: ubuntu_1_honeypot
       hosts:
         - tcp://broker.emqx.io:1883
       topics:
         - topic/monitoring/#
       qos: 2
       enabled: true
-      tags: ["ubuntu_1"]
+      tags: ["ubuntu_2"]
       paths:
         - /var/log/containers/*.log
       #processors:

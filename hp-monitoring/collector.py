@@ -4,7 +4,6 @@ import psycopg2
 import json
 import schedule
 import time
-import threading
 from datetime import datetime
 
 class Connect:
@@ -187,26 +186,31 @@ class Collector(Connect):
                                     print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
         
         except (Exception, psycopg2.Error) as error:
-                print("Failed to insert record into history table {}".format(error))
+            print("Failed to insert record into history table {}".format(error))
 
 
     def delete_data():
-        try:      
+        try:
             # time.sleep(60)     
-            cursor = Collector.connection.cursor()
-            print('Connected to PostgreSQL')
+            Collector.cursor.execute("SELECT COUNT(*) FROM sensor_details")
+            result_sensor_details = Collector.cursor.fetchone()
 
-            sql_delete_query_sensor_details = """ DELETE FROM sensor_details WHERE created_at IN (SELECT created_at FROM (SELECT created_at FROM sensor_details ORDER BY created_at ASC LIMIT 1) as Subquery) """
+            if result_sensor_details[0] > 5:
+                sql_delete_query_sensor_details = """ DELETE FROM sensor_details WHERE created_at IN (SELECT created_at FROM (SELECT created_at FROM sensor_details ORDER BY created_at ASC LIMIT 1) as Subquery) """
 
-            cursor.execute(sql_delete_query_sensor_details)
-            Collector.connection.commit()
-            print(cursor.rowcount, "Record deleted successfully into sensor_details table")
+                Collector.cursor.execute(sql_delete_query_sensor_details)
+                Collector.connection.commit()
+                print(Collector.cursor.rowcount, "Record deleted successfully into sensor_details table")
+            
+            Collector.cursor.execute("SELECT COUNT(*) FROM honeypot_details")
+            result_honeypot_details = Collector.cursor.fetchone()
 
-            sql_delete_query_honeypot_details = """ DELETE FROM honeypot_details WHERE created_at IN (SELECT created_at FROM (SELECT created_at FROM honeypot_details ORDER BY created_at ASC LIMIT 6) as Subquery) """
+            if result_honeypot_details[0] > 17:
+                sql_delete_query_honeypot_details = """ DELETE FROM honeypot_details WHERE created_at IN (SELECT created_at FROM (SELECT created_at FROM honeypot_details ORDER BY created_at ASC LIMIT 6) as Subquery) """
 
-            cursor.execute(sql_delete_query_honeypot_details)
-            Collector.connection.commit()
-            print(cursor.rowcount, "Record deleted successfully into honeypot_details table")
+                Collector.cursor.execute(sql_delete_query_honeypot_details)
+                Collector.connection.commit()
+                print(Collector.cursor.rowcount, "Record deleted successfully into honeypot_details table")
 
         except (Exception, psycopg2.Error) as error:
             print("Failed to delete record into sensor_details / honeypot_details table {}".format(error))
@@ -214,27 +218,24 @@ class Collector(Connect):
             print(row)
 
     def run():
+        # Collector.delete_data()
         client = Connect.connect_mqtt()
         # Collector.subscribe(client)
         client.loop_start()
         timeout = 60
         start_time = time.time()
-        first_message_received = False
-        while True:
-            # pass
-            # Collector.subscribe(client)
-            # Collector.add_history(client)
-            # Collector.add_history()
-            # Collector.delete_data()
 
+        schedule.every(30).seconds.do(Collector.delete_data)
+
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
             if time.time() - start_time == timeout:
                 Collector.add_history(data=0)
                 break
             else:
                 data = 1
                 Collector.subscribe(client)
-                # print(last_message)
-                # Collector.add_history(data=1, last_message=last_message)
 
         client.loop_stop()
         client.disconnect()
@@ -242,9 +243,3 @@ class Collector(Connect):
 
 if __name__ == '__main__':
     Collector.run()
-
-    # schedule.every(1).minute.do(Collector.delete_data)
-
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)
