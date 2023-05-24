@@ -6,31 +6,30 @@ from src.errors.InvariantError import InvariantError
 import datetime as dt
 
 class HoneypotsService:
-    def add_honeypot(self, name):
-        check_honeypot = HoneypotsModel.query.filter_by(name = name).first()
-
+    def add_honeypot(self, name, description):
         honeypot_schema = HoneypotsSchema()
+        try:
+            db.session.begin()
 
-        if not check_honeypot:
-            new_honeypot = HoneypotsModel(name = name, status = True, created_at = dt.datetime.now(), updated_at = dt.datetime.now())
+            check_honeypot = HoneypotsModel.query.filter_by(name = name, status = True).first()
+    
+            if check_honeypot:
+                raise InvariantError(message="honeypot already exist")
 
+            new_honeypot = HoneypotsModel(name = name, description = description, status = True, created_at = dt.datetime.now(), updated_at = dt.datetime.now())
+        
             db.session.add(new_honeypot)
             db.session.commit()
 
             return honeypot_schema.dump(new_honeypot)
-
-        if check_honeypot.status == False:
-            check_honeypot.status = True
-            check_honeypot.created_at = dt.datetime.now()
-            check_honeypot.updated_at = dt.datetime.now()
-
-            db.session.commit()
-
-            return honeypot_schema.dump(check_honeypot)
-      
-        else:
-            raise InvariantError(message="honeypot already exist")
         
+        except Exception as e:
+            db.session.rollback()
+            raise e
+        
+        finally:
+            db.session.close()
+
     def list_all_honeypots(self):
         honeypots = HoneypotsModel.query.filter_by(status=True).all()
 
@@ -45,25 +44,44 @@ class HoneypotsService:
 
         return honeypot_schema.dump(honeypot)
 
-    def edit_honeypot(self, id, name):
-        honeypot = self.check_honeypot_exists(id)
+    def edit_honeypot(self, id, name, description):
+        try: 
+            db.session.begin()
+            
+            honeypot = self.check_honeypot_exists(id)
 
-        if not honeypot.name != name:
-            return 0
+            check_honeypot = HoneypotsModel.query.filter_by(name = name, status = True).first()
+
+            if check_honeypot is not None and check_honeypot.id != honeypot.id:
+                raise InvariantError(message="honeypot already exist")
+
+            db.session.execute(db.update(HoneypotsModel).values({'name': name, 'description': description, 'updated_at': dt.datetime.now()}).where(HoneypotsModel.id == honeypot.id))
+
+            db.session.commit()
         
-        check_honeypot = HoneypotsModel.query.filter_by(name = name).first()
-
-        if check_honeypot:
-            raise InvariantError(message="honeypot already exist")
+        except Exception as e:
+            db.session.rollback()
+            raise e
         
-        db.session.execute(db.update(HoneypotsModel), {'id': honeypot.id, 'name': name, 'updated_at': dt.datetime.now()})
-        db.session.commit()
-
+        finally:
+            db.session.close()
+            
     def delete_honeypot(self, id):
-        honeypot = self.check_honeypot_exists(id)
-        honeypot.status = False
+        try:
+            db.session.begin()
 
-        db.session.commit()
+            honeypot = self.check_honeypot_exists(id)
+
+            db.session.execute(db.update(HoneypotsModel).values({'status': False, 'updated_at': dt.datetime.now()}).where(HoneypotsModel.id == honeypot.id))
+
+            db.session.commit()
+
+        except Exception as e:
+            db.session.rollback()
+            raise e
+        
+        finally:
+            db.session.close()
 
     def check_honeypot_exists(self, id):
         honeypot = HoneypotsModel.query.filter_by(id=id, status=True).first()

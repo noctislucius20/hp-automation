@@ -33,6 +33,7 @@ def downgrade():
         batch_op.alter_column('state',
                existing_type=sa.String(),
                type_=postgresql.ENUM('sleeping', 'not running', 'running', name='honeypotdetail_state_enum'),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='state::honeypotdetail_state_enum')
 
     # ### end Alembic commands ###

@@ -13,35 +13,27 @@ def add_token():
     data = request.get_json()
     try:
         AuthenticationsSchema.AuthenticationsPost().load(data)
-        id = UsersService().verify_user_credential(data.get('username'), data.get('password'))
+        user = UsersService().verify_user_credential(data.get('username'), data.get('password'))
 
-        access_token = TokenManager.TokenManager().generate_access_token(id)
-        refresh_token = TokenManager.TokenManager().generate_refresh_token(id)
+        access_token = TokenManager.TokenManager().generate_access_token(user)
+        refresh_token = TokenManager.TokenManager().generate_refresh_token(user)
 
         AuthenticationsService().add_refresh_token(refresh_token)
 
-        response = make_response({'status': 'success', 'message': 'authentication added successfully', 'data': {'access_token': access_token, 'refresh_token': refresh_token}})
-        response.headers['Content-Type'] = 'application/json'
-        response.status_code = 201
+        response = make_response({'status': 'success', 'message': 'authentication added successfully', 'data': {'access_token': access_token, 'refresh_token': refresh_token}}, 200)
         return response
 
     except exceptions.ValidationError as e:
-        response = make_response({'status': 'error', 'message': e.messages})
-        response.status_code = 400
-        response.headers['Content-Type'] = 'application/json'
+        response = make_response({'status': 'error', 'message': e.messages}, 400)
         return response
     
     except ClientError as e:
-        response = make_response({'status': 'error', 'message': e.args[0]})
-        response.status_code = e.status_code
-        response.headers['Content-Type'] = 'application/json'
+        response = make_response({'status': 'error', 'message': e.args[0]}, e.status_code)
         return response
 
     except:
         #server error 
-        response = make_response({'status': 'error', 'message': 'server fail'})
-        response.status_code = 500
-        response.headers['Content-Type'] = 'application/json'
+        response = make_response({'status': 'error', 'message': 'server fail'}, 500)
         return response
 
 
@@ -51,32 +43,24 @@ def update_token():
     try:
         AuthenticationsSchema.AuthenticationsPut().load(data)
         AuthenticationsService().verify_refresh_token(data.get('refresh_token'))
-        id = TokenManager.TokenManager().verify_refresh_token(data.get('refresh_token'))
+        user = TokenManager.TokenManager().verify_refresh_token(data.get('refresh_token'))
 
-        access_token = TokenManager.TokenManager().generate_access_token(id)
+        access_token = TokenManager.TokenManager().generate_access_token(user)
 
-        response = make_response({'status': 'success', 'message': 'access token updated', 'data': access_token})
-        response.headers['Content-Type'] = 'application/json'
-        response.status_code = 200
+        response = make_response({'status': 'success', 'message': 'access token updated', 'data': access_token}, 200)
         return response
         
     except exceptions.ValidationError as e:
-        response = make_response({'status': 'error', 'message': e.messages})
-        response.status_code = 400
-        response.headers['Content-Type'] = 'application/json'
+        response = make_response({'status': 'error', 'message': e.messages}, 400)
         return response
     
     except ClientError as e:
-        response = make_response({'status': 'error', 'message': e.args[0]})
-        response.status_code = e.status_code
-        response.headers['Content-Type'] = 'application/json'
+        response = make_response({'status': 'error', 'message': e.args[0]}, e.status_code)
         return response
 
     except:
         #server error 
-        response = make_response({'status': 'error', 'message': 'server fail'})
-        response.status_code = 500
-        response.headers['Content-Type'] = 'application/json'
+        response = make_response({'status': 'error', 'message': 'server fail'}, 500)
         return response
     
 @auth.route('/auth', methods=['DELETE'])
@@ -87,26 +71,18 @@ def delete_token():
         AuthenticationsService().verify_refresh_token(data.get('refresh_token'))
         AuthenticationsService().delete_refresh_token(data.get('refresh_token'))
 
-        response = make_response({'status': 'success', 'message': 'access token deleted successfully'})
-        response.headers['Content-Type'] = 'application/json'
-        response.status_code = 204
+        response = make_response({'status': 'success', 'message': 'access token deleted successfully'}, 204)
         return response
 
     except exceptions.ValidationError as e:
-        response = make_response({'status': 'error', 'message': e.messages})
-        response.status_code = 400
-        response.headers['Content-Type'] = 'application/json'
+        response = make_response({'status': 'error', 'message': e.messages}, 400)
         return response
     
     except ClientError as e:
-        response = make_response({'status': 'error', 'message': e.args[0]})
-        response.status_code = e.status_code
-        response.headers['Content-Type'] = 'application/json'
+        response = make_response({'status': 'error', 'message': e.args[0]}, e.status_code)
         return response
 
     except:
         #server error 
-        response = make_response({'status': 'error', 'message': 'server fail'})
-        response.status_code = 500
-        response.headers['Content-Type'] = 'application/json'
+        response = make_response({'status': 'error', 'message': 'server fail'}, 500)
         return response
