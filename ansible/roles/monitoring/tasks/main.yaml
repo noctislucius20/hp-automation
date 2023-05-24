@@ -20,12 +20,10 @@
       mode: 0644
   with_items:
       - src: monitoring_cronjob.j2
-        dest: /etc/cron.d/monitoring_cronjob
+        dest: /home/ansigent/monitoring_cronjob
 
 - name: run script using cronjob
   cron:
-      name: monitorin_cron
-      user: ansigent
       cron_file: monitoring_cronjob
 # - name: Send POST request to Elasticsearch cluster
 #   uri:
