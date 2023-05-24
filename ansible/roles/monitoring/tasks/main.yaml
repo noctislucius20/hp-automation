@@ -23,8 +23,7 @@
         dest: /home/ansigent/monitoring_cronjob
 
 - name: run script using cronjob
-  cron:
-      cron_file: monitoring_cronjob
+  command: crontab -u ansigent monitoring_cronjob
 # - name: Send POST request to Elasticsearch cluster
 #   uri:
 #       url: http://elasticsearch.example.com/myindex/_search
