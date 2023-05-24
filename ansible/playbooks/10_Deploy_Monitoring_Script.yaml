@@ -1,6 +1,19 @@
 ---
 - hosts: "{{ ip_address }}"
   become: true
+  gather_facts: false
+  pre_tasks:
+      - name: set ansible_port
+        set_fact:
+            ansible_port: 22888
+
+      - name: show facts
+        debug:
+            msg: "{{ ansible_facts }}"
+
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
   roles:
       - monitoring
   tags: [monitoring]
