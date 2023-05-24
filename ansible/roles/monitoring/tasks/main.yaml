@@ -1,7 +1,7 @@
 - name: create monitoring script from template
   template:
-      src: { { item.src } }
-      dest: { { item.dest } }
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
       owner: root
       group: root
       mode: 0644
@@ -13,8 +13,8 @@
 
 - name: create cronjob from template
   template:
-      src: { { item.src } }
-      dest: { { item.dest } }
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
       owner: ansigent
       group: root
       mode: 0644
