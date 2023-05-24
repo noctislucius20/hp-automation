@@ -1,0 +1,6 @@
+---
+- hosts: "{{ ip_address }}"
+  become: true
+  roles:
+      - monitoring
+  tags: [monitoring]

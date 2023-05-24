@@ -1,0 +1,46 @@
+- name: create monitoring script from template
+  template:
+      src: { { item.src } }
+      dest: { { item.dest } }
+      owner: root
+      group: root
+      mode: 0644
+  with_items:
+      - src: monitoring_honeypot_oop.j2
+        dest: /home/ansigent/monitoring_honeypot_oop.py
+      - src: monitoring_raspi_oop.j2
+        dest: /home/ansigent/monitoring_raspi_oop.py
+
+- name: create cronjob from template
+  template:
+      src: { { item.src } }
+      dest: { { item.dest } }
+      owner: ansigent
+      group: root
+      mode: 0644
+  with_items:
+      - src: monitoring_cronjob.j2
+        dest: /etc/cron.d/monitoring_cronjob
+
+- name: run script using cronjob
+  cron:
+      name: monitorin_cron
+      user: ansigent
+      cron_file: monitoring_cronjob
+# - name: Send POST request to Elasticsearch cluster
+#   uri:
+#       url: http://elasticsearch.example.com/myindex/_search
+#       method: POST
+#       body:
+#           query: { "match_all": {} }
+#       headers:
+#           Content-Type: "application/json"
+#       return_content: yes
+#   register: elasticsearch_response
+
+# - name: Insert data into PostgreSQL database
+#   postgresql_query:
+#       db: mydatabase
+#       login_user: myuser
+#       login_password: mypassword
+#       query: "INSERT INTO mytable (column1, column2) VALUES ('value1', 'value2')"
