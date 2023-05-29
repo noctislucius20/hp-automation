@@ -1,4 +1,6 @@
 psutil
 paho-mqtt
 numpy
-netifaces
+psycopg2
+schedule
+python-telegram-bot

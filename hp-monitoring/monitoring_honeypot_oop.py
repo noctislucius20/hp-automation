@@ -47,6 +47,15 @@ class Monitoring:
                 pass
         return False
     
+    def checkCPURunning(self):
+        for proc in psutil.process_iter():
+            try:
+                if (self.processName.lower() in proc.name().lower() and self.status.lower() in proc.status().lower() or self.processName in proc.cmdline() and self.status.lower() in proc.status().lower()):
+                    return(proc.cpu_percent())
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        return False
+    
     def checkResidentMemoryRunning(self):
         for proc in psutil.process_iter():
             try:
@@ -180,6 +189,56 @@ class Honeypot(Monitoring):
         else:
             return('Not Running')
         
+        
+    # ==== CHECK HONEYPOT CPU ====
+
+    def checkCPUDionaea():
+        if Monitoring('dionaea', 'running').checkCPURunning():
+            return Monitoring('dionaea', 'running').checkCPURunning()
+        elif Monitoring('dionaea', 'sleeping').checkCPURunning():
+            return Monitoring('dionaea', 'sleeping').checkCPURunning()
+        else:
+            return(0)
+
+    def checkCPUHoneytrap():
+        if Monitoring('honeytrap', 'running').checkCPURunning():
+            return Monitoring('honeytrap', 'running').checkCPURunning()
+        elif Monitoring('honeytrap', 'sleeping').checkCPURunning():
+            return Monitoring('honeytrap', 'sleeping').checkCPURunning()
+        else:
+            return(0)
+
+    def checkCPUGridpot():
+        if Monitoring('conpot', 'running').checkCPURunning():
+            return Monitoring('conpot', 'running').checkCPURunning()
+        elif Monitoring('conpot', 'sleeping').checkCPURunning():
+            return Monitoring('conpot', 'sleeping').checkCPURunning()
+        else:
+            return(0)
+
+    def checkCPUCowrie():
+        if Monitoring('/cowrie/cowrie-env/bin/python3', 'running').checkCPURunning():
+            return Monitoring('/cowrie/cowrie-env/bin/python3', 'running').checkCPURunning()
+        elif Monitoring('/cowrie/cowrie-env/bin/python3', 'sleeping').checkCPURunning():
+            return Monitoring('/cowrie/cowrie-env/bin/python3', 'sleeping').checkCPURunning()
+        else:
+            return(0)
+
+    def checkCPUElasticpot():
+        if Monitoring('elasticpot.py', 'running').checkCPURunning():
+            return Monitoring('elasticpot.py', 'running').checkCPURunning()
+        elif Monitoring('elasticpot.py', 'sleeping').checkCPURunning():
+            return Monitoring('elasticpot.py', 'sleeping').checkCPURunning()
+        else:
+            return(0)
+
+    def checkCPURDPY():
+        if Monitoring('/rdpy/bin/rdpy-rdphoneypot.py', 'running').checkCPURunning():
+            return Monitoring('/rdpy/bin/rdpy-rdphoneypot.py', 'running').checkCPURunning()
+        elif Monitoring('/rdpy/bin/rdpy-rdphoneypot.py', 'sleeping').checkCPURunning():
+            return Monitoring('/rdpy/bin/rdpy-rdphoneypot.py', 'sleeping').checkCPURunning()
+        else:
+            return(0)
 
     # ==== CHECK HONEYPOT RMS ====
 
@@ -498,6 +557,7 @@ class Honeypot(Monitoring):
             "hostname": socket.gethostname(),
             "honeypot_running": Honeypot.totalHoneypotRunning(),
             "dionaea_state": Honeypot.checkDionaea(),
+            "dionaea_cpu": float("{:.2f}".format(Honeypot.checkCPUDionaea())),
             "dionaea_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryDionaea())),
             "dionaea_resident_memory": float("{:.2f}".format(Honeypot.checkResidentMemoryDionaea())),
             "dionaea_text_memory": float("{:.2f}".format(Honeypot.checkTextMemoryDionaea())),
@@ -505,6 +565,7 @@ class Honeypot(Monitoring):
             "dionaea_rms_percentage": float("{:.2f}".format(Honeypot.checkRMSPercentDionaea())),
             "dionaea_vms_percentage": float("{:.2f}".format(Honeypot.checkVMSPercentDionaea())),
             "honeytrap_state": Honeypot.checkHoneytrap(),
+            "honeytrap_cpu": float("{:.2f}".format(Honeypot.checkCPUHoneytrap())),
             "honeytrap_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryHoneytrap())),
             "honeytrap_resident_memory": float("{:.2f}".format(Honeypot.checkResidentMemoryHoneytrap())),
             "honeytrap_text_memory": float("{:.2f}".format(Honeypot.checkTextMemoryHoneytrap())),
@@ -512,6 +573,7 @@ class Honeypot(Monitoring):
             "honeytrap_rms_percentage": float("{:.2f}".format(Honeypot.checkRMSPercentHoneytrap())),
             "honeytrap_vms_percentage": float("{:.2f}".format(Honeypot.checkVMSPercentHoneytrap())),
             "gridpot_state": Honeypot.checkGridpot(),
+            "gridpot_cpu": float("{:.2f}".format(Honeypot.checkCPUGridpot())),
             "gridpot_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryGridpot())),
             "gridpot_resident_memory": float("{:.2f}".format(Honeypot.checkResidentMemoryGridpot())),
             "gridpot_text_memory": float("{:.2f}".format(Honeypot.checkTextMemoryGridpot())),
@@ -519,6 +581,7 @@ class Honeypot(Monitoring):
             "gridpot_rms_percentage": float("{:.2f}".format(Honeypot.checkRMSPercentGridpot())),
             "gridpot_vms_percentage": float("{:.2f}".format(Honeypot.checkVMSPercentGridpot())),
             "cowrie_state": Honeypot.checkCowrie(),
+            "cowrie_cpu": float("{:.2f}".format(Honeypot.checkCPUCowrie())),
             "cowrie_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryCowrie())),
             "cowrie_resident_memory": float("{:.2f}".format(Honeypot.checkResidentMemoryCowrie())),
             "cowrie_text_memory": float("{:.2f}".format(Honeypot.checkTextMemoryCowrie())),
@@ -526,6 +589,7 @@ class Honeypot(Monitoring):
             "cowrie_rms_percentage": float("{:.2f}".format(Honeypot.checkRMSPercentCowrie())),
             "cowrie_vms_percentage": float("{:.2f}".format(Honeypot.checkVMSPercentCowrie())),
             "elasticpot_state": Honeypot.checkElasticpot(),
+            "elasticpot_cpu": float("{:.2f}".format(Honeypot.checkCPUElasticpot())),
             "elasticpot_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryElasticpot())),
             "elasticpot_resident_memory": float("{:.2f}".format(Honeypot.checkResidentMemoryElasticpot())),
             "elasticpot_text_memory": float("{:.2f}".format(Honeypot.checkTextMemoryElasticpot())),
@@ -533,6 +597,7 @@ class Honeypot(Monitoring):
             "elasticpot_rms_percentage": float("{:.2f}".format(Honeypot.checkRMSPercentElasticpot())),
             "elasticpot_vms_percentage": float("{:.2f}".format(Honeypot.checkVMSPercentElasticpot())),
             "rdpy_state": Honeypot.checkRDPY(),
+            "rdpy_cpu": float("{:.2f}".format(Honeypot.checkCPURDPY())),
             "rdpy_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryRDPY())),
             "rdpy_resident_memory": float("{:.2f}".format(Honeypot.checkResidentMemoryRDPY())),
             "rdpy_text_memory": float("{:.2f}".format(Honeypot.checkTextMemoryRDPY())),
