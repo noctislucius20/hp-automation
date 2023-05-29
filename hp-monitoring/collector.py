@@ -4,22 +4,14 @@ import psycopg2
 import json
 import time
 import threading
-from datetime import datetime
 import telebot
+import os
+from datetime import datetime
 from dotenv import load_dotenv
 
 
 class Connect:
-    client_id = f'python-mqtt-{random.randint(0, 100)}'
-    config_file = open('hp-monitoring/config.txt')
-    config_dict = {}
-    for lines in config_file:
-        items = lines.split(': ', 1)
-        config_dict[items[0]] = eval(items[1])
-
-    topic = 'topic/monitoring/#'
-    # topic_sensor = 'topic/monitoring/sensor/+'
-    # topic_honeypot = 'topic/monitoring/honeypot/+'
+    load_dotenv()
 
     def connect_mqtt():
         def on_connect(client, userdata, flags, rc):
@@ -28,9 +20,9 @@ class Connect:
             else:
                 print("Failed to connect, return code %d\n", rc)
 
-        client = mqtt.Client(Connect.client_id)
+        client = mqtt.Client(os.getenv('MQTT_CLIENT_SUBSCRIBE'))
         client.on_connect = on_connect
-        client.connect(Connect.config_dict['MQTT_BROKER'], Connect.config_dict['MQTT_PORT'])
+        client.connect(os.getenv('MQTT_BROKER'), int(os.getenv('MQTT_PORT')))
         return client
 
 
@@ -59,23 +51,12 @@ class Collector(Connect):
                 data = json.loads(logs_json)
                 
                 Collector.insert_data_details()
-                alert_message = Collector.add_history(1)
+                alert_message = Collector.add_history()
 
             except (Exception, psycopg2.Error) as error:
                 print("Failed to insert record into sensor_details / honeypot_details table {}".format(error))
 
-            # finally:
-            #     if connection:
-            #         if client.subscribe(topic_sensor):
-            #             sql_delete_query = """ DELETE FROM sensor_details WHERE created_at IN (SELECT created_at FROM (SELECT created_at FROM sensor_details ORDER BY created_at ASC LIMIT 1) as Subquery) """
-            #             cursor.execute(sql_delete_query)
-            #             print(cursor.rowcount, "Record deleted successfully into sensor_details table")
-
-                    # cursor.close()
-                    # connection.close()
-                    # print("PostgreSQL connection is closed")
-
-        client.subscribe(Connect.topic)
+        client.subscribe(os.getenv('MQTT_TOPIC_SUBSCRIBE'))
         client.on_message = on_message
 
     def insert_data_details():
@@ -125,7 +106,7 @@ class Collector(Connect):
             print(Collector.cursor.rowcount, f"Record inserted successfully into honeypot_details table : {datetime.now().isoformat()}")
 
 
-    def add_history(data_logs):
+    def add_history():
         try:
             ip_address = data['ip_address'][1]
             Collector.cursor.execute("SELECT COUNT(*) FROM honeypot_details")
@@ -237,7 +218,7 @@ class Collector(Connect):
 
 
 class Bot(Collector):
-    API_KEY = '6289233331:AAG_l-CfrztpTtYs_9o6ZtKo2adniEi8_Ig'
+    API_KEY = os.getenv('API_KEY')
     bot = telebot.TeleBot(API_KEY)
     is_update_running = False
 
@@ -251,7 +232,7 @@ class Bot(Collector):
 
         if not Bot.is_update_running:
             Bot.is_update_running = True
-            Bot.bot.send_message(chat_id=message.chat.id, text="Melakukan update status terbaru pada Monitoring Sensor & Honeypot... \nKetik /stop untuk memberhentikan update.")
+            Bot.bot.send_message(chat_id=message.chat.id, text="Memulai update status terbaru pada Monitoring Sensor & Honeypot... \nKetik /stop untuk memberhentikan update.")
             
             while Bot.is_update_running:
                 if 'alert_message' in locals() or 'alert_message' in globals():
@@ -268,9 +249,9 @@ class Bot(Collector):
     def send_start_message(message):
         if Bot.is_update_running:
             Bot.is_update_running = False
-            Bot.bot.send_message(chat_id=message.chat.id, text="Memberhentikan notifikasi update pada status Honeypot.")
+            Bot.bot.send_message(chat_id=message.chat.id, text="Memberhentikan update status terbaru pada status Monitoring Sensor & Honeypot. \nKetik /update untuk memulai update.")
 
-        
+
 class Main(Bot):
     def run_mqtt_loop():
         client = Connect.connect_mqtt()

@@ -3,13 +3,12 @@ import socket
 import netifaces as ni
 import paho.mqtt.client as mqtt
 import numpy as np
-from datetime import datetime
 import uuid
-import time
-import schedule
 import json
 import os
-from pathlib import Path
+from dotenv import load_dotenv
+from datetime import datetime
+
 
 class Monitoring:
     def __init__(self, processName, status):
@@ -613,13 +612,7 @@ class MQTT(Honeypot):
 
     # ==== START MQTT CONNECTION ====
 
-    home = str(Path.home())
-    os.chdir(f'{home}/Documents/tugas_akhir/hp-automation/hp-monitoring')
-    config_file = open('config.txt')
-    config_dict = {}
-    for lines in config_file:
-        items = lines.split(': ', 1)
-        config_dict[items[0]] = eval(items[1])
+    load_dotenv()
 
     def connect_mqtt():
         def on_connect(client, userdata, flags, rc):
@@ -628,9 +621,9 @@ class MQTT(Honeypot):
             else:
                 print("Failed to connect, return code %d\n", rc)
 
-        client = mqtt.Client(MQTT.config_dict['MQTT_CLIENT_HONEYPOT'])
+        client = mqtt.Client(os.getenv('MQTT_CLIENT_HONEYPOT'))
         client.on_connect = on_connect
-        client.connect(MQTT.config_dict['MQTT_BROKER'], MQTT.config_dict['MQTT_PORT'])
+        client.connect(os.getenv('MQTT_BROKER'), int(os.getenv('MQTT_PORT')))
         return client
 
     # ==== START MQTT PUBLISH ====
@@ -639,12 +632,12 @@ class MQTT(Honeypot):
         try:
                 
             msg = json.dumps(logs_json)
-            result = client.publish(MQTT.config_dict['MQTT_TOPIC_HONEYPOT'], msg, qos=2)
+            result = client.publish(os.getenv('MQTT_TOPIC_HONEYPOT'), msg, qos=2)
             status = result[0]
             if status == 0:
                 print(msg)
             else:
-                print(f"Failed to send message to topic {MQTT.config_dict['MQTT_TOPIC_HONEYPOT']}")
+                print(f"Failed to send message to topic {os.getenv('MQTT_TOPIC_HONEYPOT')}")
         except:
             print("Failed to parse data")
 
@@ -659,9 +652,4 @@ if __name__ == '__main__':
     client.loop_start()
 
     MQTT.run()
-    # schedule.every(30).seconds.do(MQTT.run)
-
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)
  
