@@ -1,14 +1,11 @@
 import random
 import paho.mqtt.client as mqtt
 import psycopg2
-import os
 import json
-import schedule
 import time
+import threading
 from datetime import datetime
-from telebot.async_telebot import AsyncTeleBot
 import telebot
-import asyncio
 from dotenv import load_dotenv
 
 
@@ -20,8 +17,9 @@ class Connect:
         items = lines.split(': ', 1)
         config_dict[items[0]] = eval(items[1])
 
-    topic_sensor = 'topic/monitoring/sensor/+'
-    topic_honeypot = 'topic/monitoring/honeypot/+'
+    topic = 'topic/monitoring/#'
+    # topic_sensor = 'topic/monitoring/sensor/+'
+    # topic_honeypot = 'topic/monitoring/honeypot/+'
 
     def connect_mqtt():
         def on_connect(client, userdata, flags, rc):
@@ -61,7 +59,6 @@ class Collector(Connect):
                 data = json.loads(logs_json)
                 
                 Collector.insert_data_details()
-                Collector.add_history(1)
                 alert_message = Collector.add_history(1)
 
             except (Exception, psycopg2.Error) as error:
@@ -78,8 +75,7 @@ class Collector(Connect):
                     # connection.close()
                     # print("PostgreSQL connection is closed")
 
-        client.subscribe(Connect.topic_sensor)
-        client.subscribe(Connect.topic_honeypot)
+        client.subscribe(Connect.topic)
         client.on_message = on_message
 
     def insert_data_details():
@@ -134,19 +130,13 @@ class Collector(Connect):
             ip_address = data['ip_address'][1]
             Collector.cursor.execute("SELECT COUNT(*) FROM honeypot_details")
             result = Collector.cursor.fetchone()
+            global alert_array
 
             if result[0] > 0:
                 honeypot = ['dionaea', 'honeytrap', 'gridpot', 'cowrie', 'elasticpot', 'rdpy']
                 
                 array = []
-                current_row_honeypot_sensor_id = None
-                current_row_state = None
-                current_row_rms = None
-                current_row_timestamp = None
-                late_row_state = None
-                late_row_rms = None
-
-                array_status = []
+                alert_array = []
 
                 for hp in honeypot:
                     query = f"SELECT honeypot_sensor_id, state, resident_memory, created_at FROM honeypot_details WHERE honeypot_sensor_id IN (SELECT honeypot_sensor.id FROM honeypot_sensor JOIN honeypots ON honeypots.id = honeypot_sensor.honeypot_id JOIN sensors ON sensors.id = honeypot_sensor.sensor_id WHERE sensors.ip_address = '{ip_address}') AND honeypot_name = '{hp}' ORDER BY created_at DESC LIMIT 2;"
@@ -167,49 +157,49 @@ class Collector(Connect):
                     late_row_state = None if len(row) < 2 else row[1][1]
                     late_row_rms = None if len(row) < 2 else row[1][2]
 
-                if current_row_state != late_row_state:
-                    if current_row_state == 'Not Running':
-                        honeypot_status = f"{hp.capitalize()} is {current_row_state}"
-                        status_code_id = 2
-                        array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, datetime.now().isoformat())
-                        sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, created_at) VALUES (%s, %s, %s, %s, %s, %s)"""
-
-                        Collector.cursor.execute(sql_insert_query, array)
-                        Collector.connection.commit()
-                        print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
-
-                        send_alert = f"Sensor : {ip_address} \nCode : 400 \nDescription: Honeypot Off \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
-                        array_status.append(send_alert)
-
-                    else:
-                        honeypot_status = f"{hp.capitalize()} is {current_row_state}"
-                        status_code_id = 1
-                        array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, datetime.now().isoformat())
-                        sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, started_at, created_at) VALUES (%s, %s, %s, %s, %s, %s)"""
-
-                        Collector.cursor.execute(sql_insert_query, array)
-                        Collector.connection.commit()
-                        print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
-
-                        send_alert = f"Sensor : {ip_address} \nCode : 200 \nDescription: Honeypot On\nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
-                        array_status.append(send_alert)
-
-                else:
-                    if current_row_rms is not None and late_row_rms is not None:
-                        if current_row_rms > late_row_rms:
-                            honeypot_status = f"There is attack on honeypot {hp.capitalize}"
-                            status_code_id = 4
-                            array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, datetime.now().isoformat())
-                            sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, created_at) VALUES (%s, %s, %s, %s, %s, %s)"""
+                    if current_row_state != late_row_state:
+                        if current_row_state == 'Not Running':
+                            honeypot_status = f"{hp.capitalize()} is {current_row_state}"
+                            status_code_id = 2
+                            array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, current_row_rms, datetime.now().isoformat())
+                            sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
 
                             Collector.cursor.execute(sql_insert_query, array)
                             Collector.connection.commit()
                             print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
 
-                            send_alert = f"Sensor : {ip_address} \nCode : 401 \nDescription: Honeypot Attack \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
-                            array_status.append(send_alert)
+                            send_alert = f"Sensor : {ip_address} \nCode : 400 \nDescription: Honeypot Off \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
+                            alert_array.append(send_alert)
 
-            return array_status
+                        else:
+                            honeypot_status = f"{hp.capitalize()} is {current_row_state}"
+                            status_code_id = 1
+                            array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, current_row_rms, datetime.now().isoformat())
+                            sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, started_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+
+                            Collector.cursor.execute(sql_insert_query, array)
+                            Collector.connection.commit()
+                            print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
+
+                            send_alert = f"Sensor : {ip_address} \nCode : 200 \nDescription: Honeypot On\nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
+                            alert_array.append(send_alert)
+
+                    else:
+                        if current_row_rms is not None and late_row_rms is not None:
+                            if current_row_rms > late_row_rms:
+                                honeypot_status = f"There is attack on honeypot {hp.capitalize()}"
+                                status_code_id = 4
+                                array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, current_row_rms, datetime.now().isoformat())
+                                sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, threat_activity_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+
+                                Collector.cursor.execute(sql_insert_query, array)
+                                Collector.connection.commit()
+                                print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
+
+                                send_alert = f"Sensor : {ip_address} \nCode : 401 \nDescription: Honeypot Attack \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
+                                alert_array.append(send_alert)
+
+            return alert_array
                 
         except (Exception, psycopg2.Error) as error:
             print("Failed to insert record into history table {}".format(error))
@@ -217,26 +207,28 @@ class Collector(Connect):
 
     def delete_data():
         try:
-            # time.sleep(60)     
-            Collector.cursor.execute("SELECT COUNT(*) FROM sensor_details")
-            result_sensor_details = Collector.cursor.fetchone()
+            while True:
+                Collector.cursor.execute("SELECT COUNT(*) FROM sensor_details")
+                result_sensor_details = Collector.cursor.fetchone()
 
-            if result_sensor_details[0] > 5:
-                sql_delete_query_sensor_details = """ DELETE FROM sensor_details WHERE created_at IN (SELECT created_at FROM (SELECT created_at FROM sensor_details ORDER BY created_at ASC LIMIT 1) as Subquery) """
+                if result_sensor_details[0] > 5:
+                    sql_delete_query_sensor_details = """ DELETE FROM sensor_details WHERE created_at IN (SELECT created_at FROM (SELECT created_at FROM sensor_details ORDER BY created_at ASC LIMIT 1) as Subquery) """
 
-                Collector.cursor.execute(sql_delete_query_sensor_details)
-                Collector.connection.commit()
-                print(Collector.cursor.rowcount, "Record deleted successfully into sensor_details table")
-            
-            Collector.cursor.execute("SELECT COUNT(*) FROM honeypot_details")
-            result_honeypot_details = Collector.cursor.fetchone()
+                    Collector.cursor.execute(sql_delete_query_sensor_details)
+                    Collector.connection.commit()
+                    print(Collector.cursor.rowcount, "Record deleted successfully into sensor_details table")
+                
+                Collector.cursor.execute("SELECT COUNT(*) FROM honeypot_details")
+                result_honeypot_details = Collector.cursor.fetchone()
 
-            if result_honeypot_details[0] > 17:
-                sql_delete_query_honeypot_details = """ DELETE FROM honeypot_details WHERE created_at IN (SELECT created_at FROM (SELECT created_at FROM honeypot_details ORDER BY created_at ASC LIMIT 6) as Subquery) """
+                if result_honeypot_details[0] > 17:
+                    sql_delete_query_honeypot_details = """ DELETE FROM honeypot_details WHERE created_at IN (SELECT created_at FROM (SELECT created_at FROM honeypot_details ORDER BY created_at ASC LIMIT 6) as Subquery) """
 
-                Collector.cursor.execute(sql_delete_query_honeypot_details)
-                Collector.connection.commit()
-                print(Collector.cursor.rowcount, "Record deleted successfully into honeypot_details table")
+                    Collector.cursor.execute(sql_delete_query_honeypot_details)
+                    Collector.connection.commit()
+                    print(Collector.cursor.rowcount, "Record deleted successfully into honeypot_details table")
+                
+                time.sleep(30)     
 
         except (Exception, psycopg2.Error) as error:
             print("Failed to delete record into sensor_details / honeypot_details table {}".format(error))
@@ -246,54 +238,63 @@ class Collector(Connect):
 
 class Bot(Collector):
     API_KEY = '6289233331:AAG_l-CfrztpTtYs_9o6ZtKo2adniEi8_Ig'
-    bot = AsyncTeleBot(API_KEY)
+    bot = telebot.TeleBot(API_KEY)
+    is_update_running = False
 
     @bot.message_handler(commands=['start'])
-    async def send_start_message(message):
-        await Bot.bot.send_message(chat_id=message.chat.id, text=f"Halo, {message.chat.first_name}! Selamat Datang di Monitoring Sensor & Honeypot Bot. \nBot ini digunakan untuk menginformasikan pember")
+    def send_start_message(message, self):
+        Bot.bot.send_message(chat_id=message.chat.id, text=f"Halo, {message.chat.first_name}! Selamat Datang di Monitoring Sensor & Honeypot Bot. \nBot ini digunakan untuk menginformasikan status terbaru pada Sensor dan Honeypot yang terdaftar.")
         
     @bot.message_handler(commands=['update'])
-    async def send_update_message(message):
+    def send_update_message(message):
         global alert_message
 
-        await Bot.bot.send_message(chat_id=message.chat.id, text="Melakukan update terbaru pada Monitoring Sensor & Honeypot... \nKetik /stop untuk memberhentikan update.")
+        if not Bot.is_update_running:
+            Bot.is_update_running = True
+            Bot.bot.send_message(chat_id=message.chat.id, text="Melakukan update status terbaru pada Monitoring Sensor & Honeypot... \nKetik /stop untuk memberhentikan update.")
+            
+            while Bot.is_update_running:
+                if 'alert_message' in locals() or 'alert_message' in globals():
+                    if len(alert_message) != 0:
+                        for status in alert_message:
+                            Bot.bot.send_message(chat_id=message.chat.id, text=status)
+                            print(f'Sent message to bot telegram at {datetime.now()}')
+                        alert_message = []
+                    else:
+                        pass
+
         
-        while True:
-            if 'alert_message' in locals() or 'alert_message' in globals():
-                if len(alert_message) != 0:
-                    for status in alert_message:
-                        await Bot.bot.send_message(chat_id=message.chat.id, text=status)
-                    alert_message = []
-                else:
-                    pass
-
     @bot.message_handler(commands=['stop'])
-    async def send_start_message(message):
-        await Bot.bot.send_message(chat_id=message.chat.id, text="Memberhentikan notifikasi update.")
+    def send_start_message(message):
+        if Bot.is_update_running:
+            Bot.is_update_running = False
+            Bot.bot.send_message(chat_id=message.chat.id, text="Memberhentikan notifikasi update pada status Honeypot.")
 
-
+        
 class Main(Bot):
-    def run():
-        Collector.delete_data()
+    def run_mqtt_loop():
         client = Connect.connect_mqtt()
-        # Collector.subscribe(client)
-        client.loop_start()
-        # timeout = 60
-        # start_time = time.time()
+        Collector.subscribe(client)
+        client.loop_forever()
 
-        # schedule.every(30).seconds.do(Collector.delete_data)
-
+    def run_telegram_bot():
         while True:
-            Collector.delete_data()
-            time.sleep(30)
-            print ('Polling...')
-            asyncio.run(Bot.bot.polling())
-            Collector.subscribe(client)
+            try:
+                print('Start Polling...')
+                Bot.bot.polling()
+            except Exception as e:
+                print("Error : ", e)
 
-        # client.loop_stop()
-        # client.disconnect()
+    def run():
+        continuous_thread = threading.Thread(target=Collector.delete_data)
+        continuous_thread.start()
+
+        telegram_thread = threading.Thread(target=Main.run_telegram_bot)
+        telegram_thread.start()
+
+        mqtt_thread = threading.Thread(target=Main.run_mqtt_loop)
+        mqtt_thread.start()
 
     
 if __name__ == '__main__':
-    # print(honeypot_status)
     Main.run()
