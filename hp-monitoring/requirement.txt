@@ -1,0 +1,6 @@
+psutil
+paho-mqtt
+numpy
+psycopg2
+schedule
+python-telegram-bot

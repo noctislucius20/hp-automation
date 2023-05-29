@@ -1,10 +1,16 @@
 import random
 import paho.mqtt.client as mqtt
 import psycopg2
+import os
 import json
 import schedule
 import time
 from datetime import datetime
+from telebot.async_telebot import AsyncTeleBot
+import telebot
+import asyncio
+from dotenv import load_dotenv
+
 
 class Connect:
     client_id = f'python-mqtt-{random.randint(0, 100)}'
@@ -29,6 +35,7 @@ class Connect:
         client.connect(Connect.config_dict['MQTT_BROKER'], Connect.config_dict['MQTT_PORT'])
         return client
 
+
 class Collector(Connect):
     connection = psycopg2.connect(user="postgres",
                                 password="scipio",
@@ -39,16 +46,23 @@ class Collector(Connect):
     cursor = connection.cursor()
     print('Connected to PostgreSQL')
 
+
+    def get_chat_id(chat_id):
+        global message_chat_id
+        message_chat_id = chat_id
+
     def subscribe(client: mqtt):     
         def on_message(client, userdata, msg):
             try:
                 global logs_json
-                global data          
+                global data
+                global alert_message
                 logs_json = msg.payload.decode()
                 data = json.loads(logs_json)
-                 
+                
                 Collector.insert_data_details()
-                Collector.add_history(data=1)
+                Collector.add_history(1)
+                alert_message = Collector.add_history(1)
 
             except (Exception, psycopg2.Error) as error:
                 print("Failed to insert record into sensor_details / honeypot_details table {}".format(error))
@@ -69,17 +83,11 @@ class Collector(Connect):
         client.on_message = on_message
 
     def insert_data_details():
-        ip_address = data['ip_address']
-        ip_addr = ''
+        ip_address = data['ip_address'][1]
         id_sensor = 0
-        
-        if ip_address[0].find('en') != -1 or ip_address[0].find('eth') != -1:
-            ip_addr = str(data['ip_address'][1])
-        else:
-            ip_addr = str('0.0.0.0')
 
         if "id_raspi" in data:
-            Collector.cursor.execute(f"SELECT id FROM sensors WHERE ip_address = '{ip_addr}'")
+            Collector.cursor.execute(f"SELECT id FROM sensors WHERE ip_address = '{ip_address}'")
             row = Collector.cursor.fetchone()
 
             if row:
@@ -100,7 +108,7 @@ class Collector(Connect):
             array_query = []
 
             for index, value in enumerate(honeypot):
-                Collector.cursor.execute(f"SELECT hs.id FROM honeypot_sensor hs JOIN honeypots h ON hs.honeypot_id = h.id JOIN sensors s ON hs.sensor_id = s.id WHERE h.name = '{value}' AND s.ip_address = '{ip_addr}'")
+                Collector.cursor.execute(f"SELECT hs.id FROM honeypot_sensor hs JOIN honeypots h ON hs.honeypot_id = h.id JOIN sensors s ON hs.sensor_id = s.id WHERE h.name = '{value}' AND s.ip_address = '{ip_address}'")
                 row = Collector.cursor.fetchall()
 
                 if row:
@@ -121,70 +129,88 @@ class Collector(Connect):
             print(Collector.cursor.rowcount, f"Record inserted successfully into honeypot_details table : {datetime.now().isoformat()}")
 
 
-    def add_history(data):
+    def add_history(data_logs):
         try:
-            #sensor mati
-            if data == 0:
-                array = [(1, 'off', 'dionaea off', datetime.now().isoformat(), datetime.now().isoformat()),
-                        (2, 'off', 'honeytrap off', datetime.now().isoformat(), datetime.now().isoformat()), 
-                        (3, 'off', 'gridpot off', datetime.now().isoformat(), datetime.now().isoformat()), 
-                        (4, 'off', 'cowrie off', datetime.now().isoformat(), datetime.now().isoformat()), 
-                        (5, 'off', 'elasticpot off', datetime.now().isoformat(), datetime.now().isoformat()),
-                        (6, 'off', 'rdpy off', datetime.now().isoformat(), datetime.now().isoformat()),
-                        ]
+            ip_address = data['ip_address'][1]
+            Collector.cursor.execute("SELECT COUNT(*) FROM honeypot_details")
+            result = Collector.cursor.fetchone()
+
+            if result[0] > 0:
+                honeypot = ['dionaea', 'honeytrap', 'gridpot', 'cowrie', 'elasticpot', 'rdpy']
                 
-                sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, stopped_at, created_at) VALUES (%s, %s, %s, %s, %s) """
-                            
-                Collector.cursor.executemany(sql_insert_query, array)
-                Collector.connection.commit()
-                print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
+                array = []
+                current_row_honeypot_sensor_id = None
+                current_row_state = None
+                current_row_rms = None
+                current_row_timestamp = None
+                late_row_state = None
+                late_row_rms = None
 
-            else:
-                Collector.cursor.execute("SELECT COUNT(*) FROM honeypot_details")
-                result = Collector.cursor.fetchone()
+                array_status = []
 
-                if result[0] > 0:
-                    honeypot = ['dionaea', 'honeytrap', 'gridpot', 'cowrie', 'elasticpot', 'rdpy']
+                for hp in honeypot:
+                    query = f"SELECT honeypot_sensor_id, state, resident_memory, created_at FROM honeypot_details WHERE honeypot_sensor_id IN (SELECT honeypot_sensor.id FROM honeypot_sensor JOIN honeypots ON honeypots.id = honeypot_sensor.honeypot_id JOIN sensors ON sensors.id = honeypot_sensor.sensor_id WHERE sensors.ip_address = '{ip_address}') AND honeypot_name = '{hp}' ORDER BY created_at DESC LIMIT 2;"
+                    Collector.cursor.execute(query)
+                    row = Collector.cursor.fetchall()
+                
+                    if len(row) < 1:
+                        current_row_honeypot_sensor_id = None
+                        current_row_state = None
+                        current_row_rms = None
+                        current_row_timestamp = None
+                    else:
+                        current_row_honeypot_sensor_id = row[0][0]
+                        current_row_state = row[0][1]
+                        current_row_rms = row[0][2]
+                        current_row_timestamp = row[0][3]
                     
-                    array = []
+                    late_row_state = None if len(row) < 2 else row[1][1]
+                    late_row_rms = None if len(row) < 2 else row[1][2]
 
-                    for hp in honeypot:
-                        Collector.cursor.execute(f"select honeypot_sensor_id, state, created_at from honeypot_details hd where honeypot_name = '{hp}' order by created_at desc limit 2")
-                        row = Collector.cursor.fetchall()
-                    
-                        if len(row) < 1:
-                            current_row_honeypot_sensor_id = None
-                            current_row_state = None
-                            current_row_timestamp = None
-                        else:
-                            current_row_honeypot_sensor_id = row[0][0]
-                            current_row_state = row[0][1]
-                            current_row_timestamp = row[0][2]
-                        
-                        late_row_state = None if len(row) < 2 else row[1][1]
+                if current_row_state != late_row_state:
+                    if current_row_state == 'Not Running':
+                        honeypot_status = f"{hp.capitalize()} is {current_row_state}"
+                        status_code_id = 2
+                        array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, datetime.now().isoformat())
+                        sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, created_at) VALUES (%s, %s, %s, %s, %s, %s)"""
 
-                        if current_row_state != late_row_state:
-                            # if late_row_state == None:
-                                if current_row_state == 'Not Running':
-                                    honeypot_status = f"{hp.capitalize()} {current_row_state}"
-                                    status_code_id = 2
-                                    array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, datetime.now().isoformat())
-                                    sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, created_at) VALUES (%s, %s, %s, %s, %s, %s)"""
+                        Collector.cursor.execute(sql_insert_query, array)
+                        Collector.connection.commit()
+                        print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
 
-                                    Collector.cursor.execute(sql_insert_query, array)
-                                    Collector.connection.commit()
-                                    print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
+                        send_alert = f"Sensor : {ip_address} \nCode : 400 \nDescription: Honeypot Off \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
+                        array_status.append(send_alert)
 
-                                else:
-                                    honeypot_status = f"{hp.capitalize()} {current_row_state}"
-                                    status_code_id = 1
-                                    array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, datetime.now().isoformat())
-                                    sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, started_at, created_at) VALUES (%s, %s, %s, %s, %s, %s)"""
+                    else:
+                        honeypot_status = f"{hp.capitalize()} is {current_row_state}"
+                        status_code_id = 1
+                        array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, datetime.now().isoformat())
+                        sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, started_at, created_at) VALUES (%s, %s, %s, %s, %s, %s)"""
 
-                                    Collector.cursor.execute(sql_insert_query, array)
-                                    Collector.connection.commit()
-                                    print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
-        
+                        Collector.cursor.execute(sql_insert_query, array)
+                        Collector.connection.commit()
+                        print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
+
+                        send_alert = f"Sensor : {ip_address} \nCode : 200 \nDescription: Honeypot On\nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
+                        array_status.append(send_alert)
+
+                else:
+                    if current_row_rms is not None and late_row_rms is not None:
+                        if current_row_rms > late_row_rms:
+                            honeypot_status = f"There is attack on honeypot {hp.capitalize}"
+                            status_code_id = 4
+                            array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, datetime.now().isoformat())
+                            sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, created_at) VALUES (%s, %s, %s, %s, %s, %s)"""
+
+                            Collector.cursor.execute(sql_insert_query, array)
+                            Collector.connection.commit()
+                            print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
+
+                            send_alert = f"Sensor : {ip_address} \nCode : 401 \nDescription: Honeypot Attack \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
+                            array_status.append(send_alert)
+
+            return array_status
+                
         except (Exception, psycopg2.Error) as error:
             print("Failed to insert record into history table {}".format(error))
 
@@ -217,29 +243,57 @@ class Collector(Connect):
             row = Collector.cursor.fetchone()
             print(row)
 
+
+class Bot(Collector):
+    API_KEY = '6289233331:AAG_l-CfrztpTtYs_9o6ZtKo2adniEi8_Ig'
+    bot = AsyncTeleBot(API_KEY)
+
+    @bot.message_handler(commands=['start'])
+    async def send_start_message(message):
+        await Bot.bot.send_message(chat_id=message.chat.id, text=f"Halo, {message.chat.first_name}! Selamat Datang di Monitoring Sensor & Honeypot Bot. \nBot ini digunakan untuk menginformasikan pember")
+        
+    @bot.message_handler(commands=['update'])
+    async def send_update_message(message):
+        global alert_message
+
+        await Bot.bot.send_message(chat_id=message.chat.id, text="Melakukan update terbaru pada Monitoring Sensor & Honeypot... \nKetik /stop untuk memberhentikan update.")
+        
+        while True:
+            if 'alert_message' in locals() or 'alert_message' in globals():
+                if len(alert_message) != 0:
+                    for status in alert_message:
+                        await Bot.bot.send_message(chat_id=message.chat.id, text=status)
+                    alert_message = []
+                else:
+                    pass
+
+    @bot.message_handler(commands=['stop'])
+    async def send_start_message(message):
+        await Bot.bot.send_message(chat_id=message.chat.id, text="Memberhentikan notifikasi update.")
+
+
+class Main(Bot):
     def run():
-        # Collector.delete_data()
+        Collector.delete_data()
         client = Connect.connect_mqtt()
         # Collector.subscribe(client)
         client.loop_start()
-        timeout = 60
-        start_time = time.time()
+        # timeout = 60
+        # start_time = time.time()
 
-        schedule.every(30).seconds.do(Collector.delete_data)
+        # schedule.every(30).seconds.do(Collector.delete_data)
 
         while True:
-            schedule.run_pending()
-            time.sleep(1)
-            if time.time() - start_time == timeout:
-                Collector.add_history(data=0)
-                break
-            else:
-                data = 1
-                Collector.subscribe(client)
+            Collector.delete_data()
+            time.sleep(30)
+            print ('Polling...')
+            asyncio.run(Bot.bot.polling())
+            Collector.subscribe(client)
 
-        client.loop_stop()
-        client.disconnect()
+        # client.loop_stop()
+        # client.disconnect()
 
-
+    
 if __name__ == '__main__':
-    Collector.run()
+    # print(honeypot_status)
+    Main.run()

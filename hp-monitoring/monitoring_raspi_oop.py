@@ -83,7 +83,7 @@ class Monitoring:
         interfaces = ni.interfaces()
         
         for interface in interfaces:
-            if 'eth' in interface or 'en' in interface:
+            if 'eth' in interface or 'en' in interface or 'wlan' in interface:
                 addresses = ni.ifaddresses(interface)
                 if ni.AF_INET in addresses:
                     ipAddress.append(interface)
@@ -188,10 +188,8 @@ if __name__ == '__main__':
     client.loop_start()
 
     MQTT.run()
-    # schedule.every(30).seconds.do(MQTT.run)
+    # schedule.every(1).second.do(MQTT.run)
 
     # while True:
     #     schedule.run_pending()
     #     time.sleep(1)
-
-    # Monitoring.ipAddress()
