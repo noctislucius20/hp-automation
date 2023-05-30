@@ -22,25 +22,32 @@
 - name: run script using cronjob
   command: crontab -u ansigent monitoring_cronjob
 
-- name: tes
-  template:
-      src: monitoring_dashboard.j2
-      dest: /home/ansigent/monitoring_dashboard.json
-      owner: ansigent
-      group: root
-      mode: 0644
+# - name: tes
+#   template:
+#       src: monitoring_dashboard.j2
+#       dest: /home/ansigent/monitoring_dashboard.json
+#       owner: ansigent
+#       group: root
+#       mode: 0644
+#   vars:
+#       dashboard_uuid: "eeeeeeeeeeee"
+
+- name: generate dashboard uuid
+  uuid: "{{ string | to_uuid }}"
+  register: dashboard_uuid
+
+- name: create monitoring dashboard
+  uri:
+      url: http://192.168.1.100:5601/api/kibana/dashboards/import?exclude=index-pattern
+      method: POST
+      body_format: json
+      body: "{{ lookup('template', '../roles/monitoring/templates/monitoring_dashboard.j2') }}"
+      headers:
+          Content-Type: "application/json"
+          kbn-xsrf: "true"
+      return_content: yes
   vars:
-      dashboard_uuid: "eeeeeeeeeeee"
-# - name: create monitoring dashboard
-#   uri:
-#       url: http://192.168.1.100:5601/api/kibana/dashboards/import?exclude=index-pattern
-#       method: POST
-#       body_format: json
-#       body: "{{ lookup('template', '../roles/monitoring/templates/monitoring_dashboard.j2') }}"
-#       headers:
-#           Content-Type: "application/json"
-#           kbn-xsrf: "true"
-#       return_content: yes
+      dashboard_uuid: "{{ dashboard_uuid }}"
 # - name: Send POST request to Elasticsearch cluster
 #   uri:
 #       url: http://elasticsearch.example.com/myindex/_search
