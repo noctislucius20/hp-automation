@@ -43,7 +43,7 @@
           kbn-xsrf: "true"
       return_content: yes
   vars:
-      dashboard_uuid: "{{ lookup('uuid') }}"
+      dashboard_uuid: "{{ ansible_date_time.iso8601_micro | to_uuid }}"
 # - name: Send POST request to Elasticsearch cluster
 #   uri:
 #       url: http://elasticsearch.example.com/myindex/_search
