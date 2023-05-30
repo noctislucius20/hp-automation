@@ -43,7 +43,7 @@
           kbn-xsrf: "true"
       return_content: yes
   vars:
-      dashboard_uuid: "{{ to_uuid }}"
+      dashboard_uuid: "{{ lookup('uuid') }}"
 # - name: Send POST request to Elasticsearch cluster
 #   uri:
 #       url: http://elasticsearch.example.com/myindex/_search
