@@ -13,17 +13,32 @@
 
 - name: create cronjob from template
   template:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
+      src: monitoring_cronjob.j2
+      dest: /home/ansigent/monitoring_cronjob
       owner: ansigent
       group: root
       mode: 0644
-  with_items:
-      - src: monitoring_cronjob.j2
-        dest: /home/ansigent/monitoring_cronjob
 
 - name: run script using cronjob
   command: crontab -u ansigent monitoring_cronjob
+
+- name: tes
+  template:
+      src: monitoring_dashboard.j2
+      dest: /home/ansigent/monitoring_dashboard.json
+      owner: ansigent
+      group: root
+      mode: 0644
+# - name: create monitoring dashboard
+#   uri:
+#       url: http://192.168.1.100:5601/api/kibana/dashboards/import?exclude=index-pattern
+#       method: POST
+#       body_format: json
+#       body: "{{ lookup('template', '../roles/monitoring/templates/monitoring_dashboard.j2') }}"
+#       headers:
+#           Content-Type: "application/json"
+#           kbn-xsrf: "true"
+#       return_content: yes
 # - name: Send POST request to Elasticsearch cluster
 #   uri:
 #       url: http://elasticsearch.example.com/myindex/_search
