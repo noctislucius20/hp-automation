@@ -1,3 +1,7 @@
+- name: get deployment method
+  set_fact:
+      method: "{{ method }}"
+
 - name: create monitoring script from template
   template:
       src: "{{ item.src }}"
@@ -25,6 +29,7 @@
 - name: generate random dashboard UUID
   set_fact:
       dashboard_uuid: "{{ 99999999 | random | to_uuid }}"
+  when: method == "POST"
 
 - name: create monitoring dashboard
   uri:
@@ -36,8 +41,9 @@
           Content-Type: "application/json"
           kbn-xsrf: "true"
       return_content: yes
+  when: method == "POST"
 
-- name: Insert data into PostgreSQL database
+- name: insert dashboard data into PostgreSQL database
   postgresql_query:
       db: hp_automation
       login_user: "{{ postgres_user }}"
@@ -49,3 +55,16 @@
           SELECT sensors.id, '{{ dashboard_uuid }}', '/app/dashboards#/view/{{ dashboard_uuid }}', now(), now()
           FROM sensors
           WHERE sensors.ip_address = '{{ ip_address }}' AND sensors.status = true;"
+  when: method == "POST"
+
+- name: update dashboard data
+  uri:
+      url: http://192.168.1.100:5601/api/saved_objects/dashboard/{{ dashboard_id }}
+      method: PUT
+      body_format: json
+      headers:
+          Content-Type: "application/json"
+          kbn-xsrf: "true"
+      body: "{{ lookup('template', '../roles/monitoring/templates/monitoring_update_dashboard.j2') }}"
+      return_content: yes
+  when: method == "PUT"
