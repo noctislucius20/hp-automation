@@ -22,16 +22,6 @@
 - name: run script using cronjob
   command: crontab -u ansigent monitoring_cronjob
 
-# - name: tes
-#   template:
-#       src: monitoring_dashboard.j2
-#       dest: /home/ansigent/monitoring_dashboard.json
-#       owner: ansigent
-#       group: root
-#       mode: 0644
-#   vars:
-#       dashboard_uuid: "eeeeeeeeeeee"
-
 - name: create monitoring dashboard
   uri:
       url: http://192.168.1.100:5601/api/kibana/dashboards/import?exclude=index-pattern
@@ -44,20 +34,14 @@
       return_content: yes
   vars:
       dashboard_uuid: "{{ 99999999 | random | to_uuid }}"
-# - name: Send POST request to Elasticsearch cluster
-#   uri:
-#       url: http://elasticsearch.example.com/myindex/_search
-#       method: POST
-#       body:
-#           query: { "match_all": {} }
-#       headers:
-#           Content-Type: "application/json"
-#       return_content: yes
-#   register: elasticsearch_response
 
-# - name: Insert data into PostgreSQL database
-#   postgresql_query:
-#       db: mydatabase
-#       login_user: myuser
-#       login_password: mypassword
-#       query: "INSERT INTO mytable (column1, column2) VALUES ('value1', 'value2')"
+- name: Insert data into PostgreSQL database
+  postgresql_query:
+      db: hp_automation
+      login_user: { { postgres_user } }
+      login_password: { { postgres_password } }
+      query:
+          "INSERT INTO sensor_dashboards (sensor_id, dashboard_id, dashboard_url, created_at, updated_at)
+          SELECT sensors.id, '{{ dashboard_uuid }}', 'sdsdd', CURRENT_DATE, CURRENT_DATE
+          FROM sensors
+          WHERE sensors.ip_address = '{{ ip_address }}' AND sensors.status = true;"
