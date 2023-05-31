@@ -22,6 +22,14 @@
 - name: run script using cronjob
   command: crontab -u ansigent monitoring_cronjob
 
+- name: generate random dashboard UUID
+  vars:
+      dashboard_uuid: "{{ 99999999 | random | to_uuid }}"
+
+- name: print the generated UUID
+  debug:
+      var: dashboard_uuid
+
 - name: create monitoring dashboard
   uri:
       url: http://192.168.1.100:5601/api/kibana/dashboards/import?exclude=index-pattern
@@ -32,12 +40,6 @@
           Content-Type: "application/json"
           kbn-xsrf: "true"
       return_content: yes
-  vars:
-      dashboard_uuid: "{{ 99999999 | random | to_uuid }}"
-
-- name: print the generated UUID
-  debug:
-      var: dashboard_uuid
 
 - name: Insert data into PostgreSQL database
   postgresql_query:
