@@ -22,7 +22,7 @@ class Connect:
 
         client = mqtt.Client(os.getenv('MQTT_CLIENT_SUBSCRIBE'))
         client.on_connect = on_connect
-        client.connect(os.getenv('MQTT_BROKER'), int(os.getenv('MQTT_PORT')))
+        client.connect(os.getenv('MQTT_BROKER_2'), int(os.getenv('MQTT_PORT')))
         return client
 
 
@@ -149,7 +149,7 @@ class Collector(Connect):
                             Collector.connection.commit()
                             print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
 
-                            send_alert = f"Sensor : {ip_address} \nCode : 400 \nDescription: Honeypot Off \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
+                            send_alert = f"Sensor : {ip_address} \nCode : 400 \nDescription : Honeypot Off \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
                             alert_array.append(send_alert)
 
                         else:
@@ -162,7 +162,7 @@ class Collector(Connect):
                             Collector.connection.commit()
                             print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
 
-                            send_alert = f"Sensor : {ip_address} \nCode : 200 \nDescription: Honeypot On\nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
+                            send_alert = f"Sensor : {ip_address} \nCode : 200 \nDescription : Honeypot On\nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
                             alert_array.append(send_alert)
 
                     else:
@@ -177,7 +177,7 @@ class Collector(Connect):
                                 Collector.connection.commit()
                                 print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
 
-                                send_alert = f"Sensor : {ip_address} \nCode : 401 \nDescription: Honeypot Attack \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
+                                send_alert = f"Sensor : {ip_address} \nCode : 401 \nDescription : Honeypot Attack \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
                                 alert_array.append(send_alert)
 
             return alert_array
@@ -223,7 +223,7 @@ class Bot(Collector):
     is_update_running = False
 
     @bot.message_handler(commands=['start'])
-    def send_start_message(message, self):
+    def send_start_message(message):
         Bot.bot.send_message(chat_id=message.chat.id, text=f"Halo, {message.chat.first_name}! Selamat Datang di Monitoring Sensor & Honeypot Bot. \nBot ini digunakan untuk menginformasikan status terbaru pada Sensor dan Honeypot yang terdaftar.")
         
     @bot.message_handler(commands=['update'])

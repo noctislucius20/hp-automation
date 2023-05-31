@@ -623,7 +623,7 @@ class MQTT(Honeypot):
 
         client = mqtt.Client(os.getenv('MQTT_CLIENT_HONEYPOT'))
         client.on_connect = on_connect
-        client.connect(os.getenv('MQTT_BROKER'), int(os.getenv('MQTT_PORT')))
+        client.connect(os.getenv('MQTT_BROKER_2'), int(os.getenv('MQTT_PORT')))
         return client
 
     # ==== START MQTT PUBLISH ====

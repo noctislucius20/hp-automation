@@ -11,7 +11,7 @@ data:
     filebeat.inputs:
     - type: mqtt
       id: ubuntu_honeypot
-      hosts: ["tcp://broker.hivemq.com:1883"]
+      hosts: ["tcp://103.59.95.89:1883"]
       topics:
         - topic/monitoring/#
       client_id: "client/subscriber"
@@ -50,7 +50,7 @@ data:
     #cloud.auth: ${ELASTIC_CLOUD_AUTH}
 
     output.logstash:
-      hosts: ["192.168.1.100:5044"]
+      hosts: ["10.33.102.212:5044"]
 
     #output.elasticsearch:
     #  hosts: ['${ELASTICSEARCH_HOST:elasticsearch}:${ELASTICSEARCH_PORT:9200}']
