@@ -495,7 +495,7 @@ class Honeypot(Monitoring):
         logs_json = {
             "id_honeypot": str(uuid.uuid4()),
             "ip_address": Honeypot.ipAddress(),
-            "hostname": socket.gethostname(),
+            "hostname": "{{ sensor_name }}",
             "honeypot_running": Honeypot.totalHoneypotRunning(),
             "dionaea_state": Honeypot.checkDionaea(),
             "dionaea_virtual_memory": float("{:.2f}".format(Honeypot.checkVirtualMemoryDionaea())),
