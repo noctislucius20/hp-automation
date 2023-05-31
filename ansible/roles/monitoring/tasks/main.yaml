@@ -42,6 +42,8 @@
       db: hp_automation
       login_user: "{{ postgres_user }}"
       login_password: "{{ postgres_pass }}"
+      login_host: "{{ postgres_host }}"
+      port: "{{ postgres_port }}"
       query:
           "INSERT INTO sensor_dashboards (sensor_id, dashboard_id, dashboard_url, created_at, updated_at)
           SELECT sensors.id, '{{ dashboard_uuid }}', 'sdsdd', CURRENT_DATE, CURRENT_DATE
