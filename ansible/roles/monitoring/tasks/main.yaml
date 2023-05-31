@@ -46,6 +46,6 @@
       port: "{{ postgres_port }}"
       query:
           "INSERT INTO sensor_dashboards (sensor_id, dashboard_id, dashboard_url, created_at, updated_at)
-          SELECT sensors.id, '{{ dashboard_uuid }}', 'sdsdd', CURRENT_DATE, CURRENT_DATE
+          SELECT sensors.id, '{{ dashboard_uuid }}', '/app/dashboards#/view/{{ dashboard_uuid }}', CURRENT_DATE, CURRENT_DATE
           FROM sensors
           WHERE sensors.ip_address = '{{ ip_address }}' AND sensors.status = true;"
