@@ -121,7 +121,7 @@ class Raspi(Monitoring):
         logs_json = {
             "id_raspi": str(uuid.uuid4()),
             "ip_address": Monitoring.ipAddress(),
-            "hostname": str({{ sensor_name }}),
+            "hostname": "{{ sensor_name }}",
             "honeypot_running": Raspi.totalHoneypotRunning(),
             "CPU_usage": Monitoring.cpu_usage(),
             "CPU_frequency": float("{:.2f}".format(Monitoring.cpu_frequency())),
