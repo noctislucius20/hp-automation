@@ -38,8 +38,8 @@
 - name: Insert data into PostgreSQL database
   postgresql_query:
       db: hp_automation
-      login_user: { { postgres_user } }
-      login_password: { { postgres_password } }
+      login_user: "{{ postgres_user }}"
+      login_password: "{{ postgres_password }}"
       query:
           "INSERT INTO sensor_dashboards (sensor_id, dashboard_id, dashboard_url, created_at, updated_at)
           SELECT sensors.id, '{{ dashboard_uuid }}', 'sdsdd', CURRENT_DATE, CURRENT_DATE
