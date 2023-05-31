@@ -23,12 +23,8 @@
   command: crontab -u ansigent monitoring_cronjob
 
 - name: generate random dashboard UUID
-  vars:
+  set_fact:
       dashboard_uuid: "{{ 99999999 | random | to_uuid }}"
-
-- name: print the generated UUID
-  debug:
-      var: dashboard_uuid
 
 - name: create monitoring dashboard
   uri:
