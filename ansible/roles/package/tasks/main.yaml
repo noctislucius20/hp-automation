@@ -78,3 +78,7 @@
           - "27017:27017"
       volumes:
           - MongoDockerData:/data/db
+
+- name: install psycopg2 module
+  pip:
+      name: psycopg2-binary
