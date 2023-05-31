@@ -35,6 +35,10 @@
   vars:
       dashboard_uuid: "{{ 99999999 | random | to_uuid }}"
 
+- name: print the generated UUID
+  debug:
+      var: dashboard_uuid
+
 - name: Insert data into PostgreSQL database
   postgresql_query:
       db: hp_automation
