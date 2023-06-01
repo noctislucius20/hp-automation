@@ -20,13 +20,24 @@ class Monitoring:
         interfaces = ni.interfaces()
         
         for interface in interfaces:
-            if 'eth' in interface or 'en' in interface:
+            if 'eth' in interface or 'en' in interface or 'wlan' in interface: #dihapus line ini
                 addresses = ni.ifaddresses(interface)
                 if ni.AF_INET in addresses:
-                    ipAddress.append(interface)
-                    ipAddress.append(addresses[ni.AF_INET][0]['addr'])
+                    ip_address = addresses[ni.AF_INET][0]['addr'] #ini pake template
+                    gateway = ni.gateways()['default'][ni.AF_INET][0]
 
-        return ipAddress
+                    ipAddress.append(ip_address) #diubah jadi variable ipAddress
+                    ipAddress.append(gateway)
+
+        return (ipAddress)
+    
+        # ip_address_array = []
+        # ip_address = '192.168.0.116' #template
+        # gateways = ni.gateways()
+        # default_gateway = gateways['default'][ni.AF_INET][0]
+        # ip_address_array.append(ip_address)
+        # ip_address_array.append(default_gateway)
+        # return(ip_address_array)
 
     def checkHoneypotRunning(self):
         for proc in psutil.process_iter():
@@ -623,7 +634,7 @@ class MQTT(Honeypot):
 
         client = mqtt.Client(os.getenv('MQTT_CLIENT_HONEYPOT'))
         client.on_connect = on_connect
-        client.connect(os.getenv('MQTT_BROKER_2'), int(os.getenv('MQTT_PORT')))
+        client.connect(os.getenv('MQTT_BROKER'), int(os.getenv('MQTT_PORT')))
         return client
 
     # ==== START MQTT PUBLISH ====
