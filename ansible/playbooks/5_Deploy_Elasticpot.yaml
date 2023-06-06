@@ -7,8 +7,14 @@
         set_fact:
             ansible_port: 22888
 
+      - name: set installed honeypot
+        set_fact:
+            honeypot_list: "{{ hp_list }}"
+
 - hosts: "{{ ip_address }}"
   become: true
+  gather_facts: false
   roles:
-      - elasticpot
+      - role: elasticpot
+        when: honeypot_list is search("elasticpot")
   tags: [honeypot]
