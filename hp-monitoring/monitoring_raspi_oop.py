@@ -2,14 +2,12 @@ import psutil
 import socket
 import netifaces as ni
 import paho.mqtt.client as mqtt
-from datetime import datetime
-import time
-import schedule
 import json
 import numpy as np
 import uuid
 import os
-from pathlib import Path
+from dotenv import load_dotenv
+from datetime import datetime
 
 
 class Monitoring:
@@ -83,13 +81,24 @@ class Monitoring:
         interfaces = ni.interfaces()
         
         for interface in interfaces:
-            if 'eth' in interface or 'en' in interface or 'wlan' in interface:
+            if 'eth' in interface or 'en' in interface or 'wlan' in interface: #dihapus line ini
                 addresses = ni.ifaddresses(interface)
                 if ni.AF_INET in addresses:
-                    ipAddress.append(interface)
-                    ipAddress.append(addresses[ni.AF_INET][0]['addr'])
+                    ip_address = addresses[ni.AF_INET][0]['addr'] #ini pake template
+                    gateway = ni.gateways()['default'][ni.AF_INET][0]
 
-        return ipAddress
+                    ipAddress.append(ip_address) #diubah jadi variable ipAddress
+                    ipAddress.append(gateway)
+
+        return (ipAddress)
+
+        # ip_address_array = []
+        # ip_address = '192.168.0.116' #template
+        # gateways = ni.gateways()
+        # default_gateway = gateways['default'][ni.AF_INET][0]
+        # ip_address_array.append(ip_address)
+        # ip_address_array.append(default_gateway)
+        # return(ip_address_array)
 
 class Raspi(Monitoring):
     def totalHoneypotRunning():
@@ -121,7 +130,7 @@ class Raspi(Monitoring):
         logs_json = {
             "id_raspi": str(uuid.uuid4()),
             "ip_address": Monitoring.ipAddress(),
-            "hostname": socket.gethostname(),
+            "hostname": socket.gethostname(), #ini ganti template
             "honeypot_running": Raspi.totalHoneypotRunning(),
             "CPU_usage": Monitoring.cpu_usage(),
             "CPU_frequency": float("{:.2f}".format(Monitoring.cpu_frequency())),
@@ -143,41 +152,38 @@ class Raspi(Monitoring):
 
 class MQTT(Raspi):
 
-    # ==== START MQTT CONNECTION & PUBLISH ====
+    # ==== START MQTT CONNECTION ====
 
-    home = str(Path.home())
-    os.chdir(f'{home}/Documents/tugas_akhir/hp-automation/hp-monitoring')
-    config_file = open('config.txt')
-    config_dict = {}
-    for lines in config_file:
-        items = lines.split(': ', 1)
-        config_dict[items[0]] = eval(items[1])
+    load_dotenv()
 
     def connect_mqtt():
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
-                print("Connected to MQTT Broker!")
+                print(f"Connected to MQTT Broker!")
             else:
                 print("Failed to connect, return code %d\n", rc)
 
-        client = mqtt.Client(MQTT.config_dict['MQTT_CLIENT_SENSOR'])
+        client = mqtt.Client(os.getenv('MQTT_CLIENT_HONEYPOT'))
         client.on_connect = on_connect
-        client.connect(MQTT.config_dict['MQTT_BROKER'], MQTT.config_dict['MQTT_PORT'])
+        client.connect(os.getenv('MQTT_BROKER'), int(os.getenv('MQTT_PORT')))
         return client
 
+    # ==== START MQTT PUBLISH ====
 
     def publish(client):
         try:
+                
             msg = json.dumps(logs_json)
-            result = client.publish(MQTT.config_dict['MQTT_TOPIC_SENSOR'], msg, qos=2)
+            result = client.publish(os.getenv('MQTT_TOPIC_SENSOR'), msg, qos=2)
             status = result[0]
             if status == 0:
                 print(msg)
             else:
-                print(f"Failed to send message to topic {MQTT.config_dict['MQTT_TOPIC_SENSOR']}")
+                print(f"Failed to send message to topic {os.getenv('MQTT_TOPIC_SENSOR')}")
         except:
             print("Failed to parse data")
 
+    # ==== RUN MQTT ====
 
     def run():
         Raspi.main()
@@ -188,8 +194,3 @@ if __name__ == '__main__':
     client.loop_start()
 
     MQTT.run()
-    # schedule.every(1).second.do(MQTT.run)
-
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)

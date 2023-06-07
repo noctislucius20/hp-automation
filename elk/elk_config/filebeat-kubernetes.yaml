@@ -11,13 +11,13 @@ data:
     filebeat.inputs:
     - type: mqtt
       id: ubuntu_honeypot
-      hosts: ["tcp://broker.hivemq.com:1883"]
+      hosts: ["tcp://103.59.95.89:1883"]
       topics:
         - topic/monitoring/#
       client_id: "client/subscriber"
       qos: 2
       enabled: true
-      tags: ["ubuntu_2"]
+      tags: ["raspi_honeypot"]
       paths:
         - /var/log/containers/*.log
       clean_session: false
