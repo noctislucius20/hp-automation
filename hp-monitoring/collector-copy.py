@@ -30,6 +30,8 @@ class Connect:
     def check_ping():
         try:
             while True:
+                global output_ping
+                output_ping = True
                 Collector.cursor.execute("SELECT ip_address, ip_gateway FROM sensors")
                 row = Collector.cursor.fetchall()
 
@@ -194,20 +196,20 @@ class Collector(Connect):
                             send_alert = f"Sensor : {ip_address} \nCode : 200 \nDescription : Honeypot On\nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
                             alert_array.append(send_alert)
 
-                    else:
-                        if current_row_rms is not None and late_row_rms is not None:
-                            if current_row_rms > late_row_rms:
-                                honeypot_status = f"There is attack on honeypot {hp.capitalize()}"
-                                status_code_id = 4
-                                array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, current_row_rms, datetime.now().isoformat())
-                                sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, threat_activity_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+                    # else:
+                    #     if current_row_rms is not None and late_row_rms is not None:
+                    #         if current_row_rms > late_row_rms:
+                    #             honeypot_status = f"There is attack on honeypot {hp.capitalize()}"
+                    #             status_code_id = 4
+                    #             array = (current_row_honeypot_sensor_id, 'On', honeypot_status, status_code_id, current_row_timestamp, current_row_rms, datetime.now().isoformat())
+                    #             sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, threat_activity_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
 
-                                Collector.cursor.execute(sql_insert_query, array)
-                                Collector.connection.commit()
-                                print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
+                    #             Collector.cursor.execute(sql_insert_query, array)
+                    #             Collector.connection.commit()
+                    #             print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
 
-                                send_alert = f"Sensor : {ip_address} \nCode : 401 \nDescription : Honeypot Attack \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
-                                alert_array.append(send_alert)
+                    #             send_alert = f"Sensor : {ip_address} \nCode : 401 \nDescription : Honeypot Attack \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
+                    #             alert_array.append(send_alert)
 
             return alert_array
                 
@@ -277,11 +279,10 @@ class Regulation(Collector):
                                 hostname = ip_address
                                 port = 22888
                                 username = 'ansigent'
-                                # password = '050501'
                                 private_key_path = '/home/audrey-server/ssh_key'
                                 private_key = paramiko.RSAKey.from_private_key_file(private_key_path)
 
-                                client.connect(hostname, port=port, pkey=private_key)
+                                client.connect(hostname, port=port, username=username, pkey=private_key)
                                 command = ''
 
                                 if hp == 'dionaea':
@@ -302,7 +303,6 @@ class Regulation(Collector):
                                 if hp == 'rdpy':
                                     command = "sudo -S docker run -it -p 3389:3389 -v rdpy:/var/log -d isif/rdpy:rdpy_hp /bin/sh -c 'python /rdpy/bin/rdpy-rdphoneypot.py -l 3389 /rdpy/bin/1 >> /var/log/rdpy.log'"
 
-                                sudo_password = '050501'
                                 stdin, stdout, stderr = client.exec_command(command)
                                 # stdin.write(sudo_password + '\n')
                                 stdin.flush()
@@ -317,6 +317,7 @@ class Regulation(Collector):
 
                                 if stderr_output:
                                     print(f"Standard Error: {stderr_output}")
+                                    print(f"{hp} is failed running on sensor {ip_address}")
 
                                 client.close()
 
@@ -339,6 +340,7 @@ class Bot(Collector):
     @bot.message_handler(commands=['update'])
     def send_update_message(message):
         global alert_message
+        global output_ping
 
         if not Bot.is_update_running:
             Bot.is_update_running = True
@@ -354,10 +356,10 @@ class Bot(Collector):
                     else:
                         pass
 
-                if Connect.check_ping():
+                if output_ping:
                     Bot.bot.send_message(chat_id=message.chat.id, text=Connect.check_ping())
                     print(f'Sent message to bot telegram on trouble in device at {datetime.now()}')
-                    time.sleep(300)
+                    output_ping = False
 
         
     @bot.message_handler(commands=['stop'])
@@ -382,6 +384,9 @@ class Main(Bot):
                 print("Error : ", e)
 
     def run():
+        ping_thread = threading.Thread(target=Collector.check_ping)
+        ping_thread.start()
+
         continuous_thread = threading.Thread(target=Collector.delete_data)
         continuous_thread.start()
 
@@ -391,11 +396,7 @@ class Main(Bot):
         mqtt_thread = threading.Thread(target=Main.run_mqtt_loop)
         mqtt_thread.start()
 
-        ping_thread = threading.Thread(target=Collector.check_ping)
-        ping_thread.start()
-
     
 if __name__ == '__main__':
     Main.run()
-    # Main.run_mqtt_loop()
-    # Regulation.check_honeypot()
+    # Collector.check_ping()
