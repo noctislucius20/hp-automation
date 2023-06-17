@@ -11,9 +11,8 @@ from datetime import datetime
 
 
 class Monitoring:
-    def __init__(self, processName, status):
+    def __init__(self, processName):
         self.processName = processName
-        self.status = status
     
     #Fungsi Penggunaan Persentase CPU
     def cpu_usage():
@@ -70,7 +69,7 @@ class Monitoring:
     def checkHoneypotRunning(self):
         for proc in psutil.process_iter():
             try:
-                if (self.processName.lower() in proc.name().lower() and self.status.lower() in proc.status().lower() or self.processName in proc.cmdline() and self.status.lower() in proc.status().lower()):
+                if (self.processName.lower() in proc.name().lower() or self.processName in proc.cmdline()):
                     return True
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
@@ -102,26 +101,10 @@ class Monitoring:
 
 class Raspi(Monitoring):
     def totalHoneypotRunning():
-        dionaea_running = Monitoring('dionaea', 'running').checkHoneypotRunning()
-        dionaea_sleeping = Monitoring('dionaea', 'sleeping').checkHoneypotRunning()
-        honeytrap_running = Monitoring('honeytrap', 'running').checkHoneypotRunning()
-        honeytrap_sleeping = Monitoring('honeytrap', 'sleeping').checkHoneypotRunning()
-        gridpot_running = Monitoring('conpot', 'running').checkHoneypotRunning()
-        gridpot_sleeping = Monitoring('conpot', 'sleeping').checkHoneypotRunning()
-        cowrie_running = Monitoring('/cowrie/cowrie-env/bin/python3', 'running').checkHoneypotRunning()
-        cowrie_sleeping = Monitoring('/cowrie/cowrie-env/bin/python3', 'sleeping').checkHoneypotRunning()
-        elasticpot_running = Monitoring('elasticpot.py', 'running').checkHoneypotRunning()
-        elasticpot_sleeping = Monitoring('elasticpot.py', 'sleeping').checkHoneypotRunning()
-        rdpy_running = Monitoring('/rdpy/bin/rdpy-rdphoneypot.py', 'running').checkHoneypotRunning()
-        rdpy_sleeping = Monitoring('/rdpy/bin/rdpy-rdphoneypot.py', 'sleeping').checkHoneypotRunning()
+        honeypot_total_running = np.array([Monitoring('dionaea').checkHoneypotRunning(), Monitoring('honeytrap').checkHoneypotRunning(), Monitoring('conpot').checkHoneypotRunning(), Monitoring('/cowrie/cowrie-env/bin/python3').checkHoneypotRunning(), Monitoring('elasticpot.py').checkHoneypotRunning(), Monitoring('/rdpy/bin/rdpy-rdphoneypot.py').checkHoneypotRunning()])
 
-        list_honeypot_running = np.array([dionaea_running, honeytrap_running, gridpot_running, cowrie_running, elasticpot_running, rdpy_running])
-        list_honeypot_sleeping = np.array([dionaea_sleeping, honeytrap_sleeping, gridpot_sleeping, cowrie_sleeping, elasticpot_sleeping, rdpy_sleeping])
-
-        if True in list_honeypot_running:
-            return(np.count_nonzero(list_honeypot_running == True))
-        elif True in list_honeypot_sleeping:
-            return(np.count_nonzero(list_honeypot_sleeping == True))
+        if True in honeypot_total_running:
+            return(np.count_nonzero(honeypot_total_running == True))
         else:
             return(0)
         
