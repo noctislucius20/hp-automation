@@ -1,6 +1,10 @@
 psutil
 paho-mqtt
 numpy
-psycopg2
+psycopg2-binary
 schedule
 python-telegram-bot
+python-dotenv
+pyTelegramBotAPI
+ping3
+paramiko
