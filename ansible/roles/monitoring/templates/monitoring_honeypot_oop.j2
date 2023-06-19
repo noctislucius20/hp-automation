@@ -17,17 +17,14 @@ class Monitoring:
         self.status = status
 
     def ipAddress():
-        ipAddress = "{{ ip_address }}"
-        # interfaces = ni.interfaces()
-        # 
-        # for interface in interfaces:
-        #     if 'eth' in interface or 'en' in interface or 'wlan' in interface:
-        #         addresses = ni.ifaddresses(interface)
-        #         if ni.AF_INET in addresses:
-        #             ipAddress.append(interface)
-        #             ipAddress.append(addresses[ni.AF_INET][0]['addr'])
+        ip_address_array = []
+        ip_address = "{{ ip_address }}"
+        gateways = ni.gateways()
+        default_gateway = gateways['default'][ni.AF_INET][0]
+        ip_address_array.append(ip_address)
+        ip_address_array.append(default_gateway)
 
-        return ipAddress
+        return(ip_address_array)
 
     def checkHoneypotRunning(self):
         for proc in psutil.process_iter():
