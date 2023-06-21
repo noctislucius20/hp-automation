@@ -30,11 +30,11 @@ class Monitoring:
 
         return (ipAddress)
     
-        # ipAddress = "192.168.195.48"
         # ip_address_array = []
+        # ip_address = '192.168.0.116' #template
         # gateways = ni.gateways()
-        # default_gateway = "192.168.195.48"
-        # ip_address_array.append(ipAddress)
+        # default_gateway = gateways['default'][ni.AF_INET][0]
+        # ip_address_array.append(ip_address)
         # ip_address_array.append(default_gateway)
         # return(ip_address_array)
 
@@ -393,9 +393,8 @@ class MQTT(Honeypot):
 
     def publish(client):
         try:
-                
             msg = json.dumps(logs_json)
-            result = client.publish(os.getenv('MQTT_TOPIC_HONEYPOT'), msg, qos=2)
+            result = client.publish(os.getenv('MQTT_TOPIC_HONEYPOT'), msg, qos=1, retain=True)
             status = result[0]
             if status == 0:
                 print(msg)
