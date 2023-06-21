@@ -154,10 +154,9 @@ class MQTT(Raspi):
     # ==== START MQTT PUBLISH ====
 
     def publish(client):
-        try:
-                
+        try:  
             msg = json.dumps(logs_json)
-            result = client.publish(os.getenv('MQTT_TOPIC_SENSOR'), msg, qos=2)
+            result = client.publish(os.getenv('MQTT_TOPIC_SENSOR'), msg, qos=1, retain=True)
             status = result[0]
             if status == 0:
                 print(msg)
