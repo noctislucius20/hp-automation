@@ -27,39 +27,6 @@ class Connect:
         client.connect(os.getenv('MQTT_BROKER'), int(os.getenv('MQTT_PORT')))
         return client
     
-    def check_ping():
-        try:
-            while True:
-                global output_ping
-                output_ping = True
-                Collector.cursor.execute("SELECT ip_address, ip_gateway FROM sensors")
-                row = Collector.cursor.fetchall()
-
-                for ip in row:
-                    ip_address = ip[0]
-                    ip_gateway = ip[1]
-                    response_address_time = ping3.ping(ip_address, timeout=5)
-
-                    if response_address_time is None:
-                        response_gateway_time = ping3.ping(ip_gateway, timeout=5)
-
-                        if response_gateway_time is not None:
-                            #kalau Gateway sukses, IP Address mati berarti sensor mati.
-                            print(f"Ping to IP Gateway {ip_gateway} successful. Response time: {response_gateway_time} ms")
-                            message = f"Sensor : {ip_address} \nCode : 500 \nDescription : Sensor Off \nStatus Honeypot : Off \nat {datetime.now()} \nMessage : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. Cek apakah perangkat hidup."
-                            return message
-                        
-                        else:
-                            #kalau Gateway gak sukses, IP Address sukses berarti internet mati
-                            print(f"Ping to IP Gateway {ip_gateway} timed out.")
-                            message = f"Sensor : {ip_address} \nCode : 501 \nDescription : Internet Off \nStatus Honeypot : Off \nat {datetime.now()} \nMessage : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. Cek apakah internet pada perangkat hidup."
-                            return message
-                
-                time.sleep(300)
-                        
-        except (Exception) as error:
-            print(error)
-    
 
 class Collector(Connect):
     connection = psycopg2.connect(user="postgres",
@@ -247,6 +214,49 @@ class Collector(Connect):
 
 
 class Regulation(Collector):
+    def check_ping():
+        try:
+            # while True:
+                global output_ping
+                output_ping = True
+                Collector.cursor.execute("SELECT ip_address, ip_gateway FROM sensors")
+                row = Collector.cursor.fetchall()
+
+                message_array = []
+
+                for ip in row:
+                    ip_address = ip[0]
+                    ip_gateway = ip[1]
+                    response_address_time = ping3.ping(ip_address, timeout=5)
+                    response_gateway_time = ping3.ping(ip_gateway, timeout=5)
+
+                    if response_address_time is None and response_gateway_time is not None:
+                        #kalau Gateway sukses, IP Address mati berarti sensor mati.
+                        print(f"Ping to IP Address {ip_address} timed out.")
+                        message = f"Sensor : {ip_address} \nCode : 500 \nDescription : Sensor Off \nStatus Honeypot : Off \nat {datetime.now()} \nMessage : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. \nCek pada perangkat : \n1. Perangkat aktif atau tidak aktif. \n2. Konfigurasi jaringan pada perangkat atau router."
+                        
+                    elif response_address_time is not None and response_gateway_time is None:
+                        #kalau Gateway gak sukses, IP Address sukses berarti internet mati
+                        print(f"Ping to IP Gateway {ip_gateway} timed out.")
+                        message = f"Sensor : {ip_address} \nCode : 501 \nDescription : Internet Off \nStatus Honeypot : Off \nat {datetime.now()} \nMessage : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. \nCek pada perangkat : \n1. Konfigurasi jaringan pada perangkat atau router. \n2. Jaringan atau Internet aktif."
+
+                    elif response_address_time is None and response_gateway_time is None:
+                        #kalau Gateway gak sukses, IP Address gak sukses berarti sensor mati
+                        print(f"Ping to IP Address {ip_address} and IP Gateway {ip_gateway} timed out.")
+                        message = f"Sensor : {ip_address} \nCode : 500 \nDescription : Sensor Off \nStatus Honeypot : Off \nat {datetime.now()} \nMessage : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. \nCek pada perangkat : \n1. Perangkat aktif atau tidak aktif. \n2. Konfigurasi jaringan pada perangkat atau router."
+
+                    else:
+                        print(f"Ping to IP Address {ip_address} and IP Gateway {ip_gateway} successful.")
+
+                    message_array.append(message)
+
+                return(message_array)
+                
+                # time.sleep(300)
+                        
+        except (Exception) as error:
+            print(error)
+
     #regulasi ketika honeypot mati
     def check_honeypot():
         try:
@@ -340,7 +350,7 @@ class Bot(Collector):
     @bot.message_handler(commands=['update'])
     def send_update_message(message):
         global alert_message
-        global output_ping
+        global check_ping
 
         if not Bot.is_update_running:
             Bot.is_update_running = True
@@ -356,10 +366,14 @@ class Bot(Collector):
                     else:
                         pass
 
-                if output_ping:
-                    Bot.bot.send_message(chat_id=message.chat.id, text=Connect.check_ping())
-                    print(f'Sent message to bot telegram on trouble in device at {datetime.now()}')
-                    output_ping = False
+                if 'check_ping' in locals() or 'check_ping' in globals():
+                    if len(check_ping) != 0:
+                        for connect in check_ping:
+                            Bot.bot.send_message(chat_id=message.chat.id, text=connect)
+                            print(f'Sent message to bot telegram on trouble in device at {datetime.now()}')
+                        check_ping = []
+                    else:
+                        pass
 
         
     @bot.message_handler(commands=['stop'])
@@ -383,8 +397,15 @@ class Main(Bot):
             except Exception as e:
                 print("Error : ", e)
 
+    def run_ping():
+        while True:
+            global check_ping
+            check_ping = Regulation.check_ping()
+            check_ping
+            time.sleep(120)
+
     def run():
-        ping_thread = threading.Thread(target=Collector.check_ping)
+        ping_thread = threading.Thread(target=Main.run_ping)
         ping_thread.start()
 
         continuous_thread = threading.Thread(target=Collector.delete_data)
@@ -399,4 +420,3 @@ class Main(Bot):
     
 if __name__ == '__main__':
     Main.run()
-    # Collector.check_ping()
