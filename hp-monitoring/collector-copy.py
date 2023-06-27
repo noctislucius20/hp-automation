@@ -147,7 +147,7 @@ class Collector(Connect):
                             Collector.connection.commit()
                             print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
 
-                            send_alert = f"Sensor : {ip_address} \nCode : 400 \nDescription : Honeypot Off \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
+                            send_alert = f"Sensor : {ip_address} \nCode : 400 \nDescription : Honeypot Off \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {current_row_rms} KB \nat {current_row_timestamp}"
                             alert_array.append(send_alert)
 
                         else:
@@ -160,7 +160,7 @@ class Collector(Connect):
                             Collector.connection.commit()
                             print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
 
-                            send_alert = f"Sensor : {ip_address} \nCode : 200 \nDescription : Honeypot On\nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
+                            send_alert = f"Sensor : {ip_address} \nCode : 200 \nDescription : Honeypot On\nStatus Honeypot : {honeypot_status} \nResident Memory Size : {current_row_rms} KB \nat {current_row_timestamp}"
                             alert_array.append(send_alert)
 
                     # else:
@@ -361,7 +361,7 @@ class Bot(Collector):
                     if len(alert_message) != 0:
                         for status in alert_message:
                             Bot.bot.send_message(chat_id=message.chat.id, text=status)
-                            print(f'Sent message to bot telegram on Honeypot running at {datetime.now()}')
+                            print(f'Sent message to bot telegram on Honeypot status at {datetime.now()}')
                         alert_message = []
                     else:
                         pass
@@ -402,7 +402,7 @@ class Main(Bot):
             global check_ping
             check_ping = Regulation.check_ping()
             check_ping
-            time.sleep(120)
+            time.sleep(300)
 
     def run():
         ping_thread = threading.Thread(target=Main.run_ping)
