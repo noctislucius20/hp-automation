@@ -160,7 +160,7 @@ class Collector(Connect):
                             Collector.connection.commit()
                             print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
 
-                            send_alert = f"Sensor : {ip_address} \nCode : 200 \nDescription : Honeypot On\nStatus Honeypot : {honeypot_status} \nResident Memory Size : {current_row_rms} KB \nat {current_row_timestamp}"
+                            send_alert = f"Sensor : {ip_address} \nCode : 200 \nDescription : Sensor & Honeypot On\nStatus Honeypot : {honeypot_status} \nResident Memory Size : {current_row_rms} KB \nat {current_row_timestamp}"
                             alert_array.append(send_alert)
 
                     # else:
@@ -222,6 +222,9 @@ class Regulation(Collector):
                 Collector.cursor.execute("SELECT ip_address, ip_gateway FROM sensors")
                 row = Collector.cursor.fetchall()
 
+                honeypot = ['dionaea', 'honeytrap', 'gridpot', 'cowrie', 'elasticpot', 'rdpy']
+                get_id_honeypot_sensor = []
+                array_query = []
                 message_array = []
 
                 for ip in row:
@@ -234,22 +237,95 @@ class Regulation(Collector):
                         #kalau Gateway sukses, IP Address mati berarti sensor mati.
                         print(f"Ping to IP Address {ip_address} timed out.")
                         message = f"Sensor : {ip_address} \nCode : 500 \nDescription : Sensor Off \nStatus Honeypot : Off \nat {datetime.now()} \nMessage : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. \nCek pada perangkat : \n1. Perangkat aktif atau tidak aktif. \n2. Konfigurasi jaringan pada perangkat atau router."
+
+                        # for index, value in enumerate(honeypot):
+                        #     Collector.cursor.execute(f"SELECT hs.id FROM honeypot_sensor hs JOIN honeypots h ON hs.honeypot_id = h.id JOIN sensors s ON hs.sensor_id = s.id WHERE h.name = '{value}' AND s.ip_address = '{ip_address}'")
+                        #     row_honeypot_sensor = Collector.cursor.fetchall()
+
+                        #     if row_honeypot_sensor:
+                        #         id = row_honeypot_sensor[0][0]
+                        #     else:
+                        #         id = int(index) + 1
+
+                        #     get_id_honeypot_sensor.append(id)
+
+                        # for id_honeypot_sensor, honeypot_name in zip(get_id_honeypot_sensor, honeypot):
+                        #     query = (id_honeypot_sensor, 'Off', f'{honeypot_name.capitalize()} is Not Running', 4, datetime.now(), 0, datetime.now())
+                        #     array_query.append(query)
+                        
+                        # sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s) """
+                        
+                        # Collector.cursor.executemany(sql_insert_query, array_query)
+                        # Collector.connection.commit()
+                        # print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
+
+                        # get_id_honeypot_sensor = []
+                        # array_query = []
                         
                     elif response_address_time is not None and response_gateway_time is None:
                         #kalau Gateway gak sukses, IP Address sukses berarti internet mati
                         print(f"Ping to IP Gateway {ip_gateway} timed out.")
                         message = f"Sensor : {ip_address} \nCode : 501 \nDescription : Internet Off \nStatus Honeypot : Off \nat {datetime.now()} \nMessage : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. \nCek pada perangkat : \n1. Konfigurasi jaringan pada perangkat atau router. \n2. Jaringan atau Internet aktif."
 
+                        # for index, value in enumerate(honeypot):
+                        #     Collector.cursor.execute(f"SELECT hs.id FROM honeypot_sensor hs JOIN honeypots h ON hs.honeypot_id = h.id JOIN sensors s ON hs.sensor_id = s.id WHERE h.name = '{value}' AND s.ip_address = '{ip_address}'")
+                        #     row_honeypot_sensor = Collector.cursor.fetchall()
+
+                        #     if row_honeypot_sensor:
+                        #         id = row_honeypot_sensor[0][0]
+                        #     else:
+                        #         id = int(index) + 1
+
+                        #     get_id_honeypot_sensor.append(id)
+
+                        # for id_honeypot_sensor, honeypot_name in zip(get_id_honeypot_sensor, honeypot):
+                        #     query = (id_honeypot_sensor, 'On', f'{honeypot_name.capitalize()} is Not Running', 5, datetime.now(), 0, datetime.now())
+                        #     array_query.append(query)
+                        
+                        # sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s) """
+                        
+                        # Collector.cursor.executemany(sql_insert_query, array_query)
+                        # Collector.connection.commit()
+                        # print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
+
+                        # get_id_honeypot_sensor = []
+                        # array_query = []
+
                     elif response_address_time is None and response_gateway_time is None:
                         #kalau Gateway gak sukses, IP Address gak sukses berarti sensor mati
                         print(f"Ping to IP Address {ip_address} and IP Gateway {ip_gateway} timed out.")
                         message = f"Sensor : {ip_address} \nCode : 500 \nDescription : Sensor Off \nStatus Honeypot : Off \nat {datetime.now()} \nMessage : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. \nCek pada perangkat : \n1. Perangkat aktif atau tidak aktif. \n2. Konfigurasi jaringan pada perangkat atau router."
 
+                        # for index, value in enumerate(honeypot):
+                        #     Collector.cursor.execute(f"SELECT hs.id FROM honeypot_sensor hs JOIN honeypots h ON hs.honeypot_id = h.id JOIN sensors s ON hs.sensor_id = s.id WHERE h.name = '{value}' AND s.ip_address = '{ip_address}'")
+                        #     row_honeypot_sensor = Collector.cursor.fetchall()
+
+                        #     if row_honeypot_sensor:
+                        #         id = row_honeypot_sensor[0][0]
+                        #     else:
+                        #         id = int(index) + 1
+
+                        #     get_id_honeypot_sensor.append(id)
+
+                        # for id_honeypot_sensor, honeypot_name in zip(get_id_honeypot_sensor, honeypot):
+                        #     query = (id_honeypot_sensor, 'Off', f'{honeypot_name.capitalize()} is Not Running', 4, datetime.now(), 0, datetime.now())
+                        #     array_query.append(query)
+                        
+                        # sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s) """
+                        
+                        # Collector.cursor.executemany(sql_insert_query, array_query)
+                        # Collector.connection.commit()
+                        # print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
+
+                        # get_id_honeypot_sensor = []
+                        # array_query = []
+
                     else:
                         print(f"Ping to IP Address {ip_address} and IP Gateway {ip_gateway} successful.")
+                        message = ''
 
                     message_array.append(message)
-
+            
                 return(message_array)
                 
                 # time.sleep(300)
@@ -369,8 +445,11 @@ class Bot(Collector):
                 if 'check_ping' in locals() or 'check_ping' in globals():
                     if len(check_ping) != 0:
                         for connect in check_ping:
-                            Bot.bot.send_message(chat_id=message.chat.id, text=connect)
-                            print(f'Sent message to bot telegram on trouble in device at {datetime.now()}')
+                            if connect != '' :
+                                Bot.bot.send_message(chat_id=message.chat.id, text=connect)
+                                print(f'Sent message to bot telegram on trouble in device at {datetime.now()}')
+                            else:
+                                pass
                         check_ping = []
                     else:
                         pass
