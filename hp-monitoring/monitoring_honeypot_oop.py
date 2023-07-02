@@ -60,7 +60,16 @@ class Monitoring:
         for proc in psutil.process_iter():
             try:
                 if (self.processName.lower() in proc.name().lower() or self.processName in proc.cmdline()):
-                    return(proc.cpu_percent())
+                    return(proc.cpu_percent(interval=0.1))
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        return False
+
+    def checkMemoryRunning(self):
+        for proc in psutil.process_iter():
+            try:
+                if (self.processName.lower() in proc.name().lower() or self.processName in proc.cmdline()):
+                    return(proc.memory_percent())
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
@@ -169,6 +178,21 @@ class Honeypot(Monitoring):
 
             check_cpu_array.append(check_cpu)
         return(check_cpu_array)
+    
+
+    # ==== CHECK HONEYPOT MEMORY PERCENT ====
+
+    def checkMemoryHoneypot():
+        honeypot_memory = [Monitoring('dionaea').checkMemoryRunning(), Monitoring('honeytrap').checkMemoryRunning(), Monitoring('conpot').checkMemoryRunning(), Monitoring('/cowrie/cowrie-env/bin/python3').checkMemoryRunning(), Monitoring('elasticpot.py').checkMemoryRunning(), Monitoring('/rdpy/bin/rdpy-rdphoneypot.py').checkMemoryRunning()]
+        check_memory_array = []
+        for index in honeypot_memory:
+            if index == False:
+                check_memory = 0
+            else:
+                check_memory = index
+
+            check_memory_array.append(check_memory)
+        return(check_memory_array)
 
 
     # ==== CHECK HONEYPOT RMS ====
@@ -299,6 +323,7 @@ class Honeypot(Monitoring):
 
         honeypot_state = Honeypot.statusHoneypot()
         honeypot_cpu = Honeypot.checkCPUHoneypot()
+        honeypot_memory = Honeypot.checkMemoryHoneypot()
         honeypot_vms = Honeypot.checkVirtualMemoryHoneypot()
         honeypot_rms = Honeypot.checkResidentMemoryHoneypot()
         honeypot_tms = Honeypot.checkTextMemoryHoneypot()
@@ -314,6 +339,7 @@ class Honeypot(Monitoring):
             "honeypot_running": Honeypot.totalHoneypotRunning(),
             "dionaea_state": honeypot_state[0],
             "dionaea_cpu": float("{:.2f}".format(honeypot_cpu[0])),
+            "dionaea_memory": float("{:.2f}".format(honeypot_memory[0])),
             "dionaea_virtual_memory": float("{:.2f}".format(honeypot_vms[0])),
             "dionaea_resident_memory": float("{:.2f}".format(honeypot_rms[0])),
             "dionaea_text_memory": float("{:.2f}".format(honeypot_tms[0])),
@@ -323,6 +349,7 @@ class Honeypot(Monitoring):
             "dionaea_vms_percentage": float("{:.2f}".format(honeypot_vms_percentage[0])),
             "honeytrap_state": honeypot_state[1],
             "honeytrap_cpu": float("{:.2f}".format(honeypot_cpu[1])),
+            "honeytrap_memory": float("{:.2f}".format(honeypot_memory[1])),
             "honeytrap_virtual_memory": float("{:.2f}".format(honeypot_vms[1])),
             "honeytrap_resident_memory": float("{:.2f}".format(honeypot_rms[1])),
             "honeytrap_text_memory": float("{:.2f}".format(honeypot_tms[1])),
@@ -332,6 +359,7 @@ class Honeypot(Monitoring):
             "honeytrap_vms_percentage": float("{:.2f}".format(honeypot_vms_percentage[1])),
             "gridpot_state": honeypot_state[2],
             "gridpot_cpu": float("{:.2f}".format(honeypot_cpu[2])),
+            "gridpot_memory": float("{:.2f}".format(honeypot_memory[2])),
             "gridpot_virtual_memory": float("{:.2f}".format(honeypot_vms[2])),
             "gridpot_resident_memory": float("{:.2f}".format(honeypot_rms[2])),
             "gridpot_text_memory": float("{:.2f}".format(honeypot_tms[2])),
@@ -341,6 +369,7 @@ class Honeypot(Monitoring):
             "gridpot_vms_percentage": float("{:.2f}".format(honeypot_vms_percentage[2])),
             "cowrie_state": honeypot_state[3],
             "cowrie_cpu": float("{:.2f}".format(honeypot_cpu[3])),
+            "cowrie_memory": float("{:.2f}".format(honeypot_memory[3])),
             "cowrie_virtual_memory": float("{:.2f}".format(honeypot_vms[3])),
             "cowrie_resident_memory": float("{:.2f}".format(honeypot_rms[3])),
             "cowrie_text_memory": float("{:.2f}".format(honeypot_tms[3])),
@@ -350,6 +379,7 @@ class Honeypot(Monitoring):
             "cowrie_vms_percentage": float("{:.2f}".format(honeypot_vms_percentage[3])),
             "elasticpot_state": honeypot_state[4],
             "elasticpot_cpu": float("{:.2f}".format(honeypot_cpu[4])),
+            "elasticpot_memory": float("{:.2f}".format(honeypot_memory[4])),
             "elasticpot_virtual_memory": float("{:.2f}".format(honeypot_vms[4])),
             "elasticpot_resident_memory": float("{:.2f}".format(honeypot_rms[4])),
             "elasticpot_text_memory": float("{:.2f}".format(honeypot_tms[4])),
@@ -359,6 +389,7 @@ class Honeypot(Monitoring):
             "elasticpot_vms_percentage": float("{:.2f}".format(honeypot_vms_percentage[4])),
             "rdpy_state": honeypot_state[5],
             "rdpy_cpu": float("{:.2f}".format(honeypot_cpu[5])),
+            "rdpy_memory": float("{:.2f}".format(honeypot_memory[5])),
             "rdpy_virtual_memory": float("{:.2f}".format(honeypot_vms[5])),
             "rdpy_resident_memory": float("{:.2f}".format(honeypot_rms[5])),
             "rdpy_text_memory": float("{:.2f}".format(honeypot_tms[5])),
