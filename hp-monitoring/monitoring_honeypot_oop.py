@@ -190,10 +190,10 @@ class Honeypot(Monitoring):
                 check_memory = 0
             else:
                 check_memory = index
-
+                
             check_memory_array.append(check_memory)
         return(check_memory_array)
-
+    
 
     # ==== CHECK HONEYPOT RMS ====
 
