@@ -1,4 +1,5 @@
 psutil
+netifaces
 paho-mqtt
 numpy
 psycopg2-binary
