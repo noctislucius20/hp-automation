@@ -16,7 +16,7 @@ class Monitoring:
     
     #Fungsi Penggunaan Persentase CPU
     def cpu_usage():
-        return psutil.cpu_percent(interval=0.5)
+        return psutil.cpu_percent(interval=0.1)
 
     #Fungsi Frekuensi CPU
     def cpu_frequency():
