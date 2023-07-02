@@ -1,0 +1,16 @@
+- name: run gridpot docker image
+  docker_container:
+      name: gridpot
+      image: isif/gridpot:gridpot_hp
+      ports:
+          - 102:102
+          - 8000:80
+          - 161:161
+          - 502:502
+      volumes:
+          - gridpot:/gridpot
+      tty: true
+      interactive: true
+      state: started
+      detach: true
+      command: /bin/bash -c "cd gridpot; gridlabd -D run_realtime=1 --server ./gridpot/gridlabd/3.1/models/IEEE_13_Node_With_Houses.glm; conpot -t gridpot"

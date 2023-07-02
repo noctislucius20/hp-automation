@@ -1,0 +1,93 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: elk-pv-volume  # Sets PV's name
+  labels:
+    type: local  # Sets PV's type to local
+    app: elk
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi # Sets PV Volume
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/elk-data"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: elk-pv-claim  # Sets name of PVC
+  labels:
+    app: elk
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany  # Sets read and write access
+  resources:
+    requests:
+      storage: 10Gi  # Sets volume size
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elk  # Sets Deployment name
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elk
+  template:
+    metadata:
+      labels:
+        app: elk
+    spec:
+      containers:
+        - name: elk
+          image: elk # Sets Image
+          imagePullPolicy: "Never"
+          ports:
+            - name: kibana
+              containerPort: 5601  # Exposes container port
+            - name: elasticsearch
+              containerPort: 9200
+            - name: filebeat
+              containerPort: 9300
+            - name: logstashapi
+              containerPort: 9600
+            - name: logstash
+              containerPort: 5044
+          volumeMounts:
+            - mountPath: /var/lib/elasticsearch
+              name: elk
+      volumes:
+        - name: elk
+          persistentVolumeClaim:
+            claimName: elk-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elk # Sets service name
+  labels:
+    app: elk # Labels and Selectors
+spec:
+  type: NodePort # Sets service type
+  ports:
+    - name: kibana
+      port: 5601 # Sets port to run the elk application
+      targetPort: kibana
+    - name: elasticsearch
+      port: 9200 
+      targetPort: elasticsearch
+    - name: logstash
+      port: 5044 # Sets port to run the elk application
+      targetPort: logstash
+    - name: filebeat
+      port: 9300 # Sets port to run the elk application
+      targetPort: filebeat
+    - name: logstashapi
+      port: 9600 # Sets port to run the elk application
+      targetPort: logstashapi
+  selector:
+    app: elk

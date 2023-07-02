@@ -1,0 +1,27 @@
+- name: build elk docker image
+  docker_image:
+    name: elk
+    tag: latest
+    build:
+      path: /home/ansiadmin/hp-automation/elk/elk_config
+      pull: yes
+    source: build
+    state: present
+  register: elk_build
+
+- name: load elk image to minikube
+  command: minikube image load elk
+  when: elk_build.changed
+
+- name: create elk namespace
+  k8s:
+    name: elk
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: install elk
+  k8s:
+    src: /home/ansiadmin/hp-automation/ansible/roles/elk/files/elk.yaml
+    namespace: elk
+    state: present

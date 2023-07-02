@@ -1,0 +1,13 @@
+- name: run elasticpot docker image
+  docker_container:
+      name: elasticpot
+      image: isif/elasticpot:elasticpot_hp
+      ports:
+          - 9200:9200/tcp
+      volumes:
+          - elasticpot:/elasticpot/log
+      tty: true
+      interactive: true
+      state: started
+      detach: true
+      command: /bin/sh -c "cd elasticpot; python3 elasticpot.py"

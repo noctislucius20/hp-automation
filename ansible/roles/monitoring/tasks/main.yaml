@@ -1,0 +1,70 @@
+- name: get deployment method
+  set_fact:
+      method: "{{ method }}"
+
+- name: create monitoring script from template
+  template:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      owner: root
+      group: root
+      mode: 0644
+  with_items:
+      - src: monitoring_honeypot_oop.j2
+        dest: /home/ansigent/monitoring_honeypot_oop.py
+      - src: monitoring_raspi_oop.j2
+        dest: /home/ansigent/monitoring_raspi_oop.py
+
+- name: create cronjob from template
+  template:
+      src: monitoring_cronjob.j2
+      dest: /home/ansigent/monitoring_cronjob
+      owner: ansigent
+      group: root
+      mode: 0644
+
+- name: run script using cronjob
+  command: crontab -u ansigent monitoring_cronjob
+
+- name: generate random dashboard UUID
+  set_fact:
+      dashboard_uuid: "{{ 99999999 | random | to_uuid }}"
+  when: method == "POST"
+
+- name: create monitoring dashboard
+  uri:
+      url: http://192.168.1.100:5601/api/kibana/dashboards/import?exclude=index-pattern
+      method: POST
+      body_format: json
+      body: "{{ lookup('template', '../roles/monitoring/templates/monitoring_dashboard.j2') }}"
+      headers:
+          Content-Type: "application/json"
+          kbn-xsrf: "true"
+      return_content: yes
+  when: method == "POST"
+
+- name: insert dashboard data into PostgreSQL database
+  postgresql_query:
+      db: hp_automation
+      login_user: "{{ postgres_user }}"
+      login_password: "{{ postgres_pass }}"
+      login_host: "{{ postgres_host }}"
+      port: "{{ postgres_port }}"
+      query:
+          "INSERT INTO sensor_dashboards (sensor_id, dashboard_id, dashboard_url, created_at, updated_at)
+          SELECT sensors.id, '{{ dashboard_uuid }}', '/app/dashboards#/view/{{ dashboard_uuid }}', now(), now()
+          FROM sensors
+          WHERE sensors.ip_address = '{{ ip_address }}' AND sensors.status = true;"
+  when: method == "POST"
+
+- name: update dashboard data
+  uri:
+      url: http://192.168.1.100:5601/api/saved_objects/dashboard/{{ dashboard_id }}
+      method: PUT
+      body_format: json
+      headers:
+          Content-Type: "application/json"
+          kbn-xsrf: "true"
+      body: "{{ lookup('template', '../roles/monitoring/templates/monitoring_update_dashboard.j2') }}"
+      return_content: yes
+  when: method == "PUT"

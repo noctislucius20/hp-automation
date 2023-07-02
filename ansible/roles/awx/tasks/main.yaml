@@ -1,0 +1,28 @@
+- name: create AWX namespace
+  k8s:
+      definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+              name: awx
+      state: present
+
+- name: install AWX
+  k8s:
+      src: /home/ansiadmin/hp-automation/ansible/roles/awx/files/awx-operator.yaml
+      namespace: awx
+      state: present
+
+- name: create AWX deployment
+  k8s:
+      definition:
+          apiVersion: awx.ansible.com/v1beta1
+          kind: AWX
+          metadata:
+              name: awx
+          spec:
+              service_type: nodeport
+              ingress_type: none
+              hostname: awx.example.com
+      namespace: awx
+      state: present

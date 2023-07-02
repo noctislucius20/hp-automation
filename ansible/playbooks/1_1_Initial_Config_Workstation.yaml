@@ -1,0 +1,14 @@
+---
+- hosts: "{{ ip_address }}"
+  become: true
+  pre_tasks:
+      - name: install updates
+        apt:
+            upgrade: dist
+            update_cache: yes
+
+- hosts: "{{ ip_address }}"
+  become: true
+  roles:
+      - workstation
+  tags: [workstation]

@@ -1,0 +1,64 @@
+---
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  pre_tasks:
+      - name: set ansible_port
+        set_fact:
+            ansible_port: 22888
+
+      - name: set installed honeypot
+        set_fact:
+            honeypot_list: "{{ hp_list }}"
+
+      - name: show facts
+        debug:
+            msg: "{{ ansible_facts }}"
+
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  roles:
+      - role: cowrie
+        when: honeypot_list is search("cowrie")
+  tags: [cowrie]
+
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  roles:
+      - role: dionaea
+        when: honeypot_list is search("dionaea")
+  tags: [dionaea]
+
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  roles:
+      - role: elasticpot
+        when: honeypot_list is search("elasticpot")
+  tags: [elasticpot]
+
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  roles:
+      - role: gridpot
+        when: honeypot_list is search("gridpot")
+  tags: [gridpot]
+
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  roles:
+      - role: honeytrap
+        when: honeypot_list is search("honeytrap")
+  tags: [honeytrap]
+
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  roles:
+      - role: rdpy
+        when: honeypot_list is search("rdpy")
+  tags: [rdpy]

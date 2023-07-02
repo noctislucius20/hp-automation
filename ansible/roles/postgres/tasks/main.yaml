@@ -1,0 +1,27 @@
+- name: create postgres namespace
+  k8s:
+    name: postgres
+    api_version: v1
+    kind: Namespace
+    state: present 
+
+- name: install postgres configmap
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: postgres-config
+        labels:
+          app: postgres
+      data:
+        POSTGRES_USER: "{{ postgres_user }}"
+        POSTGRES_PASSWORD: "{{ postgres_pass }}"
+    namespace: postgres
+    state: present
+
+- name: install postgres
+  k8s:
+    src: /home/ansiadmin/hp-automation/ansible/roles/postgres/files/postgres.yaml
+    namespace: postgres
+    state: present

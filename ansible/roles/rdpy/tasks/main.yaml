@@ -1,0 +1,13 @@
+- name: run rdpy docker image
+  docker_container:
+      name: rdpy
+      image: isif/rdpy:rdpy_hp
+      ports:
+          - 3389:3389
+      volumes:
+          - rdpy:/var/log
+      tty: true
+      interactive: true
+      detach: true
+      state: started
+      command: /bin/bash -c "python /rdpy/bin/rdpy-rdphoneypot.py -l 3389 /rdpy/bin/1 >> /var/log/rdpy.log"

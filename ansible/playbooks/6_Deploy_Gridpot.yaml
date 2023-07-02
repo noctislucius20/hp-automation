@@ -1,0 +1,20 @@
+---
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  pre_tasks:
+      - name: set ansible_port
+        set_fact:
+            ansible_port: 22888
+
+      - name: set installed honeypot
+        set_fact:
+            honeypot_list: "{{ hp_list }}"
+
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  roles:
+      - role: gridpot
+        when: honeypot_list is search("gridpot")
+  tags: [honeypot]
