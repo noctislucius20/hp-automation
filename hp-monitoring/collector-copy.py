@@ -43,12 +43,10 @@ class Collector(Connect):
             try:
                 global logs_json
                 global data
-                global alert_message
                 logs_json = msg.payload.decode()
                 data = json.loads(logs_json)
                 
                 Collector.insert_data_details()
-                alert_message = Collector.add_history()
                 Regulation.check_honeypot()
 
             except (Exception, psycopg2.Error) as error:
@@ -77,7 +75,8 @@ class Collector(Connect):
             Collector.connection.commit()
             print(Collector.cursor.rowcount, f"Record inserted successfully into sensor_details table : {datetime.now().isoformat()}")
 
-        if "id_honeypot" in data :
+        else :
+            global alert_message
             honeypot = ['dionaea', 'honeytrap', 'gridpot', 'cowrie', 'elasticpot', 'rdpy']
             get_id_honeypot_sensor = []
             array_query = []
@@ -102,6 +101,7 @@ class Collector(Connect):
             Collector.cursor.executemany(sql_insert_query, array_query)
             Collector.connection.commit()
             print(Collector.cursor.rowcount, f"Record inserted successfully into honeypot_details table : {datetime.now().isoformat()}")
+            alert_message = Collector.add_history()
 
 
     def add_history():
@@ -134,7 +134,6 @@ class Collector(Connect):
                         current_row_timestamp = row[0][3]
                     
                     late_row_state = None if len(row) < 2 else row[1][1]
-                    late_row_rms = None if len(row) < 2 else row[1][2]
 
                     if current_row_state != late_row_state:
                         if current_row_state == 'Not Running':
@@ -207,7 +206,7 @@ class Collector(Connect):
                     Collector.connection.commit()
                     print(Collector.cursor.rowcount, "Record deleted successfully into honeypot_details table")
                 
-                time.sleep(30)     
+                time.sleep(1)     
 
         except (Exception, psycopg2.Error) as error:
             print("Failed to delete record into sensor_details / honeypot_details table {}".format(error))
@@ -407,8 +406,8 @@ class Regulation(Collector):
 
                                 client.close()
 
-                    else:
-                        print(f"Honeypot {hp} not deployed on IP Address {ip_address}")
+                            else:
+                                print(f"Honeypot {hp} not deployed on IP Address {ip_address}")
         
         except (Exception) as error:
             print(error)
@@ -434,7 +433,7 @@ class Bot(Collector):
             
             while Bot.is_update_running:
                 if 'alert_message' in locals() or 'alert_message' in globals():
-                    if len(alert_message) != 0:
+                    if alert_message is not None:
                         for status in alert_message:
                             Bot.bot.send_message(chat_id=message.chat.id, text=status)
                             print(f'Sent message to bot telegram on Honeypot status at {datetime.now()}')
@@ -443,7 +442,7 @@ class Bot(Collector):
                         pass
 
                 if 'check_ping' in locals() or 'check_ping' in globals():
-                    if len(check_ping) != 0:
+                    if check_ping is not None:
                         for connect in check_ping:
                             if connect != '' :
                                 Bot.bot.send_message(chat_id=message.chat.id, text=connect)
@@ -456,7 +455,7 @@ class Bot(Collector):
 
         
     @bot.message_handler(commands=['stop'])
-    def send_start_message(message):
+    def send_stop_message(message):
         if Bot.is_update_running:
             Bot.is_update_running = False
             Bot.bot.send_message(chat_id=message.chat.id, text="Memberhentikan update status terbaru pada status Monitoring Sensor & Honeypot. \nKetik /update untuk memulai update.")
