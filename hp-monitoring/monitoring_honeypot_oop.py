@@ -1,5 +1,6 @@
 import psutil
 import socket
+import time
 import netifaces as ni
 import paho.mqtt.client as mqtt
 import numpy as np
@@ -15,28 +16,43 @@ class Monitoring:
         self.processName = processName
 
     def ipAddress():
-        ipAddress = []
-        interfaces = ni.interfaces()
-        
-        for interface in interfaces:
-            if 'eth' in interface or 'en' in interface or 'wlan' in interface: #dihapus line ini
-                addresses = ni.ifaddresses(interface)
-                if ni.AF_INET in addresses:
-                    ip_address = addresses[ni.AF_INET][0]['addr'] #ini pake template
-                    gateway = ni.gateways()['default'][ni.AF_INET][0]
+        # interfaces = ni.interfaces()
+        # for interface in interfaces:
+        #     if 'tun' in interface: #dihapus line ini
+        #         addresses = ni.ifaddresses(interface)
+        #         if ni.AF_INET in addresses:
+        #             ip_address = addresses[ni.AF_INET][0]['addr'] #ini pake template
+        #             ip_gateway = gateways['default'][ni.AF_INET][0]
+        # return (ip_address)
 
-                    ipAddress.append(ip_address) #diubah jadi variable ipAddress
-                    ipAddress.append(gateway)
+        ip_address = '192.168.195.191'
+        return(ip_address)
 
-        return (ipAddress)
-    
-        # ip_address_array = []
-        # ip_address = '192.168.0.116' #template
+    def ipGateway():
         # gateways = ni.gateways()
-        # default_gateway = gateways['default'][ni.AF_INET][0]
-        # ip_address_array.append(ip_address)
-        # ip_address_array.append(default_gateway)
-        # return(ip_address_array)
+        # ip_gateway = ""
+        
+        # if 'default' in gateways and ni.AF_INET in gateways['default']:
+        #     for gw in gateways['default'][ni.AF_INET]:
+        #         if gw[1] == 'tun0':
+        #             ip_gateway = gw[0]
+        #             return ip_gateway
+                
+        # if ip_gateway:
+        #     return ip_gateway
+        # else:
+        #     interfaces = ni.interfaces()
+        #     for interface in interfaces:
+        #         if 'tun' in interface: #dihapus line ini
+        #             addresses = ni.ifaddresses(interface)
+        #             if ni.AF_INET in addresses:
+        #                 ip_gateway = addresses[ni.AF_INET][0]['addr'] #ini pake template
+        #                 gateway_default = gateways['default'][ni.AF_INET][0]
+
+        #     return (ip_gateway)
+
+        ip_address = '192.168.195.191'
+        return(ip_address)
 
     def checkHoneypotRunning(self):
         for proc in psutil.process_iter():
@@ -335,6 +351,7 @@ class Honeypot(Monitoring):
         logs_json = {
             "id_honeypot": str(uuid.uuid4()),
             "ip_address": Honeypot.ipAddress(),
+            "ip_gateway": Honeypot.ipGateway(),
             "hostname": socket.gethostname(), #diganti template
             "honeypot_running": Honeypot.totalHoneypotRunning(),
             "dionaea_state": honeypot_state[0],
@@ -425,7 +442,7 @@ class MQTT(Honeypot):
     def publish(client):
         try:
             msg = json.dumps(logs_json)
-            result = client.publish(os.getenv('MQTT_TOPIC_HONEYPOT'), msg, qos=1, retain=True)
+            result = client.publish(os.getenv('MQTT_TOPIC_HONEYPOT'), msg, qos=2, retain=True)
             status = result[0]
             if status == 0:
                 print(msg)
@@ -444,5 +461,7 @@ if __name__ == '__main__':
     client = MQTT.connect_mqtt()
     client.loop_start()
 
-    MQTT.run()
+    while True:
+        MQTT.run()
+        time.sleep(1)
  
