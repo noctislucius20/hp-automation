@@ -1,1 +1,7 @@
+========== CLIENT ===========
 @reboot /bin/bash /home/raspi/hp-automation/hp-monitoring/monitoring.sh &
+
+
+=========== ADMIN ============
+@reboot /bin/bash /home/audrey-server/hp-automation/hp-monitoring/collector.sh &
+@reboot /bin/bash /home/audrey-server/hp-automation/hp-monitoring/automation.sh &

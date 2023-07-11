@@ -93,7 +93,7 @@ class Monitoring:
         for proc in psutil.process_iter():
             try:
                 if (self.processName.lower() in proc.name().lower() or self.processName in proc.cmdline()):
-                    return((proc.memory_info().rss) / 1024)
+                    return((proc.memory_info().rss) / 1024 / 1024)
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
@@ -102,7 +102,7 @@ class Monitoring:
         for proc in psutil.process_iter():
             try:
                 if (self.processName.lower() in proc.name().lower()) or self.processName in proc.cmdline():
-                    return((proc.memory_info().vms) / 1024)
+                    return((proc.memory_info().vms) / 1024 / 1024)
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
@@ -111,7 +111,7 @@ class Monitoring:
         for proc in psutil.process_iter():
             try:
                 if (self.processName.lower() in proc.name().lower() or self.processName in proc.cmdline()):
-                    return((proc.memory_info().text) / 1024)
+                    return((proc.memory_info().text) / 1024 / 1024)
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
@@ -120,7 +120,7 @@ class Monitoring:
         for proc in psutil.process_iter():
             try:
                 if (self.processName.lower() in proc.name().lower() or self.processName in proc.cmdline()):
-                    return((proc.memory_info().data) / 1024)
+                    return((proc.memory_info().data) / 1024 / 1024)
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
@@ -129,7 +129,7 @@ class Monitoring:
         for proc in psutil.process_iter():
             try:
                 if (self.processName.lower() in proc.name().lower() or self.processName in proc.cmdline()):
-                    return((proc.memory_full_info().swap) / 1024)
+                    return((proc.memory_full_info().swap) / 1024 / 1024)
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False

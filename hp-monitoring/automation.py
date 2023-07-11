@@ -36,67 +36,12 @@ class Regulation:
                 response_address_time = ping3.ping(ip_address, timeout=5)
                 response_gateway_time = ping3.ping(ip_gateway, timeout=5)
 
-                if response_address_time is None and response_gateway_time is not None:
-                    #kalau Gateway sukses, IP Address mati berarti sensor mati.
+                #kalau Gateway sukses/gak sukses, IP Address mati berarti sensor/internet mati.
+                if response_address_time is None and response_gateway_time is None or response_gateway_time is not None and response_gateway_time is None:
                     print(f"Ping to IP Address {ip_address} timed out.")
-                    message = f"[Alerting Raspberry Pi Status] \n\nSensor : {ip_address} \nCode : 500 \nDescription : Lost Connection to Sensor \nStatus Honeypot : Off \nTimestamp : {datetime.now(Regulation.timezone)} \n\nMessage : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. \nCek pada perangkat : \n1. Perangkat aktif atau tidak aktif. \n2. Konfigurasi jaringan pada perangkat atau router."
+                    message = f"[Alerting Raspberry Pi Status] \n\nSensor : {ip_address} \nCode : 500 \nConnection Status : Not Connected \nDescription : Lost Connection to Device \nTimestamp : {datetime.now(Regulation.timezone)} \n\nMessage : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. \nCek pada perangkat : \n1. Perangkat aktif atau tidak aktif. \n2. Konfigurasi jaringan pada perangkat atau router."
                     
                     Bot.notifications(message, "Raspberry Pi Status Alert")
-
-                    # for index, value in enumerate(honeypot):
-                    #     Regulation.cursor.execute(f"SELECT hs.id FROM honeypot_sensor hs JOIN honeypots h ON hs.honeypot_id = h.id JOIN sensors s ON hs.sensor_id = s.id WHERE h.name = '{value}' AND s.ip_address = '{ip_address}'")
-                    #     row_honeypot_sensor = Regulation.cursor.fetchall()
-
-                    #     if row_honeypot_sensor:
-                    #         id = row_honeypot_sensor[0][0]
-                    #     else:
-                    #         id = int(index) + 1
-
-                    #     get_id_honeypot_sensor.append(id)
-
-                    # for id_honeypot_sensor, honeypot_name in zip(get_id_honeypot_sensor, honeypot):
-                    #     query = (id_honeypot_sensor, 'Off', f'{honeypot_name.capitalize()} is Not Running', 4, datetime.now(), 0, datetime.now())
-                    #     array_query.append(query)
-                    
-                    # sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s) """
-                    
-                    # Regulation.cursor.executemany(sql_insert_query, array_query)
-                    # Regulation.connection.commit()
-                    # print(Regulation.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
-
-                    # get_id_honeypot_sensor = []
-                    # array_query = []
-                    
-                elif response_address_time is None and response_gateway_time is None:
-                    #kalau Gateway gak sukses, IP Address gak sukses berarti sensor mati
-                    print(f"Ping to IP Address {ip_address} and IP Gateway {ip_gateway} timed out.")
-                    message = f"[Alerting Raspberry Pi Status] \n\nSensor : {ip_address} \nCode : 500 \nDescription : Sensor Off \nStatus Honeypot : Off \nTimestamp : {datetime.now(Regulation.timezone)} \n\nMessage : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. \nCek pada perangkat : \n1. Perangkat aktif atau tidak aktif. \n2. Konfigurasi jaringan pada perangkat atau router."
-
-                    Bot.notifications(message, "Raspberry Pi Status Alert")
-
-                    # for index, value in enumerate(honeypot):
-                    #     Regulation.cursor.execute(f"SELECT hs.id FROM honeypot_sensor hs JOIN honeypots h ON hs.honeypot_id = h.id JOIN sensors s ON hs.sensor_id = s.id WHERE h.name = '{value}' AND s.ip_address = '{ip_address}'")
-                    #     row_honeypot_sensor = Regulation.cursor.fetchall()
-
-                    #     if row_honeypot_sensor:
-                    #         id = row_honeypot_sensor[0][0]
-                    #     else:
-                    #         id = int(index) + 1
-
-                    #     get_id_honeypot_sensor.append(id)
-
-                    # for id_honeypot_sensor, honeypot_name in zip(get_id_honeypot_sensor, honeypot):
-                    #     query = (id_honeypot_sensor, 'Off', f'{honeypot_name.capitalize()} is Not Running', 4, datetime.now(), 0, datetime.now())
-                    #     array_query.append(query)
-                    
-                    # sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s) """
-                    
-                    # Regulation.cursor.executemany(sql_insert_query, array_query)
-                    # Regulation.connection.commit()
-                    # print(Regulation.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now().isoformat()}")
-
-                    # get_id_honeypot_sensor = []
-                    # array_query = []
 
                 else:
                     print(f"Ping to IP Address {ip_address} and IP Gateway {ip_gateway} successful.")
@@ -202,6 +147,4 @@ class Main(Bot):
         Regulation.check_ping()
 
 if __name__ == '__main__':
-    while True:
-        Main.run()
-        time.sleep(60)
+    Main.run()
