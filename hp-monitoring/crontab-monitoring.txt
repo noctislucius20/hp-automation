@@ -3,5 +3,5 @@
 
 
 =========== ADMIN ============
-@reboot /bin/bash /home/audrey-server/hp-automation/hp-monitoring/collector.sh &
-@reboot /bin/bash /home/audrey-server/hp-automation/hp-monitoring/automation.sh &
+@reboot /bin/bash /home/ansiadmin/hp-automation/hp-monitoring/collector.sh &
+@reboot /bin/bash /home/ansiadmin/hp-automation/hp-monitoring/automation.sh &

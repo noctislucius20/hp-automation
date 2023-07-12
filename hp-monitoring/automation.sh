@@ -9,5 +9,5 @@ run_script() {
 while true; do
     run_script
 
-    sleep 60
+    sleep 180
 done
