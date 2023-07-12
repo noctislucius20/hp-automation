@@ -371,7 +371,7 @@ class Collector:
             dashboard_url = row_dashboard_url[0]
 
             if rms_array[0] > 90 and cpu_array[0] > 10 and state_array[0] != 'Sleeping':
-                honeypot_status = f"{honeypot[0].capitalize()} is Unhealthy"
+                honeypot_status = f"{honeypot[0].capitalize()} is Not Normal"
                 status_code_id = 3
                 array = (get_id_honeypot_sensor[0], 'On', honeypot_status, status_code_id, time, rms_array[0], datetime.now(Collector.timezone).isoformat())
                 sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
@@ -380,11 +380,11 @@ class Collector:
                 Collector.connection.commit()
                 print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now(Collector.timezone).isoformat()}")
 
-                send_alert = f"[Alerting Honeypot Resource] \n\nSensor : {ip_address} \nCode : 401 \nConnection Status : Connected \nDescription : Honeypot is Unhealthy \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms_array[0]} MB \nCPU Percentage : {cpu_array[0]}% \nRAM Usage Sensor : {ram_usage} MB \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
+                send_alert = f"[Alerting Honeypot Resource] \n\nSensor : {ip_address} \nCode : 401 \nConnection Status : Connected \nDescription : Honeypot is Not Normal \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms_array[0]} MB \nCPU Percentage : {cpu_array[0]}% \nRAM Usage Sensor : {ram_usage} MB \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
                 Bot.notifications(send_alert, "Honeypot Resource Alert")      
 
             if rms_array[1] > 90 and cpu_array[1] > 3 and state_array[1] != 'Sleeping':
-                honeypot_status = f"{honeypot[1].capitalize()} is Unhealthy"
+                honeypot_status = f"{honeypot[1].capitalize()} is Not Normal"
                 status_code_id = 3
                 array = (get_id_honeypot_sensor[1], 'On', honeypot_status, status_code_id, time, rms_array[1], datetime.now(Collector.timezone).isoformat())
                 sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
@@ -393,11 +393,11 @@ class Collector:
                 Collector.connection.commit()
                 print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now(Collector.timezone).isoformat()}")
 
-                send_alert = f"[Alerting Honeypot Resource] \n\nSensor : {ip_address} \nCode : 401 \nConnection Status : Connected \nDescription : Honeypot is Unhealthy \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms_array[1]} MB \nCPU Percentage : {cpu_array[1]}% \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
+                send_alert = f"[Alerting Honeypot Resource] \n\nSensor : {ip_address} \nCode : 401 \nConnection Status : Connected \nDescription : Honeypot is Not Normal \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms_array[1]} MB \nCPU Percentage : {cpu_array[1]}% \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
                 Bot.notifications(send_alert, "Honeypot Resource Alert")      
 
             if rms_array[2] > 115 and cpu_array[2] > 73 and state_array[2] != 'Sleeping':
-                honeypot_status = f"{honeypot[2].capitalize()} is Unhealthy"
+                honeypot_status = f"{honeypot[2].capitalize()} is Not Normal"
                 status_code_id = 3
                 array = (get_id_honeypot_sensor[2], 'On', honeypot_status, status_code_id, time, rms_array[2], datetime.now(Collector.timezone).isoformat())
                 sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
@@ -406,11 +406,11 @@ class Collector:
                 Collector.connection.commit()
                 print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now(Collector.timezone).isoformat()}")
 
-                send_alert = f"[Alerting Honeypot Resource] \n\nSensor : {ip_address} \nCode : 401 \nConnection Status : Connected \nDescription : Honeypot is Unhealthy \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms_array[2]} MB \nCPU Percentage : {cpu_array[2]}% \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
+                send_alert = f"[Alerting Honeypot Resource] \n\nSensor : {ip_address} \nCode : 401 \nConnection Status : Connected \nDescription : Honeypot is Not Normal \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms_array[2]} MB \nCPU Percentage : {cpu_array[2]}% \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
                 Bot.notifications(send_alert, "Honeypot Resource Alert")           
 
             if rms_array[3] > 45 and cpu_array[3] > 12 and state_array[0] != 'Sleeping':
-                honeypot_status = f"{honeypot[3].capitalize()} is Unhealthy"
+                honeypot_status = f"{honeypot[3].capitalize()} is Not Normal"
                 status_code_id = 3
                 array = (get_id_honeypot_sensor[3], 'On', honeypot_status, status_code_id, time, rms_array[3], datetime.now(Collector.timezone).isoformat())
                 sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
@@ -419,11 +419,11 @@ class Collector:
                 Collector.connection.commit()
                 print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now(Collector.timezone).isoformat()}")
 
-                send_alert = f"[Alerting Honeypot Resource] \n\nSensor : {ip_address} \nCode : 401 \nConnection Status : Connected \nDescription : Honeypot is Unhealthy \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms_array[3]} MB \nCPU Percentage : {cpu_array[3]}% \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
+                send_alert = f"[Alerting Honeypot Resource] \n\nSensor : {ip_address} \nCode : 401 \nConnection Status : Connected \nDescription : Honeypot is Not Normal \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms_array[3]} MB \nCPU Percentage : {cpu_array[3]}% \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
                 Bot.notifications(send_alert, "Honeypot Resource Alert")  
 
             if rms_array[4] > 60 and cpu_array[4] > 73 and state_array[0] != 'Sleeping':
-                honeypot_status = f"{honeypot[4].capitalize()} is Unhealthy"
+                honeypot_status = f"{honeypot[4].capitalize()} is Not Normal"
                 status_code_id = 3
                 array = (get_id_honeypot_sensor[4], 'On', honeypot_status, status_code_id, time, rms_array[4], datetime.now(Collector.timezone).isoformat())
                 sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
@@ -432,11 +432,11 @@ class Collector:
                 Collector.connection.commit()
                 print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now(Collector.timezone).isoformat()}")
 
-                send_alert = f"[Alerting Honeypot Resource] \n\nSensor : {ip_address} \nCode : 401 \nConnection Status : Connected \nDescription : Honeypot is Unhealthy \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms_array[4]} MB \nCPU Percentage : {cpu_array[4]}% \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
+                send_alert = f"[Alerting Honeypot Resource] \n\nSensor : {ip_address} \nCode : 401 \nConnection Status : Connected \nDescription : Honeypot is Not Normal \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms_array[4]} MB \nCPU Percentage : {cpu_array[4]}% \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
                 Bot.notifications(send_alert, "Honeypot Resource Alert") 
 
             if rms_array[5] > 150 and cpu_array[5] > 95 and state_array[0] != 'Sleeping':
-                honeypot_status = f"{honeypot[5].capitalize()} is Unhealthy"
+                honeypot_status = f"{honeypot[5].capitalize()} is Not Normal"
                 status_code_id = 3
                 array = (get_id_honeypot_sensor[5], 'On', honeypot_status, status_code_id, time, rms_array[5], datetime.now(Collector.timezone).isoformat())
                 sql_insert_query = """ INSERT INTO history (honeypot_sensor_id, sensor_status, honeypot_status, status_code_id, stopped_at, resident_memory_size, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
@@ -445,7 +445,7 @@ class Collector:
                 Collector.connection.commit()
                 print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now(Collector.timezone).isoformat()}")
 
-                send_alert = f"[Alerting Honeypot Resource] \n\nSensor : {ip_address} \nCode : 401 \nConnection Status : Connected \nDescription : Honeypot is Unhealthy \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms_array[5]} MB \nCPU Percentage : {cpu_array[5]}% \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
+                send_alert = f"[Alerting Honeypot Resource] \n\nSensor : {ip_address} \nCode : 401 \nConnection Status : Connected \nDescription : Honeypot is Not Normal \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms_array[5]} MB \nCPU Percentage : {cpu_array[5]}% \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
                 Bot.notifications(send_alert, "Honeypot Resource Alert")    
     
         except (Exception) as error:
@@ -473,6 +473,4 @@ class Main(Bot):
 
 
 if __name__ == '__main__':
-    while True:
-        Main.run()
-        time.sleep(5)
+    Main.run()
