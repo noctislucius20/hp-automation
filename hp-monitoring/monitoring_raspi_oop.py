@@ -76,43 +76,43 @@ class Monitoring:
         return False
 
     def ipAddress():
-        # interfaces = ni.interfaces()
-        # for interface in interfaces:
-        #     if 'tun' in interface: #dihapus line ini
-        #         addresses = ni.ifaddresses(interface)
-        #         if ni.AF_INET in addresses:
-        #             ip_address = addresses[ni.AF_INET][0]['addr'] #ini pake template
-        #             ip_gateway = gateways['default'][ni.AF_INET][0]
-        # return (ip_address)
+        interfaces = ni.interfaces()
+        for interface in interfaces:
+            if 'tun' in interface: #dihapus line ini
+                addresses = ni.ifaddresses(interface)
+                if ni.AF_INET in addresses:
+                    ip_address = addresses[ni.AF_INET][0]['addr'] #ini pake template
+                    # ip_gateway = ni.gateways()['default'][ni.AF_INET][0]
+        return (ip_address)
 
-        ip_address = '192.168.195.191'
-        return(ip_address)
+        # ip_address = '192.168.195.191'
+        # return(ip_address)
 
     def ipGateway():
-        # gateways = ni.gateways()
-        # ip_gateway = ""
+        gateways = ni.gateways()
+        ip_gateway = ""
         
-        # if 'default' in gateways and ni.AF_INET in gateways['default']:
-        #     for gw in gateways['default'][ni.AF_INET]:
-        #         if gw[1] == 'tun0':
-        #             ip_gateway = gw[0]
-        #             return ip_gateway
-                
-        # if ip_gateway:
-        #     return ip_gateway
-        # else:
-        #     interfaces = ni.interfaces()
-        #     for interface in interfaces:
-        #         if 'tun' in interface: #dihapus line ini
-        #             addresses = ni.ifaddresses(interface)
-        #             if ni.AF_INET in addresses:
-        #                 ip_gateway = addresses[ni.AF_INET][0]['addr'] #ini pake template
-        #                 gateway_default = gateways['default'][ni.AF_INET][0]
+        if 'default' in gateways and ni.AF_INET in gateways['default']:
+            for gw in gateways['default'][ni.AF_INET]:
+                if gw[1] == 'tun0':
+                    ip_gateway = gw[0]
+                    return ip_gateway
+                    
+        if ip_gateway:
+            return ip_gateway
+        else:
+            interfaces = ni.interfaces()
+            for interface in interfaces:
+                if 'tun' in interface: #dihapus line ini
+                    addresses = ni.ifaddresses(interface)
+                    if ni.AF_INET in addresses:
+                        ip_gateway = addresses[ni.AF_INET][0]['addr'] #ini pake template
+                        # ip_gateway = ni.gateways()['default'][ni.AF_INET][0]
 
-        #     return (ip_gateway)
+            return (ip_gateway)
 
-        ip_gateway = '192.168.195.191'
-        return(ip_gateway)
+        # ip_gateway = '192.168.195.191'
+        # return(ip_gateway)
 
 class Raspi(Monitoring):
     def totalHoneypotRunning():
@@ -128,7 +128,7 @@ class Raspi(Monitoring):
         logs_json = {
             "id_raspi": str(uuid.uuid4()),
             "ip_address": Monitoring.ipAddress(),
-            "ip_gateway": Monitoring.ipAddress(),
+            "ip_gateway": Monitoring.ipGateway(),
             "hostname": socket.gethostname(), #ini ganti template
             "honeypot_running": Raspi.totalHoneypotRunning(),
             "CPU_usage": Monitoring.cpu_usage(),

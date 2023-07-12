@@ -47,7 +47,6 @@ class Collector(Connect):
                 data = json.loads(logs_json)
                 
                 Collector.insert_data_details()
-                Regulation.check_honeypot()
 
             except (Exception, psycopg2.Error) as error:
                 print("Failed to insert record into sensor_details / honeypot_details table {}".format(error))
@@ -56,7 +55,8 @@ class Collector(Connect):
         client.on_message = on_message
 
     def insert_data_details():
-        ip_address = data['ip_address'][0]
+        ip_address = data['ip_address']
+        print(ip_address)
         id_sensor = 0
 
         if "id_raspi" in data:
@@ -102,11 +102,11 @@ class Collector(Connect):
             Collector.connection.commit()
             print(Collector.cursor.rowcount, f"Record inserted successfully into honeypot_details table : {datetime.now().isoformat()}")
             alert_message = Collector.add_history()
-
+            Regulation.check_honeypot()
 
     def add_history():
         try:
-            ip_address = data['ip_address'][0]
+            ip_address = data['ip_address']
             Collector.cursor.execute("SELECT COUNT(*) FROM honeypot_details")
             result = Collector.cursor.fetchone()
             global alert_array
@@ -176,7 +176,6 @@ class Collector(Connect):
 
                     #             send_alert = f"Sensor : {ip_address} \nCode : 401 \nDescription : Honeypot Attack \nStatus Honeypot : {honeypot_status} \nat {current_row_timestamp}"
                     #             alert_array.append(send_alert)
-
             return alert_array
                 
         except (Exception, psycopg2.Error) as error:
@@ -206,7 +205,7 @@ class Collector(Connect):
                     Collector.connection.commit()
                     print(Collector.cursor.rowcount, "Record deleted successfully into honeypot_details table")
                 
-                time.sleep(1)     
+                time.sleep(30)     
 
         except (Exception, psycopg2.Error) as error:
             print("Failed to delete record into sensor_details / honeypot_details table {}".format(error))
@@ -335,7 +334,7 @@ class Regulation(Collector):
     #regulasi ketika honeypot mati
     def check_honeypot():
         try:
-            ip_address = data['ip_address'][0]
+            ip_address = data['ip_address']
             Collector.cursor.execute("SELECT COUNT(*) FROM history")
             result = Collector.cursor.fetchone()
 
@@ -464,8 +463,14 @@ class Bot(Collector):
 class Main(Bot):
     def run_mqtt_loop():
         client = Connect.connect_mqtt()
+        client.loop_start()
         Collector.subscribe(client)
-        client.loop_forever()
+        while True:
+            try:
+                time.sleep(30)
+            except KeyboardInterrupt:
+                client.loop_stop()
+                client.disconnect()
 
     def run_telegram_bot():
         while True:
