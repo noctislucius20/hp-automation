@@ -153,7 +153,7 @@ class Collector:
                             Collector.connection.commit()
                             print(Collector.cursor.rowcount, f"Record inserted successfully into history table : {datetime.now(Collector.timezone).isoformat()}")
 
-                            send_alert = f"[Alerting Honeypot Status] \n\nSensor : {ip_address} \nCode : 200 \nConnection Status : Connected \nDescription : Sensor & Honeypot On \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms} MB \nCPU Percentage : {cpu}% \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
+                            send_alert = f"[Alerting Honeypot Status] \n\nSensor : {ip_address} \nCode : 200 \nConnection Status : Connected \nDescription : Sensor & Honeypot On \nHoneypot Health Status : Normal \nStatus Honeypot : {honeypot_status} \nResident Memory Size : {rms} MB \nCPU Percentage : {cpu}% \nDashboard URL : http://10.33.102.212:5601{dashboard_url} \nTimestamp : {time}"
                             Bot.notifications(send_alert, "Alerting Honeypot Status")
 
                 else:
