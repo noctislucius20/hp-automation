@@ -1,7 +1,7 @@
 #!/bin/bash
 
 run_script() {
-    /bin/python3 /home/audrey-server/automation.py >> logs_automation.txt
+    /bin/python3 /home/ansiadmin/automation.py >> logs_automation.txt
 }
 
 > "logs_automation.txt"

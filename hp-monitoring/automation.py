@@ -83,7 +83,7 @@ class Automation(Regulation):
                             port = 22888
                             username = 'ansigent'
                             private_key_path = '/home/audrey-server/ssh_key'
-                            private_key = paramiko.RSAKey.from_private_key_file(private_key_path)
+                            private_key = paramiko.Ed25519Key.from_private_key_file(private_key_path)
 
                             client.connect(hostname, port=port, username=username, pkey=private_key)
                             command = ''

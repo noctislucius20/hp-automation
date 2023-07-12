@@ -2,7 +2,7 @@
 
 
 run_script() {
-    /bin/python3 /home/audrey-server/collector.py >> logs_collector.txt
+    /bin/python3 /home/ansiadmin/collector.py >> logs_collector.txt
 }
 
 > "logs_collector.txt"
