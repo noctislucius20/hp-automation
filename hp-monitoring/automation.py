@@ -82,7 +82,7 @@ class Automation(Regulation):
                             hostname = ip_address
                             port = 22888
                             username = 'ansigent'
-                            private_key_path = '/home/audrey-server/ssh_key'
+                            private_key_path = '/home/ansiadmin/.ssh/ansible'
                             private_key = paramiko.Ed25519Key.from_private_key_file(private_key_path)
 
                             client.connect(hostname, port=port, username=username, pkey=private_key)
