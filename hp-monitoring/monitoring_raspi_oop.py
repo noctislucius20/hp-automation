@@ -191,6 +191,4 @@ if __name__ == '__main__':
     client = MQTT.connect_mqtt()
     client.loop_start()
     
-    while True:
-        MQTT.run()
-        time.sleep(1)
+    MQTT.run()
