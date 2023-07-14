@@ -9,3 +9,5 @@ python-dotenv
 pyTelegramBotAPI
 ping3
 paramiko
+Elasticsearch
+pytz
