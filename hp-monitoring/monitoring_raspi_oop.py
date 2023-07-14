@@ -78,14 +78,14 @@ class Monitoring:
     def ipAddress():
         interfaces = ni.interfaces()
         for interface in interfaces:
-            if 'tun' in interface: #dihapus line ini
+            if 'wl' in interface: #dihapus line ini
                 addresses = ni.ifaddresses(interface)
                 if ni.AF_INET in addresses:
                     ip_address = addresses[ni.AF_INET][0]['addr'] #ini pake template
                     # ip_gateway = ni.gateways()['default'][ni.AF_INET][0]
         return (ip_address)
 
-        # ip_address = '192.168.195.191'
+        # ip_address = '192.168.191.191'
         # return(ip_address)
 
     def ipGateway():
@@ -94,7 +94,7 @@ class Monitoring:
         
         if 'default' in gateways and ni.AF_INET in gateways['default']:
             for gw in gateways['default'][ni.AF_INET]:
-                if gw[1] == 'tun0':
+                if gw[1] == 'wl':
                     ip_gateway = gw[0]
                     return ip_gateway
                     
@@ -103,15 +103,14 @@ class Monitoring:
         else:
             interfaces = ni.interfaces()
             for interface in interfaces:
-                if 'tun' in interface: #dihapus line ini
+                if 'wl' in interface: #dihapus line ini
                     addresses = ni.ifaddresses(interface)
                     if ni.AF_INET in addresses:
-                        ip_gateway = addresses[ni.AF_INET][0]['addr'] #ini pake template
-                        # ip_gateway = ni.gateways()['default'][ni.AF_INET][0]
+                        ip_gateway = ni.gateways()['default'][ni.AF_INET][0] #ini pake template
 
             return (ip_gateway)
 
-        # ip_gateway = '192.168.195.191'
+        # ip_gateway = '192.168.191.191'
         # return(ip_gateway)
 
 class Raspi(Monitoring):
