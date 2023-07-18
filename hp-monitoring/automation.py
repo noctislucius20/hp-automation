@@ -39,7 +39,7 @@ class Regulation:
                 #kalau Gateway sukses/gak sukses, IP Address mati berarti sensor/internet mati.
                 if response_address_time is None and response_gateway_time is None or response_gateway_time is not None and response_gateway_time is None:
                     print(f"Ping to IP Address {ip_address} timed out.")
-                    message = f"*[Alerting Raspberry Pi Status]* \n\nDevice : {ip_address} \n*Code* : 500 \n*Connection Status* : Not Connected \n*Description* : Lost Connection to Device \nTimestamp : {datetime.now(Regulation.timezone)} \n\n*Message* : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. \nCek pada perangkat : \n1. Perangkat aktif atau tidak aktif. \n2. Konfigurasi jaringan pada perangkat atau router."
+                    message = f"*[Alerting Raspberry Pi Status]* \n\n*Device* : {ip_address} \n*Code* : 500 \n*Connection Status* : Not Connected \n*Description* : Lost Connection to Device \n*Timestamp* : {datetime.now(Regulation.timezone)} \n\n*Message* : Tidak berhasil melakukan update pada perangkat dengan alamat IP {ip_address}. \nCek pada perangkat : \n1. Perangkat aktif atau tidak aktif. \n2. Konfigurasi jaringan pada perangkat atau router."
                     
                     Bot.notifications(message, "Raspberry Pi Status Alert")
 
