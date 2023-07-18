@@ -440,7 +440,7 @@ class MQTT(Honeypot):
     def publish(client):
         try:
             msg = json.dumps(logs_json)
-            result = client.publish(os.getenv('MQTT_TOPIC_HONEYPOT'), msg, qos=2, retain=True)
+            result = client.publish(os.getenv('MQTT_TOPIC_HONEYPOT'), msg, qos=1, retain=True)
             status = result[0]
             if status == 0:
                 print(msg)
