@@ -10,5 +10,5 @@ run_script() {
 while true; do
     run_script
 
-    sleep 5
+    sleep 1
 done
