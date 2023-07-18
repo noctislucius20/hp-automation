@@ -7,6 +7,7 @@ import json
 import numpy as np
 import uuid
 import os
+import docker
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -29,15 +30,15 @@ class Monitoring:
 
     #Fungsi Total RAM dalam bentuk MB (Virtual Memory)
     def ram_total():
-        return (psutil.virtual_memory().total) / 1024 / 1024
+        return (psutil.virtual_memory().total) / (1024 * 1024)
 
     #Fungsi Penggunaan RAM dalam bentuk MB (Virtual Memory)
     def ram_usage():
-        return (psutil.virtual_memory().total - psutil.virtual_memory().available) / 1024 / 1024
+        return (psutil.virtual_memory().total - psutil.virtual_memory().available) / (1024 * 1024)
 
     #Fungsi Tersediaan RAM dalam bentuk MB (Virtual Memory)
     def ram_available():
-        return (psutil.virtual_memory().available) / 1024 / 1024   
+        return (psutil.virtual_memory().available) / (1024 * 1024)   
 
     #Fungsi Persentase Penggunaan RAM
     def ram_percent():
@@ -45,15 +46,15 @@ class Monitoring:
 
     #Fungsi Total Swap Memory dalam Bentuk MB
     def swap_memory_total():
-        return (psutil.swap_memory().total) / 1024 / 1024
+        return (psutil.swap_memory().total) / (1024 * 1024)
 
     #Fungsi Penggunaan Swap Memory dalam Bentuk MB
     def swap_memory_usage():
-        return (psutil.swap_memory().used) / 1024 / 1024
+        return (psutil.swap_memory().used) / (1024 * 1024)
 
     #Fungsi Tersediaan Swap Memory dalam Bentuk MB
     def swap_memory_free():
-        return (psutil.swap_memory().free) / 1024 / 1024
+        return (psutil.swap_memory().free) / (1024 * 1024)
 
     #Fungsi Persentase Penggunaan Swap Memory dalam Bentuk MB
     def swap_memory_percentage():
@@ -76,43 +77,57 @@ class Monitoring:
                 pass
         return False
 
-    def ipAddress():
-        interfaces = ni.interfaces()
-        for interface in interfaces:
-            if 'wl' in interface: #dihapus line ini
-                addresses = ni.ifaddresses(interface)
-                if ni.AF_INET in addresses:
-                    ip_address = addresses[ni.AF_INET][0]['addr'] #ini pake template
-                    # ip_gateway = gateways['default'][ni.AF_INET][0]
-        return (ip_address)
+    def checkStorage():
+        usage = psutil.disk_usage('/')
+        storage_array = []
 
-        # ip_address = '192.168.195.191'
-        # return(ip_address)
+        total_storage = usage.total / (1024**3)
+        used_storage = usage.used / (1024**3)
+        free_storage = usage.free / (1024**3)
+
+        storage_array.append(total_storage)
+        storage_array.append(used_storage)
+        storage_array.append(free_storage)
+
+        return (storage_array)
+
+    def ipAddress():
+        # interfaces = ni.interfaces()
+        # for interface in interfaces:
+        #     if 'wl' in interface: #dihapus line ini
+        #         addresses = ni.ifaddresses(interface)
+        #         if ni.AF_INET in addresses:
+        #             ip_address = addresses[ni.AF_INET][0]['addr'] #ini pake template
+        #             # ip_gateway = gateways['default'][ni.AF_INET][0]
+        # return (ip_address)
+
+        ip_address = '192.168.191.191'
+        return(ip_address)
 
     def ipGateway():
-        gateways = ni.gateways()
-        ip_gateway = ""
+        # gateways = ni.gateways()
+        # ip_gateway = ""
         
-        if 'default' in gateways and ni.AF_INET in gateways['default']:
-            for gw in gateways['default'][ni.AF_INET]:
-                if gw[1] == 'wl':
-                    ip_gateway = gw[0]
-                    return ip_gateway
+        # if 'default' in gateways and ni.AF_INET in gateways['default']:
+        #     for gw in gateways['default'][ni.AF_INET]:
+        #         if gw[1] == 'wl':
+        #             ip_gateway = gw[0]
+        #             return ip_gateway
                     
-        if ip_gateway:
-            return ip_gateway
-        else:
-            interfaces = ni.interfaces()
-            for interface in interfaces:
-                if 'wl' in interface: #dihapus line ini
-                    addresses = ni.ifaddresses(interface)
-                    if ni.AF_INET in addresses:
-                        ip_gateway = ni.gateways()['default'][ni.AF_INET][0] #ini pake template
+        # if ip_gateway:
+        #     return ip_gateway
+        # else:
+        #     interfaces = ni.interfaces()
+        #     for interface in interfaces:
+        #         if 'wl' in interface: #dihapus line ini
+        #             addresses = ni.ifaddresses(interface)
+        #             if ni.AF_INET in addresses:
+        #                 ip_gateway = ni.gateways()['default'][ni.AF_INET][0] #ini pake template
 
-            return (ip_gateway)
+        #     return (ip_gateway)
 
-        # ip_gateway = '192.168.191.191'
-        # return(ip_gateway)
+        ip_gateway = '192.168.191.191'
+        return(ip_gateway)
 
 class Raspi(Monitoring):
     def totalHoneypotRunning():
@@ -124,6 +139,8 @@ class Raspi(Monitoring):
             return(0)
         
     def main():
+        raspi_storage = Monitoring.checkStorage()
+
         global logs_json
         logs_json = {
             "id_raspi": str(uuid.uuid4()),
@@ -142,6 +159,9 @@ class Raspi(Monitoring):
             "swap_memory_usage": float("{:.2f}".format(Monitoring.swap_memory_usage())),
             "swap_memory_free": float("{:.2f}".format(Monitoring.swap_memory_free())),
             "swap_memory_percentage": Monitoring.swap_memory_percentage(),
+            "storage_total": float("{:.2f}".format(raspi_storage[0])),
+            "storage_used": float("{:.2f}".format(raspi_storage[1])),
+            "storage_free": float("{:.2f}".format(raspi_storage[2])),
             "network_packet_recv": Monitoring.network_packet_recv(),
             "network_packet_sent": Monitoring.network_packet_sent(),
             "datetime": datetime.now().isoformat()

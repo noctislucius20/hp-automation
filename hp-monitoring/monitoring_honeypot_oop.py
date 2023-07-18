@@ -7,6 +7,7 @@ import numpy as np
 import uuid
 import json
 import os
+import docker
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -16,41 +17,41 @@ class Monitoring:
         self.processName = processName
 
     def ipAddress():
-        interfaces = ni.interfaces()
-        for interface in interfaces:
-            if 'wl' in interface: #dihapus line ini
-                addresses = ni.ifaddresses(interface)
-                if ni.AF_INET in addresses:
-                    ip_address = addresses[ni.AF_INET][0]['addr'] #ini pake template
-        return (ip_address)
+        # interfaces = ni.interfaces()
+        # for interface in interfaces:
+        #     if 'wl' in interface: #dihapus line ini
+        #         addresses = ni.ifaddresses(interface)
+        #         if ni.AF_INET in addresses:
+        #             ip_address = addresses[ni.AF_INET][0]['addr'] #ini pake template
+        # return (ip_address)
 
-        # ip_address = '192.168.191.191'
-        # return(ip_address)
+        ip_address = '192.168.191.191'
+        return(ip_address)
 
     def ipGateway():
-        gateways = ni.gateways()
-        ip_gateway = ""
+        # gateways = ni.gateways()
+        # ip_gateway = ""
         
-        if 'default' in gateways and ni.AF_INET in gateways['default']:
-            for gw in gateways['default'][ni.AF_INET]:
-                if gw[1] == 'wlan0':
-                    ip_gateway = gw[0]
-                    return ip_gateway
+        # if 'default' in gateways and ni.AF_INET in gateways['default']:
+        #     for gw in gateways['default'][ni.AF_INET]:
+        #         if gw[1] == 'wlan0':
+        #             ip_gateway = gw[0]
+        #             return ip_gateway
                     
-        if ip_gateway:
-            return ip_gateway
-        else:
-            interfaces = ni.interfaces()
-            for interface in interfaces:
-                if 'wl' in interface: #dihapus line ini
-                    addresses = ni.ifaddresses(interface)
-                    if ni.AF_INET in addresses:
-                        ip_gateway = ni.gateways()['default'][ni.AF_INET][0]
+        # if ip_gateway:
+        #     return ip_gateway
+        # else:
+        #     interfaces = ni.interfaces()
+        #     for interface in interfaces:
+        #         if 'wl' in interface: #dihapus line ini
+        #             addresses = ni.ifaddresses(interface)
+        #             if ni.AF_INET in addresses:
+        #                 ip_gateway = ni.gateways()['default'][ni.AF_INET][0]
 
-            return (ip_gateway)
+        #     return (ip_gateway)
 
-        # ip_gateway = '192.168.191.191'
-        # return(ip_gateway)
+        ip_gateway = '192.168.191.191'
+        return(ip_gateway)
 
     def checkHoneypotRunning(self):
         for proc in psutil.process_iter():
@@ -92,7 +93,7 @@ class Monitoring:
         for proc in psutil.process_iter():
             try:
                 if (self.processName.lower() in proc.name().lower() or self.processName in proc.cmdline()):
-                    return((proc.memory_info().rss) / 1024 / 1024)
+                    return((proc.memory_info().rss) / (1024 * 1024))
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
@@ -101,7 +102,7 @@ class Monitoring:
         for proc in psutil.process_iter():
             try:
                 if (self.processName.lower() in proc.name().lower()) or self.processName in proc.cmdline():
-                    return((proc.memory_info().vms) / 1024 / 1024)
+                    return((proc.memory_info().vms) / (1024 * 1024))
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
@@ -110,7 +111,7 @@ class Monitoring:
         for proc in psutil.process_iter():
             try:
                 if (self.processName.lower() in proc.name().lower() or self.processName in proc.cmdline()):
-                    return((proc.memory_info().text) / 1024 / 1024)
+                    return((proc.memory_info().text) / (1024 * 1024))
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
@@ -119,7 +120,7 @@ class Monitoring:
         for proc in psutil.process_iter():
             try:
                 if (self.processName.lower() in proc.name().lower() or self.processName in proc.cmdline()):
-                    return((proc.memory_info().data) / 1024 / 1024)
+                    return((proc.memory_info().data) / (1024 * 1024))
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
@@ -128,7 +129,7 @@ class Monitoring:
         for proc in psutil.process_iter():
             try:
                 if (self.processName.lower() in proc.name().lower() or self.processName in proc.cmdline()):
-                    return((proc.memory_full_info().swap) / 1024 / 1024)
+                    return((proc.memory_full_info().swap) / (1024 * 1024))
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
@@ -150,6 +151,13 @@ class Monitoring:
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
+
+    def checkStorage(self):
+        client = docker.from_env()
+        system_info = client.df()
+        for volume in system_info["Volumes"]:
+            if (self.processName.lower() in volume['Name']) :
+                return (float(volume['UsageData']['Size']) / ((1024 * 1024)))
  
 class Honeypot(Monitoring):
 
@@ -326,8 +334,20 @@ class Honeypot(Monitoring):
                 check_vms_percent = index
 
             check_vms_percent_array.append(check_vms_percent)
-        return(check_vms_percent_array)    
+        return(check_vms_percent_array)
 
+
+    def checkHoneypotStorage():
+        honeypot_storage = [Monitoring('dionaea').checkStorage(), Monitoring('honeytrap').checkStorage(), Monitoring('gridpot').checkStorage(), Monitoring('cowrie-var').checkStorage(), Monitoring('elasticpot').checkStorage(), Monitoring('rdpy').checkStorage()] 
+        check_storage_array = []
+        for index in honeypot_storage:
+            if index == False:
+                check_storage = 0
+            else:
+                check_storage = index
+
+            check_storage_array.append(check_storage)
+        return(check_storage_array)
 
     # ==== RUNNING LOGS MONITORING HONEYPOT ====
     
@@ -345,6 +365,7 @@ class Honeypot(Monitoring):
         honeypot_swap = Honeypot.checkSwapMemoryHoneypot()
         honeypot_rms_percentage = Honeypot.checkRMSPercentHoneypot()
         honeypot_vms_percentage = Honeypot.checkVMSPercentHoneypot()
+        honeypot_storage = Honeypot.checkHoneypotStorage()
 
         logs_json = {
             "id_honeypot": str(uuid.uuid4()),
@@ -362,6 +383,7 @@ class Honeypot(Monitoring):
             "dionaea_swap_memory": float("{:.2f}".format(honeypot_swap[0])),
             "dionaea_rms_percentage": float("{:.2f}".format(honeypot_rms_percentage[0])),
             "dionaea_vms_percentage": float("{:.2f}".format(honeypot_vms_percentage[0])),
+            "dionaea_storage": float("{:.2f}".format(honeypot_storage[0])),
             "honeytrap_state": honeypot_state[1],
             "honeytrap_cpu": float("{:.2f}".format(honeypot_cpu[1])),
             "honeytrap_memory": float("{:.2f}".format(honeypot_memory[1])),
@@ -372,6 +394,7 @@ class Honeypot(Monitoring):
             "honeytrap_swap_memory": float("{:.2f}".format(honeypot_swap[1])),
             "honeytrap_rms_percentage": float("{:.2f}".format(honeypot_rms_percentage[1])),
             "honeytrap_vms_percentage": float("{:.2f}".format(honeypot_vms_percentage[1])),
+            "honeytrap_storage": float("{:.2f}".format(honeypot_storage[1])),
             "gridpot_state": honeypot_state[2],
             "gridpot_cpu": float("{:.2f}".format(honeypot_cpu[2])),
             "gridpot_memory": float("{:.2f}".format(honeypot_memory[2])),
@@ -382,6 +405,7 @@ class Honeypot(Monitoring):
             "gridpot_swap_memory": float("{:.2f}".format(honeypot_swap[2])),
             "gridpot_rms_percentage": float("{:.2f}".format(honeypot_rms_percentage[2])),
             "gridpot_vms_percentage": float("{:.2f}".format(honeypot_vms_percentage[2])),
+            "gridpot_storage": float("{:.2f}".format(honeypot_storage[2])),
             "cowrie_state": honeypot_state[3],
             "cowrie_cpu": float("{:.2f}".format(honeypot_cpu[3])),
             "cowrie_memory": float("{:.2f}".format(honeypot_memory[3])),
@@ -392,6 +416,7 @@ class Honeypot(Monitoring):
             "cowrie_swap_memory": float("{:.2f}".format(honeypot_swap[3])),
             "cowrie_rms_percentage": float("{:.2f}".format(honeypot_rms_percentage[3])),
             "cowrie_vms_percentage": float("{:.2f}".format(honeypot_vms_percentage[3])),
+            "cowrie_storage": float("{:.2f}".format(honeypot_storage[3])),
             "elasticpot_state": honeypot_state[4],
             "elasticpot_cpu": float("{:.2f}".format(honeypot_cpu[4])),
             "elasticpot_memory": float("{:.2f}".format(honeypot_memory[4])),
@@ -402,6 +427,7 @@ class Honeypot(Monitoring):
             "elasticpot_swap_memory": float("{:.2f}".format(honeypot_swap[4])),
             "elasticpot_rms_percentage": float("{:.2f}".format(honeypot_rms_percentage[4])),
             "elasticpot_vms_percentage": float("{:.2f}".format(honeypot_vms_percentage[4])),
+            "elasticpot_storage": float("{:.2f}".format(honeypot_storage[4])),
             "rdpy_state": honeypot_state[5],
             "rdpy_cpu": float("{:.2f}".format(honeypot_cpu[5])),
             "rdpy_memory": float("{:.2f}".format(honeypot_memory[5])),
@@ -412,6 +438,7 @@ class Honeypot(Monitoring):
             "rdpy_swap_memory": float("{:.2f}".format(honeypot_swap[5])),
             "rdpy_rms_percentage": float("{:.2f}".format(honeypot_rms_percentage[5])),
             "rdpy_vms_percentage": float("{:.2f}".format(honeypot_vms_percentage[5])),
+            "rdpy_storage": float("{:.2f}".format(honeypot_storage[5])),
             "datetime": datetime.now().isoformat()
         }
 
