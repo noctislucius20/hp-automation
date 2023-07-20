@@ -56,7 +56,8 @@ class UsersService:
         
         # username, first and last name only can be changed by its user
         if user.username != username or user.first_name != first_name or user.last_name != last_name:
-            if current_user.roles.value == 'admin' and current_user.username != user_param:
+            # if current_user.roles.value == 'admin' and current_user.username != user_param:
+            if current_user.username != user_param:
                 raise AuthorizationError(message="You don't have permission to change this user")
             
         # roles only can be changed by admin

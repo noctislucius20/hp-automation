@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '8d9468e700c9'
-down_revision = '2476d9220460'
+down_revision = 'ea7a20483456'
 branch_labels = None
 depends_on = None
 
@@ -22,6 +22,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('sensor_id', sa.Integer(), nullable=False),
     sa.Column('sensor_name', sa.String(), nullable=False),
+    sa.Column('state', sa.Boolean(), nullable=False),
     sa.Column('honeypot_running', sa.Integer(), nullable=False),
     sa.Column('cpu_usage', sa.Float(), nullable=False),
     sa.Column('cpu_frequency', sa.Float(), nullable=False),

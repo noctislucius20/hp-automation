@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '84057b391203'
-down_revision = 'bf85bb5936a0'
+down_revision = '6d956753a530'
 branch_labels = None
 depends_on = None
 
@@ -21,9 +21,9 @@ def upgrade():
     op.create_table('sensors',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('ip_address', sa.String(), nullable=False),
+    sa.Column('ip_gateway', sa.String(), nullable=True),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('state', sa.Boolean(), nullable=False),
     sa.Column('status', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),

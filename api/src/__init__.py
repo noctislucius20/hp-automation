@@ -60,10 +60,11 @@ def create_app():
     from src.models.HistoryModel import History
     from src.models.StatusCodesModel import StatusCodes
     from src.models.JobLogsModel import JobLogs
+    from src.models.SensorDashboardsModel import SensorDashboards
 
     # register blueprints for route
     from src.controllers.UsersController import user
-    from src.controllers.ApiInfoController import api
+    from src.controllers.APIInfoController import api
     from src.controllers.SensorsController import sensor
     from src.controllers.HoneypotsController import honeypot
     from src.controllers.HoneypotSensorController import honeypotsensor

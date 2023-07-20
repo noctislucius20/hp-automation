@@ -1,8 +1,6 @@
-import json
 from src.errors.InvariantError import InvariantError
 from src.errors.AuthorizationError import AuthorizationError
-from functools import wraps
-from flask import request, make_response
+from flask import request
 
 import jwt
 import os

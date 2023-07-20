@@ -1,3 +1,4 @@
+import aiohttp
 from src.errors.InvariantError import InvariantError
 from src.models.JobLogsModel import JobLogs as JobLogsModel
 from src import db
@@ -15,6 +16,7 @@ class JobsService:
         self.awx_token = os.getenv('AWX_ACCESS_TOKEN')
         self.awx_inventory_id = os.getenv('AWX_INVENTORY_ID')
         self.awx_workflow_job_id = os.getenv('AWX_WORKFLOW_JOB_TEMPLATE_ID')
+        self.awx_workflow_update_job_id = os.getenv('AWX_WORKFLOW_UPDATE_JOB_TEMPLATE_ID')
         self.awx_url_header = {
             'Authorization': f'Bearer {self.awx_token}',
             'Content-Type': 'application/json'
@@ -62,20 +64,27 @@ class JobsService:
         except Exception as e:
             raise e
 
-    def run_job(self, ip_address, honeypot, sensor_id):
+    def run_job(self, ip_address, honeypot, sensor_id, name, dashboard_id, method):
         try:
             hp_list = [hp['name'].lower() for hp in honeypot]
 
             extra_vars = {
                 'ip_address': ip_address,
-                'hp_list': ', '.join(hp_list)
+                'hp_list': ', '.join(hp_list),
+                'sensor_name': name,
+                'dashboard_id': dashboard_id,
+                'method': method
             }
     
             payload = {
                 'extra_vars': str(extra_vars)
             }
-    
-            response = requests.post(url=(self.awx_url + f'/workflow_job_templates/{self.awx_workflow_job_id}/launch/'), headers=self.awx_url_header, data=json.dumps(payload))
+
+            if method == 'POST':
+                response = requests.post(url=(self.awx_url + f'/workflow_job_templates/{self.awx_workflow_job_id}/launch/'), headers=self.awx_url_header, data=json.dumps(payload))
+
+            if method == 'PUT':
+                response = requests.post(url=(self.awx_url + f'/workflow_job_templates/{self.awx_workflow_update_job_id}/launch/'), headers=self.awx_url_header, data=json.dumps(payload))
             
             job_logs = JobLogsModel(sensor_id=sensor_id, job_id=response.json()['workflow_job'], job_url=(self.awx_url + (f'{response.json()["url"]}').replace('api/v2/', '')), created_at=dt.datetime.now()) 
             db.session.add(job_logs)
@@ -101,32 +110,40 @@ class JobsService:
         
     def cancel_job(self, workflow_job_id):
         try:
-            response = requests.post(url=(self.awx_url + f'/workflow_jobs/{workflow_job_id}/cancel/'), headers=self.awx_url_header)
+            requests.post(url=(self.awx_url + f'/workflow_jobs/{workflow_job_id}/cancel/'), headers=self.awx_url_header)
             
-            print(json.dumps(response.json()))
-            
+            return 0
         except Exception as e:
             raise e
 
-    def get_job_status(self, latest_job):
-        try:
-            response = requests.get(url=(self.awx_url + f'/workflow_jobs/{latest_job}/'), headers=self.awx_url_header)
-            return response.json()['status']
+    # def get_job_status(self, latest_job):
+    #     try:
+    #         response = requests.get(url=(self.awx_url + f'/workflow_jobs/{latest_job}/'), headers=self.awx_url_header)
+    #         return response.json()['status']
         
-        except Exception as e:
-            raise e
+    #     except Exception as e:
+    #         raise e
         
-    def get_log(self, workflow_job_id):
+    async def get_log(self, workflow_job_id):
         try:
             check_running = requests.get(url=(self.awx_url + f'/workflow_jobs/{workflow_job_id}/'), headers=self.awx_url_header).json()
 
             job_list = requests.get(url=(self.awx_url + f'/workflow_jobs/{workflow_job_id}/workflow_nodes/'), headers=self.awx_url_header).json()
 
-            job_id = sorted([str(job["summary_fields"]["job"]["id"]) for job in job_list['results'] if 'job' in job["summary_fields"]], key=int)
+            job_ids = sorted([str(job["summary_fields"]["job"]["id"]) for job in job_list['results'] if 'job' in job["summary_fields"]], key=int)
 
-            response = requests.get(url=(self.awx_url + f'/jobs/{job_id[-1]}/stdout/?format=html'), headers=self.awx_url_header)
+            del job_ids[0]
 
-            return {'finished': True if check_running['finished'] is not None else False, 'logs': response.text.replace("#161b1f", "#BEBEBE")}
+            results = []
+            async with aiohttp.ClientSession() as session:
+                for job_id in job_ids:
+                    response = await session.get(url=(self.awx_url + f'/jobs/{job_id}/stdout/?format=html'), headers=self.awx_url_header)
+                    results.append(await response.text())
+
+            new_result = '<br/><div style="color: #ffae00">=================== End of this step. Start a new job ===================</div><br/>'.join(results)
+
+            # response = requests.get(url=(self.awx_url + f'/jobs/{job_id[-1]}/stdout/?format=html'), headers=self.awx_url_header)
+            return {'finished': True if check_running['finished'] is not None else False, 'logs': new_result.replace("#161b1f", "#BEBEBE")}
         
         except Exception as e:
             raise e
