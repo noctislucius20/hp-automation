@@ -1,3 +1,4 @@
+import asyncio
 from time import sleep
 from flask import Blueprint, request, make_response, jsonify
 from src import socketio
@@ -44,7 +45,7 @@ def get_all_sensors():
     try:
         token_required()
 
-        sensors = SensorsService().list_all_sensors()
+        sensors = asyncio.run(SensorsService().list_all_sensors())
 
         response = make_response({'status': 'success', 'data': sensors}, 200)
         return response
@@ -63,7 +64,7 @@ def get_sensor_by_id(id):
     try:
         token_required()
 
-        sensor = SensorsService().get_one_sensor(id)
+        sensor = asyncio.run(SensorsService().get_one_sensor(id))
 
         response = make_response({'status': 'success', 'data': sensor}, 200)
         return response

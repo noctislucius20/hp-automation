@@ -6,12 +6,12 @@ from src.errors.InvariantError import InvariantError
 from src.models.HoneypotsModel import Honeypots as HoneypotsModel
 from src.models.HoneypotSensorModel import HoneypotSensor as HoneypotSensorModel
 from src.models.JobLogsModel import JobLogs as JobLogsModel
+from src.models.SensorDashboardsModel import SensorDashboards as SensorDashboardsModel
 
 import datetime as dt
 import json
 import aiohttp
 import os
-import asyncio
 import requests
 
 class SensorsService:
@@ -22,6 +22,11 @@ class SensorsService:
         self.awx_workflow_job_id = os.getenv('AWX_WORKFLOW_JOB_TEMPLATE_ID')
         self.awx_url_header = {
             'Authorization': f'Bearer {self.awx_token}',
+            'Content-Type': 'application/json'
+        }
+        self.kibana_url = os.getenv('KIBANA_BASE_URL')
+        self.kibana_url_header = {
+            'kbn-xsrf': 'true',
             'Content-Type': 'application/json'
         }
  
@@ -41,7 +46,7 @@ class SensorsService:
             db.session.add(new_sensor)
             db.session.commit()
             
-            callback(honeypot = honeypot, sensor_id = new_sensor.id, ip_address = ip_address)
+            callback(honeypot = honeypot, sensor_id = new_sensor.id, ip_address = ip_address, name = name)
 
             return sensor_schema.dump(new_sensor)
 
@@ -54,14 +59,32 @@ class SensorsService:
         finally:
             db.session.close()
                  
-    def list_all_sensors(self):
-        sensors = SensorsModel.query.filter_by(status=True).all()
+    async def list_all_sensors(self):
+        sensors = (
+            db.session.query(JobLogsModel.job_id, SensorsModel)
+            .join(SensorsModel, JobLogsModel.sensor_id == SensorsModel.id)
+            .filter(SensorsModel.status == True)
+            .order_by(db.desc(JobLogsModel.created_at))
+            .all()
+        )
 
-        sensors_schema = SensorsSchema(many=True)
+        results = []
+        async with aiohttp.ClientSession() as session:
+            for job_id, sensor in sensors:
+                response = await session.get(f'{self.awx_url}/workflow_jobs/{job_id}/', headers=self.awx_url_header)
+                job_list = {
+                    'deployment_status': json.loads(await response.text())['status'],
+                    'finished_at': dt.datetime.strptime(json.loads(await response.text())['finished'], '%Y-%m-%dT%H:%M:%S.%fZ') if json.loads(await response.text())['finished'] else None
+                }
+                sensor_schema = SensorsSchema()
+                sensor_data = sensor_schema.dump(sensor)
+                sensor_data['job_history'] = job_list
+
+                results.append(sensor_data)
         
-        return sensors_schema.dump(sensors)
+        return results
     
-    def get_one_sensor(self, id):
+    async def get_one_sensor(self, id):
         sensor = self.check_sensor_exists(id)
 
         honeypot_info = (
@@ -72,30 +95,40 @@ class SensorsService:
             .filter(SensorsModel.id == sensor.id)
             .all()
         )
-        
-        latest_job = (
+
+        query_job_history = (
             db.session
-            .query(JobLogsModel.job_id)
-            .join(SensorsModel)
+            .query(JobLogsModel.job_id, SensorsModel)
+            .join(SensorsModel, JobLogsModel.sensor_id == SensorsModel.id)
             .filter(SensorsModel.id == sensor.id)
             .order_by(db.desc(JobLogsModel.created_at))
+            .all()
+        )
+
+        dashbooard_url = (
+            db.session
+            .query(SensorDashboardsModel.dashboard_url)
+            .filter(SensorDashboardsModel.sensor_id == sensor.id)
             .first()
         )
 
+        job_history = []
+        async with aiohttp.ClientSession() as session:
+            for job_id, sensor in query_job_history:
+                response = await session.get(f'{self.awx_url}/workflow_jobs/{job_id}/', headers=self.awx_url_header)
+                job_list = {
+                    'deployment_status': json.loads(await response.text())['status'],
+                    'finished_at': dt.datetime.strptime(json.loads(await response.text())['finished'], '%Y-%m-%dT%H:%M:%S.%fZ') if json.loads(await response.text())['finished'] else None
+                }
+                job_history.append(job_list)
+
         honeypots = [{ 'id': id_, 'name': name} for id_, name in honeypot_info]  
             
-        token = request.headers.get('Authorization')
-        headers = {'Content-Type': 'application/json', 'Authorization': token}
-        url = os.getenv("SERVER_URL")
-        
-        job_status = requests.get(f'{url}/ansible/jobs', json={'latest_job':int(latest_job[0])}, headers=headers)
-
-        print(job_status)
-
         sensor_schema = SensorsSchema()
         sensor_data = sensor_schema.dump(sensor)
         sensor_data['honeypot'] = honeypots
-        sensor_data['job_status'] = job_status.json()['job_status']
+        sensor_data['job_history'] = job_history
+        sensor_data['dashboard_url'] = f'{self.kibana_url}{dashbooard_url[0]}' if dashbooard_url else '#'
 
         return sensor_data
 
@@ -111,11 +144,18 @@ class SensorsService:
 
             if check_sensor is not None and check_sensor.id != sensor.id:
                 raise InvariantError(message="sensor already exist")
+            
+            dashboard_id = (
+                db.session
+                .query(SensorDashboardsModel.dashboard_id)
+                .filter(SensorDashboardsModel.sensor_id == sensor.id)
+                .first()
+            )
 
             db.session.execute(db.update(SensorsModel).values({'name': name, 'description': description, 'ip_address': ip_address, 'updated_at': dt.datetime.now()}).where(SensorsModel.id == sensor.id))
 
-            db.session.flush()
-            callback(honeypot = honeypot, sensor_id = id, ip_address = ip_address, old_ip_address = old_ip_address)
+            db.session.commit()
+            callback(honeypot = honeypot, sensor_id = id, ip_address = ip_address, old_ip_address = old_ip_address, dashboard_id = dashboard_id[0], name = name)
 
         except Exception as e:
             db.session.rollback()
@@ -152,6 +192,22 @@ class SensorsService:
 
             if del_host.status_code == 500:
                 raise Exception("server fail")
+            
+            dashboard_id = (
+                db.session
+                .query(SensorDashboardsModel.dashboard_id)
+                .filter(SensorDashboardsModel.sensor_id == sensor.id)
+                .first()
+            )
+
+            # Delete kibana dashboard
+            if dashboard_id:
+                delete_dashboard = requests.delete(url=(self.kibana_url + f'/api/saved_objects/dashboard/{dashboard_id[0]}'), headers=self.kibana_url_header)
+                if delete_dashboard.status_code == 500:
+                    raise Exception("server fail")
+                
+                db.session.execute(db.delete(SensorDashboardsModel)
+                                     .where(SensorDashboardsModel.sensor_id == sensor.id))
 
             db.session.commit()
 
@@ -170,7 +226,7 @@ class SensorsService:
         
         return sensor
     
-    def execute_init_job(self, honeypot, sensor_id, ip_address):
+    def execute_init_job(self, honeypot, sensor_id, ip_address, name):
         try:
             token = request.headers.get('Authorization')
 
@@ -181,7 +237,8 @@ class SensorsService:
             job_payload = {
                 'sensor_id': sensor_id,
                 'ip_address': ip_address, 
-                'honeypot': honeypot
+                'honeypot': honeypot,
+                'name': name
             }
 
             headers = {'Content-Type': 'application/json', 'Authorization': token}
@@ -200,7 +257,7 @@ class SensorsService:
         except Exception as e:
             raise e
 
-    def execute_update_job(self, honeypot, sensor_id, ip_address, old_ip_address):
+    def execute_update_job(self, honeypot, sensor_id, ip_address, old_ip_address, dashboard_id, name):
         try:
             token = request.headers.get('Authorization')
 
@@ -212,6 +269,8 @@ class SensorsService:
                 'sensor_id': sensor_id,
                 'ip_address': ip_address,
                 'old_ip_address': old_ip_address, 
+                'name': name,
+                'dashboard_id': dashboard_id,
                 'honeypot': honeypot
             }
 

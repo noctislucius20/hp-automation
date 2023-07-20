@@ -8,5 +8,6 @@ class History(db.Model):
     status_code_id = db.Column(db.Integer, db.ForeignKey('status_codes.id'), nullable=False)
     started_at = db.Column(db.DateTime(timezone=True), nullable=True)
     stopped_at = db.Column(db.DateTime(timezone=True), nullable=True)
-    peak_memory_usage_at = db.Column(db.DateTime(timezone=True), nullable=True)
+    threat_activity_at = db.Column(db.DateTime(timezone=True), nullable=True)
+    resident_memory_size = db.Column(db.Float, nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), nullable=False)
