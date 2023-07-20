@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'ac9fa568e89c'
-down_revision = 'd081f25e6fd4'
+down_revision = '2476d9220460'
 branch_labels = None
 depends_on = None
 
@@ -34,7 +34,8 @@ def upgrade():
     sa.Column('status_code_id', sa.Integer(), nullable=False),
     sa.Column('started_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('stopped_at', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('peak_memory_usage_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('threat_activity_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('resident_memory_size', sa.Float(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['status_code_id'], ['status_codes.id'], ),
     sa.ForeignKeyConstraint(['honeypot_sensor_id'], ['honeypot_sensor.id'], ),

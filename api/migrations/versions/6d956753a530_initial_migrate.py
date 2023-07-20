@@ -26,10 +26,9 @@ def upgrade():
     sa.Column('last_name', sa.Text(), nullable=True),
     sa.Column('roles', sa.Enum('admin', 'user', name='user_roles_enum'), nullable=False),
     sa.Column('status', sa.Boolean(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('username')
     )
     # ### end Alembic commands ###
 
