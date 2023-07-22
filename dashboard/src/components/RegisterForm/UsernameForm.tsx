@@ -12,20 +12,20 @@ type Props = {
 const UsernameForm = (props: Props) => {
   return (
     <>
-      <FormField label="Username" help="Please enter your username">
+      <FormField label="Username">
         <Field name="username" />
       </FormField>
-      <ErrorMessage name="username" component="div" className="text-red-500 text-xs italic mb-4" />
+      <ErrorMessage name="username" component="div" className="text-red-500 text-xs italic mt-0" />
 
-      <FormField label="First Name" help="Please enter your first name">
+      <FormField label="First Name">
         <Field name="firstName" />
       </FormField>
-      <ErrorMessage name="firstName" component="div" className="text-red-500 text-xs italic mb-4" />
+      <ErrorMessage name="firstName" component="div" className="text-red-500 text-xs italic mt-0" />
 
-      <FormField label="Last Name" help="Please enter your last name">
+      <FormField label="Last Name">
         <Field name="lastName" />
       </FormField>
-      <ErrorMessage name="lastName" component="div" className="text-red-500 text-xs italic " />
+      <ErrorMessage name="lastName" component="div" className="text-red-500 text-xs italic mt-0" />
 
       <BaseDivider />
 

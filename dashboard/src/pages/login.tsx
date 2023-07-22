@@ -89,7 +89,7 @@ const LoginPage = () => {
                   </NotificationBar>
                 )}
                 <Form>
-                  <FormField label="Username" help="Please enter your username">
+                  <FormField label="Username">
                     <Field name="username" />
                   </FormField>
                   <ErrorMessage
@@ -98,7 +98,7 @@ const LoginPage = () => {
                     className="text-red-500 text-xs italic mb-4"
                   />
 
-                  <FormField label="Password" help="Please enter your password">
+                  <FormField label="Password">
                     <Field name="password" type="password" />
                   </FormField>
                   <ErrorMessage

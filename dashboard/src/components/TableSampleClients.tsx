@@ -41,6 +41,7 @@ const TableSampleClients = () => {
         isActive={isModalInfoActive}
         onConfirm={handleModalAction}
         onCancel={handleModalAction}
+        isSubmitting={false}
       >
         <p>
           Lorem ipsum dolor sit amet <b>adipiscing elit</b>
@@ -55,6 +56,7 @@ const TableSampleClients = () => {
         isActive={isModalTrashActive}
         onConfirm={handleModalAction}
         onCancel={handleModalAction}
+        isSubmitting={false}
       >
         <p>
           Lorem ipsum dolor sit amet <b>adipiscing elit</b>
