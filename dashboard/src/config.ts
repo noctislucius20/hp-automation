@@ -8,4 +8,7 @@ export const appTitle = 'Free Tailwind 3 React Next Typescript dashboard templat
 
 export const getPageTitle = (currentPageTitle: string) => `${currentPageTitle} — ${appTitle}`
 
-export const flaskApiUrl = 'http://localhost:5000/api/v1'
+export const flaskApiUrl =
+  process.env.NODE_ENV === 'production'
+    ? 'http://192.168.1.200:8080/api/v1'
+    : 'http://localhost:5000/api/v1'

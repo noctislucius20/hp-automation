@@ -111,6 +111,7 @@ const UiPage = () => {
         isActive={isModalInfoActive}
         onConfirm={handleModalAction}
         onCancel={handleModalAction}
+        isSubmitting={false}
       >
         {modalSampleContents}
       </CardBoxModal>
@@ -121,6 +122,7 @@ const UiPage = () => {
         buttonLabel="Done"
         isActive={isModalDangerActive}
         onConfirm={handleModalAction}
+        isSubmitting={false}
       >
         {modalSampleContents}
       </CardBoxModal>
@@ -131,6 +133,7 @@ const UiPage = () => {
         buttonLabel="Done"
         isActive={isModalSuccessActive}
         onConfirm={handleModalAction}
+        isSubmitting={false}
       >
         {modalSampleContents}
       </CardBoxModal>

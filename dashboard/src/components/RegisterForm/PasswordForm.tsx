@@ -13,22 +13,18 @@ type Props = {
 const PasswordForm = (props: Props) => {
   return (
     <>
-      <FormField label="Password" help="Please enter your password">
+      <FormField label="Password">
         <Field name="password" type="password" />
       </FormField>
-      <ErrorMessage
-        name="password"
-        component="div"
-        className="text-red-500 text-xs italic mt-2 mb-4"
-      />
+      <ErrorMessage name="password" component="div" className="text-red-500 text-xs italic mt-0" />
 
-      <FormField label="Confirm Password" help="Confirm your password">
+      <FormField label="Confirm Password">
         <Field name="confirmPassword" type="password" />
       </FormField>
       <ErrorMessage
         name="confirmPassword"
         component="div"
-        className="text-red-500 text-xs italic mt-2"
+        className="text-red-500 text-xs italic mt-0"
       />
 
       <BaseDivider />
