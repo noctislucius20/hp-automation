@@ -15,7 +15,6 @@ import * as Yup from 'yup'
 import NotificationBar from '../../components/NotificationBar'
 import axios from 'axios'
 import { useRouter } from 'next/router'
-import jwt from 'jsonwebtoken'
 
 const HoneypotDetails = () => {
   const router = useRouter()
@@ -26,43 +25,10 @@ const HoneypotDetails = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isReadOnly, setIsReadOnly] = useState(true)
 
-  const refreshJwtToken = async () => {
-    try {
-      const token = JSON.parse(localStorage.getItem('token'))
-      const config = {
-        method: 'PUT',
-        url: `${flaskApiUrl}/auth`,
-        data: { refresh_token: token.refresh_token },
-      }
-      const response = await axios.request(config)
-      const accessToken = jwt.decode(response.data.data)
-
-      localStorage.setItem('expirationTime', JSON.stringify(accessToken.exp))
-      localStorage.setItem(
-        'token',
-        JSON.stringify({ access_token: response.data.data, refresh_token: token.refresh_token })
-      )
-    } catch (error) {
-      console.log(error)
-      setStatus({
-        error: {
-          message:
-            error.response == undefined ? 'Something went wrong' : error.response.data.message,
-          code: error.response == undefined ? 500 : error.response.status,
-        },
-        success: null,
-      })
-    }
-  }
-
   useEffect(() => {
     if (id) {
       const getHoneypot = async () => {
         try {
-          if (localStorage.getItem('expirationTime') < JSON.stringify(Date.now() / 1000)) {
-            await refreshJwtToken()
-          }
-
           const token = JSON.parse(localStorage.getItem('token'))
           const config = {
             headers: { Authorization: `Bearer ${token.access_token}` },
@@ -104,10 +70,6 @@ const HoneypotDetails = () => {
 
   const handleHoneypotSubmit = async (values, { resetForm, setStatus }) => {
     try {
-      if (localStorage.getItem('expirationTime') < JSON.stringify(Date.now() / 1000)) {
-        await refreshJwtToken()
-      }
-
       const token = JSON.parse(localStorage.getItem('token'))
       const config = {
         headers: { Authorization: `Bearer ${token.access_token}` },

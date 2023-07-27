@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { mdiLogout, mdiClose } from '@mdi/js'
 import BaseIcon from './BaseIcon'
 import AsideMenuItem from './AsideMenuItem'
@@ -31,7 +31,7 @@ export default function AsideMenuLayer({ menu, className = '', ...props }: Props
         url: `${flaskApiUrl}/auth`,
         data: { refresh_token: token.refresh_token },
       }
-      const response = await axios.request(config)
+      await axios.request(config)
       localStorage.removeItem('token')
       localStorage.removeItem('expirationTime')
     } catch (error) {

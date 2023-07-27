@@ -21,7 +21,6 @@ import NotificationBar from '../../../components/NotificationBar'
 import Spinner from 'react-spinner-material'
 import axios from 'axios'
 import { useRouter } from 'next/router'
-import jwt from 'jsonwebtoken'
 import io from 'socket.io-client'
 
 const SensorLogs = () => {
@@ -39,34 +38,6 @@ const SensorLogs = () => {
     setShowStopButton(true)
   }, 7000)
 
-  const refreshJwtToken = async () => {
-    try {
-      const token = JSON.parse(localStorage.getItem('token'))
-      const config = {
-        method: 'PUT',
-        url: `${flaskApiUrl}/auth`,
-        data: { refresh_token: token.refresh_token },
-      }
-      const response = await axios.request(config)
-      const accessToken = jwt.decode(response.data.data)
-
-      localStorage.setItem('expirationTime', JSON.stringify(accessToken.exp))
-      localStorage.setItem(
-        'token',
-        JSON.stringify({ access_token: response.data.data, refresh_token: token.refresh_token })
-      )
-    } catch (error) {
-      console.log(error)
-      setStatus({
-        error: {
-          message:
-            error.response == undefined ? 'Something went wrong' : error.response.data.message,
-          code: error.response == undefined ? 500 : error.response.status,
-        },
-      })
-    }
-  }
-
   useEffect(() => {
     let mounted = true
     const socket = io('http://localhost:5000/', {
@@ -76,10 +47,6 @@ const SensorLogs = () => {
     if (id) {
       const getLogs = async () => {
         try {
-          if (localStorage.getItem('expirationTime') < JSON.stringify(Date.now() / 1000)) {
-            await refreshJwtToken()
-          }
-
           socket.on('logs', (data) => {
             if (mounted) {
               setLogs((logs) => [...logs, data])
@@ -131,9 +98,6 @@ const SensorLogs = () => {
 
   const handleRelaunchJob = async () => {
     try {
-      if (localStorage.getItem('expirationTime') < JSON.stringify(Date.now() / 1000)) {
-        await refreshJwtToken()
-      }
       setIsSubmitting(true)
       const token = JSON.parse(localStorage.getItem('token'))
       const config = {
@@ -163,9 +127,6 @@ const SensorLogs = () => {
 
   const handleCancelJob = async () => {
     try {
-      if (localStorage.getItem('expirationTime') < JSON.stringify(Date.now() / 1000)) {
-        await refreshJwtToken()
-      }
       setIsSubmitting(true)
       const token = JSON.parse(localStorage.getItem('token'))
       const config = {
