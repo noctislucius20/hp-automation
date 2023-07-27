@@ -15,7 +15,7 @@ export default function FooterBar({ children }: Props) {
         <div className="text-center md:text-left mb-6 md:mb-0">
           <b>
             &copy;{year},{` `}
-            ???
+            HoneypotExpress
           </b>
           {` `}
           {children}

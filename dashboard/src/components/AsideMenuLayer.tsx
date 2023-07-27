@@ -7,6 +7,8 @@ import { MenuAsideItem } from '../interfaces'
 import { useAppSelector } from '../stores/hooks'
 import axios from 'axios'
 import { flaskApiUrl } from '../config'
+import Image from 'next/image'
+import logo from '../../public/logo.png'
 
 type Props = {
   menu: MenuAsideItem[]
@@ -60,10 +62,12 @@ export default function AsideMenuLayer({ menu, className = '', ...props }: Props
         className={`lg:rounded-2xl flex-1 flex flex-col overflow-hidden dark:bg-slate-900 ${asideStyle}`}
       >
         <div
-          className={`flex flex-row h-14 items-center justify-between dark:bg-slate-900 ${asideBrandStyle}`}
+          className={`flex flex-row h-14 items-center justify-between dark:bg-slate-900 ${asideBrandStyle} mb-5`}
         >
           <div className="text-center flex-1 lg:text-left lg:pl-6 xl:text-center xl:pl-0">
-            <b className="font-black">????</b>
+            <div className="grid justify-items-center pt-5">
+              <Image src={logo} width={125} alt="" />
+            </div>
           </div>
           <button
             className="hidden lg:inline-block xl:hidden p-3"

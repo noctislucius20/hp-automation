@@ -15,7 +15,9 @@ import { useRouter } from 'next/router'
 import NotificationBar from '../components/NotificationBar'
 import { mdiAlertCircle, mdiClose } from '@mdi/js'
 import * as Yup from 'yup'
+import Image from 'next/image'
 import jwt from 'jsonwebtoken'
+import logo from '../../public/logo.png'
 
 const LoginPage = () => {
   const router = useRouter()
@@ -62,6 +64,9 @@ const LoginPage = () => {
 
       <SectionFullScreen bg="purplePink">
         <CardBox className="w-11/12 md:w-7/12 lg:w-6/12 xl:w-4/12 shadow-2xl">
+          <div className="grid justify-items-center">
+            <Image src={logo} width={225} alt="" />
+          </div>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
