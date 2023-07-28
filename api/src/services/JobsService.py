@@ -25,8 +25,8 @@ class JobsService:
     def add_host(self, ip_address):   
         try:
             host_var = {
-                'ansible_user': '{{ honeypot_user }}',
-                'ansible_become_pass': '{{ honeypot_pass }}'
+                'ansible_user': '{{ sensor_user }}',
+                'ansible_become_pass': '{{ sensor_pass }}'
             }
     
             payload = {
