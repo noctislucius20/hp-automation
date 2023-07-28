@@ -44,8 +44,9 @@ def update_token():
         AuthenticationsSchema.AuthenticationsPut().load(data)
         AuthenticationsService().verify_refresh_token(data.get('refresh_token'))
         user = TokenManager.TokenManager().verify_refresh_token(data.get('refresh_token'))
-
-        access_token = TokenManager.TokenManager().generate_access_token(user)
+        
+        data["id"] = user["id"]
+        access_token = TokenManager.TokenManager().generate_access_token(data)
 
         response = make_response({'status': 'success', 'message': 'access token updated', 'data': access_token}, 200)
         return response

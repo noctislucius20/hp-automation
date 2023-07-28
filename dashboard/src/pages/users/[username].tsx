@@ -15,7 +15,6 @@ import * as Yup from 'yup'
 import NotificationBar from '../../components/NotificationBar'
 import axios from 'axios'
 import { useRouter } from 'next/router'
-import jwt from 'jsonwebtoken'
 
 const UserDetails = () => {
   const router = useRouter()
@@ -25,50 +24,12 @@ const UserDetails = () => {
   const [status, setStatus] = useState({ error: null, success: null })
   const [isLoading, setIsLoading] = useState(true)
   const [isReadOnly, setIsReadOnly] = useState(true)
-  const [currentUser, setCurrentUser] = useState('')
-
-  // refresh token if expired
-  const refreshJwtToken = async () => {
-    try {
-      const token = JSON.parse(localStorage.getItem('token'))
-      const config = {
-        method: 'PUT',
-        url: `${flaskApiUrl}/auth`,
-        data: { refresh_token: token.refresh_token },
-      }
-      const response = await axios.request(config)
-      const accessToken = jwt.decode(response.data.data)
-      if (accessToken.roles === 'admin') {
-        setCurrentUser('admin')
-      }
-
-      localStorage.setItem('expirationTime', JSON.stringify(accessToken.exp))
-      localStorage.setItem(
-        'token',
-        JSON.stringify({ access_token: response.data.data, refresh_token: token.refresh_token })
-      )
-    } catch (error) {
-      console.log(error)
-      setStatus({
-        error: {
-          message:
-            error.response == undefined ? 'Something went wrong' : error.response.data.message,
-          code: error.response == undefined ? 500 : error.response.status,
-        },
-        success: null,
-      })
-    }
-  }
 
   // get user details
   useEffect(() => {
     if (username) {
       const getUser = async () => {
         try {
-          if (localStorage.getItem('expirationTime') < JSON.stringify(Date.now() / 1000)) {
-            await refreshJwtToken()
-          }
-
           const token = JSON.parse(localStorage.getItem('token'))
           const config = {
             headers: {
@@ -120,10 +81,6 @@ const UserDetails = () => {
   // handle user submit
   const handleUserSubmit = async (values, { resetForm, setStatus }) => {
     try {
-      if (localStorage.getItem('expirationTime') < JSON.stringify(Date.now() / 1000)) {
-        await refreshJwtToken()
-      }
-
       const token = JSON.parse(localStorage.getItem('token'))
       const config = {
         headers: {
@@ -257,12 +214,7 @@ const UserDetails = () => {
                   )}
                   <Form>
                     <>
-                      <FormField
-                        label="Username"
-                        // isTransparent={currentUser === 'admin' ? true : false}
-                        isTransparent={true}
-                      >
-                        {/* <Field name="username" disabled={currentUser === 'admin' ? true : false} /> */}
+                      <FormField label="Username" isTransparent={true}>
                         <Field name="username" disabled={true} />
                       </FormField>
                       <ErrorMessage
@@ -270,20 +222,10 @@ const UserDetails = () => {
                         component="div"
                         className="text-red-500 text-xs italic mb-4"
                       />
-                      <FormField
-                        label="First Name"
-                        // isTransparent={currentUser === 'admin' ? true : false}
-                        isTransparent={true}
-                      >
-                        {/* <Field name="firstName" disabled={currentUser === 'admin' ? true : false} /> */}
+                      <FormField label="First Name" isTransparent={true}>
                         <Field name="firstName" disabled={true} />
                       </FormField>
-                      <FormField
-                        label="Last Name"
-                        // isTransparent={currentUser === 'admin' ? true : false}
-                        isTransparent={true}
-                      >
-                        {/* <Field name="lastName" disabled={currentUser === 'admin' ? true : false} /> */}
+                      <FormField label="Last Name" isTransparent={true}>
                         <Field name="lastName" disabled={true} />
                       </FormField>
                       <FormField label="Roles" isTransparent={isReadOnly}>

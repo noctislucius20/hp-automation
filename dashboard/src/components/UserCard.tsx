@@ -1,8 +1,6 @@
 import { mdiCheckDecagram } from '@mdi/js'
-import { Field, Form, Formik } from 'formik'
 import { useAppSelector } from '../stores/hooks'
 import CardBox from './CardBox'
-import FormCheckRadio from './FormCheckRadio'
 import PillTag from './PillTag'
 import UserAvatarCurrentUser from './UserAvatarCurrentUser'
 
@@ -15,10 +13,10 @@ const UserCard = ({ className }: Props) => {
 
   return (
     <CardBox className={className}>
-      <div className="flex flex-col lg:flex-row items-center justify-around lg:justify-center">
-        <UserAvatarCurrentUser className="mb-6 lg:mb-0 lg:mx-12" />
+      <div className="flex flex-col lg:flex-col items-center justify-around lg:justify-center">
+        <UserAvatarCurrentUser className="mb-6 lg:mx-12" />
         <div className="space-y-3 text-center md:text-left lg:mx-12">
-          <div className="flex justify-center md:block">
+          {/* <div className="flex justify-center md:block">
             <Formik
               initialValues={{
                 notifications: ['1'],
@@ -31,15 +29,17 @@ const UserCard = ({ className }: Props) => {
                 </FormCheckRadio>
               </Form>
             </Formik>
-          </div>
-          <h1 className="text-2xl">
-            Howdy, <b>{userName}</b>!
-          </h1>
-          <p>
+          </div> */}
+          <div className="text-center">
+            <h1 className="text-2xl mb-3">
+              Hello, <b>{userName}</b>!
+            </h1>
+            {/* <p>
             Last login <b>12 mins ago</b> from <b>127.0.0.1</b>
-          </p>
-          <div className="flex justify-center md:block">
-            <PillTag label="Verified" color="info" icon={mdiCheckDecagram} />
+          </p> */}
+            <div className="flex justify-center md:block">
+              <PillTag label="Verified" color="info" icon={mdiCheckDecagram} />
+            </div>
           </div>
         </div>
       </div>

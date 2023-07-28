@@ -12,6 +12,8 @@ import { setUser } from '../stores/mainSlice'
 import { useAppDispatch, useAppSelector } from '../stores/hooks'
 import { useRouter } from 'next/router'
 import jwt from 'jsonwebtoken'
+import { flaskApiUrl } from '../config'
+import axios from 'axios'
 
 type Props = {
   children: ReactNode
@@ -23,24 +25,75 @@ export default function LayoutAuthenticated({ children }: Props) {
 
   const [loggedIn, setLoggedIn] = useState(false)
   const [roles, setRoles] = useState('')
+  const [status, setStatus] = useState({ error: null })
+
+  const refreshJwtToken = async () => {
+    try {
+      const token = JSON.parse(localStorage.getItem('token'))
+      const user = jwt.decode(token.access_token)
+      const config = {
+        method: 'PUT',
+        url: `${flaskApiUrl}/auth`,
+        data: {
+          refresh_token: token.refresh_token,
+          username: user.username,
+          roles: user.roles,
+        },
+      }
+      console.log(config)
+      const response = await axios.request(config)
+      const accessToken = jwt.decode(response.data.data)
+
+      localStorage.setItem('expirationTime', JSON.stringify(accessToken.exp))
+      localStorage.setItem(
+        'token',
+        JSON.stringify({ access_token: response.data.data, refresh_token: token.refresh_token })
+      )
+    } catch (error) {
+      console.log(error)
+      setStatus({
+        error: {
+          message:
+            error.response == undefined ? 'Something went wrong' : error.response.data.message,
+          code: error.response == undefined ? 500 : error.response.status,
+        },
+      })
+    }
+  }
 
   useEffect(() => {
     const getLogged = async () => {
       try {
+        if (localStorage.getItem('expirationTime') < JSON.stringify(Date.now() / 1000)) {
+          await refreshJwtToken()
+        }
+
         const token = JSON.parse(localStorage.getItem('token'))
         if (!token) {
           setLoggedIn(false)
           router.push('/login')
         } else {
           const user = jwt.decode(token.access_token)
+          const config = {
+            headers: {
+              Authorization: `Bearer ${token.access_token}`,
+            },
+            method: 'GET',
+            url: `${flaskApiUrl}/users/${user.username}`,
+          }
+          const response = await axios.request(config)
+
           setLoggedIn(true)
           setRoles(user.roles)
           dispatch(
             setUser({
-              name: user.username,
-              email: 'john@example.com',
+              username: response.data.data.username,
+              firstName: response.data.data.first_name,
+              lastName: response.data.data.last_name,
+              roles: response.data.data.roles,
+              email: null,
               avatar:
-                'https://avatars.dicebear.com/api/avataaars/example.svg?options[top][]=shortHair&options[accessoriesChance]=93',
+                'https://avatars.dicebear.com/api/avataaars/example.svg?options[top][]=shortHair&options[accessoriesChance]=91',
             })
           )
         }

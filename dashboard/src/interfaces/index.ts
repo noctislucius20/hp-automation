@@ -1,5 +1,8 @@
 export type UserPayloadObject = {
-  name: string
+  username: string
+  firstName: string
+  lastName: string
+  roles: string
   email: string
   avatar: string
 }
@@ -74,6 +77,8 @@ export type Client = {
 export type StyleKey = 'white' | 'basic'
 
 export type UserForm = {
-  name: string
-  email: string
+  username: string
+  firstName: string
+  lastName: string
+  roles: string
 }

@@ -110,6 +110,8 @@ def update_sensor_by_id(id):
 @sensor.route('/sensors/<id>', methods=['DELETE'])
 def delete_sensor_by_id(id):
     try:
+        token_required()
+
         SensorsService().delete_sensor(id=id)
         response = make_response({'status': 'success', 'message': 'sensor deleted successfully'}, 204)
         return response
