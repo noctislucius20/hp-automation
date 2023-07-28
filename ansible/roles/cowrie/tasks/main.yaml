@@ -42,4 +42,4 @@
   docker_container:
       name: cowrie
       state: stopped
-  when: honeypot_list not in search("cowrie")
+  when: not honeypot_list is search("cowrie")
