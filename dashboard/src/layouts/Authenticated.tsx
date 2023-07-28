@@ -30,11 +30,17 @@ export default function LayoutAuthenticated({ children }: Props) {
   const refreshJwtToken = async () => {
     try {
       const token = JSON.parse(localStorage.getItem('token'))
+      const user = jwt.decode(token.access_token)
       const config = {
         method: 'PUT',
         url: `${flaskApiUrl}/auth`,
-        data: { refresh_token: token.refresh_token },
+        data: {
+          refresh_token: token.refresh_token,
+          username: user.username,
+          roles: user.roles,
+        },
       }
+      console.log(config)
       const response = await axios.request(config)
       const accessToken = jwt.decode(response.data.data)
 

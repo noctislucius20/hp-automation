@@ -55,8 +55,15 @@ class UsersService:
         user = self.check_user_existed(user_param)
         
         # username, first and last name only can be changed by its user
-        if user.username != username or user.first_name != first_name or user.last_name != last_name:
+        if user.username != username:
+            check_user = UsersModel.query.filter_by(username=username, status=True).first()
+            if check_user:
+                raise InvariantError(message="Username already exist")
             # if current_user.roles.value == 'admin' and current_user.username != user_param:
+            if current_user.username != user_param:
+                raise AuthorizationError(message="You don't have permission to change this user")
+
+        if user.first_name != first_name or user.last_name != last_name:
             if current_user.username != user_param:
                 raise AuthorizationError(message="You don't have permission to change this user")
             
@@ -64,6 +71,7 @@ class UsersService:
         if user.roles.value != roles:
             if current_user.roles.value != 'admin':
                 raise AuthorizationError(message="You don't have permission to change this user")
+      
 
         db.session.execute(db.update(UsersModel).values({'username': username, 'first_name': first_name, 'last_name': last_name, 'roles': roles, 'updated_at': dt.datetime.now()}).where(UsersModel.id == user.id))
         db.session.commit()

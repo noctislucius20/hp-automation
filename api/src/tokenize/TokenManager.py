@@ -26,12 +26,11 @@ class TokenManager:
         return jwt.encode({'id': payload['id'], 'username': payload['username'], 'roles': payload['roles'], 'exp': dt.datetime.utcnow() + dt.timedelta(seconds=int(os.getenv('ACCESS_TOKEN_AGE')))}, os.getenv('ACCESS_TOKEN_KEY'))
     
     def generate_refresh_token(self, payload):
-        return jwt.encode({'id': payload['id'], 'username': payload['username'], 'roles': payload['roles'], 'exp': dt.datetime.utcnow() + dt.timedelta(seconds=int(os.getenv('REFRESH_TOKEN_AGE')))}, os.getenv('REFRESH_TOKEN_KEY'))
+        return jwt.encode({'id': payload['id'], 'exp': dt.datetime.utcnow() + dt.timedelta(seconds=int(os.getenv('REFRESH_TOKEN_AGE')))}, os.getenv('REFRESH_TOKEN_KEY'))
     
     def verify_refresh_token(self, refresh_token):
         try:
             user = jwt.decode(refresh_token, os.getenv('REFRESH_TOKEN_KEY'), algorithms='HS256', verify=True)
             return user
-
         except:
             raise InvariantError(message='refresh token invalid')

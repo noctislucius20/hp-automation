@@ -38,14 +38,19 @@ const ProfilePage = () => {
     roles: userRoles,
   }
 
-  const refreshJwtToken = async () => {
+  const refreshJwtToken = async (username) => {
     try {
       const token = JSON.parse(localStorage.getItem('token'))
       const config = {
         method: 'PUT',
         url: `${flaskApiUrl}/auth`,
-        data: { refresh_token: token.refresh_token },
+        data: {
+          refresh_token: token.refresh_token,
+          username: username,
+          roles: userForm.roles,
+        },
       }
+      console.log(config)
       const response = await axios.request(config)
       const accessToken = jwt.decode(response.data.data)
 
@@ -69,31 +74,29 @@ const ProfilePage = () => {
 
   const handleUserSubmit = async (values, { resetForm, setStatus }) => {
     try {
-      if (localStorage.getItem('expirationTime') < JSON.stringify(Date.now() / 1000)) {
-        await refreshJwtToken()
-      }
-
       const token = JSON.parse(localStorage.getItem('token'))
+      const user = jwt.decode(token.access_token)
       const config = {
         headers: {
           Authorization: `Bearer ${token.access_token}`,
         },
         method: 'PUT',
-        url: `${flaskApiUrl}/users/${userName}`,
+        url: `${flaskApiUrl}/users/${user.username}`,
         data: values,
       }
-      console.log(config)
+      console.log(user.username)
       const response = await axios.request(config)
+      await refreshJwtToken(values.username)
       setIsReadOnly(true)
 
-      const config_token = {
-        method: 'DELETE',
-        url: `${flaskApiUrl}/auth`,
-        data: { refresh_token: token.refresh_token },
-      }
-      await axios.request(config_token)
-      localStorage.removeItem('token')
-      localStorage.removeItem('expirationTime')
+      // const config_token = {
+      //   method: 'DELETE',
+      //   url: `${flaskApiUrl}/auth`,
+      //   data: { refresh_token: token.refresh_token },
+      // }
+      // await axios.request(config_token)
+      // localStorage.removeItem('token')
+      // localStorage.removeItem('expirationTime')
 
       setStatus({
         error: null,
@@ -103,7 +106,7 @@ const ProfilePage = () => {
         },
       })
 
-      router.push(`/login`)
+      router.push(`/profile`)
     } catch (error) {
       console.log(error)
       resetForm()
@@ -131,25 +134,7 @@ const ProfilePage = () => {
           title="Profile"
           main
         ></SectionTitleLineWithButton>
-        {status && status.error && (
-          <NotificationBar
-            color="danger"
-            icon={mdiAlertCircle}
-            button={
-              <BaseButton
-                color="white"
-                roundedFull
-                small
-                icon={mdiClose}
-                onClick={() => {
-                  setStatus({ error: null, success: null })
-                }}
-              />
-            }
-          >
-            Error {status.error.code}: {status.error.message}
-          </NotificationBar>
-        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <UserCard />
           <div className="flex flex-col">

@@ -8,6 +8,8 @@ class AuthenticationsPost(ma.SQLAlchemySchema):
     password = ma.String(required=True)
 
 class AuthenticationsPut(ma.SQLAlchemySchema):
+    username = ma.String(required=True)
+    roles = ma.String(required=True)
     refresh_token = ma.String(required=True)
 
 class AuthenticationsDelete(ma.SQLAlchemySchema):
