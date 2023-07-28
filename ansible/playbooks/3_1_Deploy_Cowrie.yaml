@@ -16,5 +16,5 @@
   become: true
   roles:
       - role: cowrie
-        when: honeypot_list is search("cowrie")
+        # when: honeypot_list is search("cowrie")
   tags: [honeypot]
