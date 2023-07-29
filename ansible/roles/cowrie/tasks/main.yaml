@@ -36,10 +36,3 @@
       read_only: true
       state: started
       detach: true
-
-# stop container when this honeypot not selected
-- name: stop cowrie docker image
-  docker_container:
-      name: cowrie
-      state: stopped
-  when: not honeypot_list is search("cowrie")

@@ -18,3 +18,15 @@
       - role: honeytrap
         when: honeypot_list is search("honeytrap")
   tags: [honeypot]
+
+# when honeypot is not selected
+- hosts: "{{ ip_address }}"
+  gather_facts: false
+  become: true
+  tasks:
+      - name: stop honeytrap docker image
+        docker_container:
+            name: honeytrap
+            state: stopped
+        when: not honeypot_list is search("honeytrap")
+  tags: [honeypot]

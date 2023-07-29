@@ -18,3 +18,15 @@
       - role: elasticpot
         when: honeypot_list is search("elasticpot")
   tags: [honeypot]
+
+# when honeypot is not selected
+- hosts: "{{ ip_address }}"
+  gather_facts: false
+  become: true
+  tasks:
+      - name: stop elasticpot docker image
+        docker_container:
+            name: elasticpot
+            state: stopped
+        when: not honeypot_list is search("elasticpot")
+  tags: [honeypot]
