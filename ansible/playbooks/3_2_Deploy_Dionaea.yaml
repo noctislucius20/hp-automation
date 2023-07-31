@@ -18,3 +18,15 @@
       - role: dionaea
         when: honeypot_list is search("dionaea")
   tags: [honeypot]
+
+# when honeypot is not selected
+- hosts: "{{ ip_address }}"
+  gather_facts: false
+  become: true
+  tasks:
+      - name: stop dionaea docker image
+        docker_container:
+            name: dionaea
+            state: stopped
+        when: not honeypot_list is search("dionaea")
+  tags: [honeypot]

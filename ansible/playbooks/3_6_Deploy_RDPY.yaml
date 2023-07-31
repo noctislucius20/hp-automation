@@ -18,3 +18,15 @@
       - role: rdpy
         when: honeypot_list is search("rdpy")
   tags: [honeypot]
+
+# when honeypot is not selected
+- hosts: "{{ ip_address }}"
+  gather_facts: false
+  become: true
+  tasks:
+      - name: stop rdpy docker image
+        docker_container:
+            name: rdpy
+            state: stopped
+        when: not honeypot_list is search("rdpy")
+  tags: [honeypot]
