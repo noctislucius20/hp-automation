@@ -63,9 +63,9 @@
       update_cache: yes
   notify: restart_docker
 
-- name: install docker-python module
+- name: install python module
   pip:
-      name: docker
+      name: [docker, urllib3==1.26.5]
 
 # install mongodb
 - name: install mongodb docker
