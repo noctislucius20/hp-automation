@@ -107,7 +107,7 @@ const SensorsCreate = () => {
   return (
     <>
       <Head>
-        <title>{getPageTitle('Forms')}</title>
+        <title>{getPageTitle('Add Sensor')}</title>
       </Head>
 
       <SectionMain>

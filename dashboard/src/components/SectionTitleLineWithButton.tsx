@@ -1,4 +1,4 @@
-import React, { Children, ReactNode } from 'react'
+import React, { ReactNode } from 'react'
 import BaseIcon from './BaseIcon'
 import IconRounded from './IconRounded'
 

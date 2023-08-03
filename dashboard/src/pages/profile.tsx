@@ -128,6 +128,26 @@ const ProfilePage = () => {
         <title>{getPageTitle('Profile')}</title>
       </Head>
 
+      {status && status.error && (
+        <NotificationBar
+          color="danger"
+          icon={mdiAlertCircle}
+          button={
+            <BaseButton
+              color="white"
+              roundedFull
+              small
+              icon={mdiClose}
+              onClick={() => {
+                setStatus({ error: null, success: null })
+              }}
+            />
+          }
+        >
+          Error {status.error.code}: {status.error.message}
+        </NotificationBar>
+      )}
+
       <SectionMain>
         <SectionTitleLineWithButton
           icon={mdiAccount}
