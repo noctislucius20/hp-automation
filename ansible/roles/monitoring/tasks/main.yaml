@@ -32,6 +32,7 @@
   when: method == "POST"
 
 - name: create monitoring dashboard
+  ignore_errors: true
   uri:
       url: http://192.168.1.100:5601/api/kibana/dashboards/import?exclude=index-pattern
       method: POST
@@ -44,6 +45,7 @@
   when: method == "POST"
 
 - name: insert dashboard data into PostgreSQL database
+  ignore_errors: true
   postgresql_query:
       db: hp_automation
       login_user: "{{ postgres_user }}"
@@ -58,6 +60,7 @@
   when: method == "POST"
 
 - name: update dashboard data
+  ignore_errors: true
   uri:
       url: http://192.168.1.100:5601/api/saved_objects/dashboard/{{ dashboard_id }}
       method: PUT

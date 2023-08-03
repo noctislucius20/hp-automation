@@ -12,7 +12,6 @@
             msg: "{{ ansible_facts }}"
 
 - hosts: "{{ ip_address }}"
-  ignore_errors: true
   become: true
   gather_facts: false
   roles:
