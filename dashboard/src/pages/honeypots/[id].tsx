@@ -15,6 +15,7 @@ import * as Yup from 'yup'
 import NotificationBar from '../../components/NotificationBar'
 import axios from 'axios'
 import { useRouter } from 'next/router'
+import jwt from 'jsonwebtoken'
 
 const HoneypotDetails = () => {
   const router = useRouter()
@@ -24,6 +25,17 @@ const HoneypotDetails = () => {
   const [status, setStatus] = useState({ error: null, success: null })
   const [isLoading, setIsLoading] = useState(true)
   const [isReadOnly, setIsReadOnly] = useState(true)
+
+  useEffect(() => {
+    const checkIfNotAdmin = () => {
+      const token = JSON.parse(localStorage.getItem('token'))
+      const user = jwt.decode(token.access_token)
+      if (!user.roles.includes('admin')) {
+        router.push('/errors/forbidden')
+      }
+    }
+    checkIfNotAdmin()
+  }, [router])
 
   useEffect(() => {
     if (id) {

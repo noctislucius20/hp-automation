@@ -90,7 +90,7 @@ class JobsService:
             db.session.add(job_logs)
             db.session.commit()
 
-            print(json.dumps(response.json()))  
+            json.dumps(response.json())
             
         except Exception as e:
             raise e
@@ -103,7 +103,7 @@ class JobsService:
             db.session.add(job_logs)
             db.session.commit()
 
-            print(json.dumps(response.json()))
+            json.dumps(response.json())
             
         except Exception as e:
             raise e

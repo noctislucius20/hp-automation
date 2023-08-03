@@ -4,9 +4,9 @@ export const localStorageStyleKey = 'style'
 
 export const containerMaxW = 'xl:max-w-6xl xl:mx-auto'
 
-export const appTitle = 'Free Tailwind 3 React Next Typescript dashboard template'
+export const appTitle = 'HoneypotExpress'
 
-export const getPageTitle = (currentPageTitle: string) => `${currentPageTitle} — ${appTitle}`
+export const getPageTitle = (currentPageTitle: string) => `${currentPageTitle} - ${appTitle}`
 
 export const flaskApiUrl =
   process.env.NODE_ENV === 'production'

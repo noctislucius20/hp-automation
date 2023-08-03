@@ -155,7 +155,7 @@ class SensorsService:
             db.session.execute(db.update(SensorsModel).values({'name': name, 'description': description, 'ip_address': ip_address, 'updated_at': dt.datetime.now()}).where(SensorsModel.id == sensor.id))
 
             db.session.commit()
-            callback(honeypot = honeypot, sensor_id = id, ip_address = ip_address, old_ip_address = old_ip_address, dashboard_id = dashboard_id[0], name = name)
+            callback(honeypot = honeypot, sensor_id = id, ip_address = ip_address, old_ip_address = old_ip_address, dashboard_id = dashboard_id[0] if dashboard_id else '', name = name)
 
         except Exception as e:
             db.session.rollback()

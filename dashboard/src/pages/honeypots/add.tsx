@@ -1,7 +1,7 @@
 import { mdiAlertCircle, mdiArrowLeftThick, mdiBeehiveOutline, mdiClose, mdiPlusBox } from '@mdi/js'
 import { ErrorMessage, Field, Form, Formik } from 'formik'
 import Head from 'next/head'
-import { ReactElement, useState } from 'react'
+import { ReactElement, useEffect, useState } from 'react'
 import BaseButton from '../../components/BaseButton'
 import BaseButtons from '../../components/BaseButtons'
 import BaseDivider from '../../components/BaseDivider'
@@ -15,11 +15,23 @@ import * as Yup from 'yup'
 import NotificationBar from '../../components/NotificationBar'
 import axios from 'axios'
 import { useRouter } from 'next/router'
+import jwt from 'jsonwebtoken'
 
 const HoneypotsCreate = () => {
   const router = useRouter()
 
   const [status, setStatus] = useState({ error: null })
+
+  useEffect(() => {
+    const checkIfNotAdmin = () => {
+      const token = JSON.parse(localStorage.getItem('token'))
+      const user = jwt.decode(token.access_token)
+      if (!user.roles.includes('admin')) {
+        router.push('/errors/forbidden')
+      }
+    }
+    checkIfNotAdmin()
+  }, [router])
 
   const initialValues = {
     name: '',
@@ -65,7 +77,7 @@ const HoneypotsCreate = () => {
   return (
     <>
       <Head>
-        <title>{getPageTitle('Forms')}</title>
+        <title>{getPageTitle('Add Honeypot')}</title>
       </Head>
 
       <SectionMain>

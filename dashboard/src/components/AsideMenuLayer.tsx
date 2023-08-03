@@ -66,7 +66,7 @@ export default function AsideMenuLayer({ menu, className = '', ...props }: Props
         >
           <div className="text-center flex-1 lg:text-left lg:pl-6 xl:text-center xl:pl-0">
             <div className="grid justify-items-center pt-5">
-              <Image src={logo} width={125} alt="" />
+              <Image src={logo} width={150} alt="" />
             </div>
           </div>
           <button

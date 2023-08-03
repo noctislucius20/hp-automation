@@ -1,6 +1,7 @@
 import { mdiAlertCircle, mdiBeehiveOutline, mdiClose, mdiPlusThick, mdiTable } from '@mdi/js'
 import axios from 'axios'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import { ReactElement, useEffect, useState } from 'react'
 import BaseButton from '../../components/BaseButton'
 import CardBox from '../../components/CardBox'
@@ -10,8 +11,10 @@ import SectionTitleLineWithButton from '../../components/SectionTitleLineWithBut
 import TableHoneypots from '../../components/TableHoneypot/TableHoneypots'
 import { flaskApiUrl, getPageTitle } from '../../config'
 import LayoutAuthenticated from '../../layouts/Authenticated'
+import jwt from 'jsonwebtoken'
 
 const HoneypotsPage = () => {
+  const router = useRouter()
   const [honeypots, setHoneypots] = useState([])
   const [status, setStatus] = useState({ error: null })
   const [isLoading, setIsLoading] = useState(true)
@@ -19,6 +22,17 @@ const HoneypotsPage = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isModalTrashActive, setIsModalTrashActive] = useState(false)
+
+  useEffect(() => {
+    const checkIfNotAdmin = () => {
+      const token = JSON.parse(localStorage.getItem('token'))
+      const user = jwt.decode(token.access_token)
+      if (!user.roles.includes('admin')) {
+        router.push('/errors/forbidden')
+      }
+    }
+    checkIfNotAdmin()
+  }, [router])
 
   useEffect(() => {
     const getHoneypots = async () => {
