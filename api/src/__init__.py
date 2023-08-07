@@ -55,8 +55,6 @@ def create_app():
     from src.models.SensorsModel import Sensors
     from src.models.AuthenticationsModel import Authentications
     from src.models.HoneypotSensorModel import HoneypotSensor
-    from src.models.HoneypotDetailsModel import HoneypotDetails
-    from src.models.SensorDetailsModel import SensorDetails
     from src.models.HistoryModel import History
     from src.models.StatusCodesModel import StatusCodes
     from src.models.JobLogsModel import JobLogs
