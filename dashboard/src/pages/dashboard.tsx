@@ -58,10 +58,8 @@ const Dashboard = () => {
         const distinctResponse = distinctArray(response.data.data)
 
         setSensors(distinctResponse)
-        setIsLoading(false)
       } catch (error) {
         console.log(error)
-        setIsLoading
         setStatus({
           error: {
             message:
@@ -90,7 +88,6 @@ const Dashboard = () => {
 
         const response = await axios.request(config)
         setHoneypots(response.data.data)
-        setIsLoading(false)
       } catch (error) {
         console.log(error)
         setStatus({
@@ -162,19 +159,19 @@ const Dashboard = () => {
           <CardBoxWidget
             icon={mdiMonitorMultiple}
             iconColor="warning"
-            number={sensors.length}
+            number={isLoading ? 0 : sensors.length}
             label="Total Sensors"
           />
           <CardBoxWidget
             icon={mdiBeehiveOutline}
             iconColor="success"
-            number={honeypots.length}
+            number={isLoading ? 0 : honeypots.length}
             label="Total Honeypots"
           />
           <CardBoxWidget
             icon={mdiFormatListCheckbox}
             iconColor="info"
-            number={deployHistory.length}
+            number={isLoading ? 0 : deployHistory.length}
             label="Deployments Executed"
           />
         </div>
