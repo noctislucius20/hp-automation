@@ -10,5 +10,5 @@ export const getPageTitle = (currentPageTitle: string) => `${currentPageTitle} -
 
 export const flaskApiUrl =
   process.env.NODE_ENV === 'production'
-    ? 'http://192.168.1.200:8080/api/v1'
+    ? 'http://192.168.195.195:8080/api/v1'
     : 'http://localhost:5000/api/v1'
