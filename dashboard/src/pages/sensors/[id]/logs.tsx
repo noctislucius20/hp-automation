@@ -40,9 +40,14 @@ const SensorLogs = () => {
 
   useEffect(() => {
     let mounted = true
-    const socket = io('http://localhost:5000/', {
-      rememberUpgrade: true,
-    })
+    const socket = io(
+      process.env.NODE_ENV === 'production'
+        ? 'http://192.168.195.195:8080'
+        : 'http://localhost:5000',
+      {
+        rememberUpgrade: true,
+      }
+    )
 
     if (id) {
       const getLogs = async () => {
