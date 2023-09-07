@@ -17,62 +17,41 @@
 
 - hosts: "{{ ip_address }}"
   become: true
+  strategy: free
   gather_facts: false
   tasks:
       - name: deploy cowrie honeypot
+        include_role:
+            name: cowrie
         when: honeypot_list is search("cowrie")
-        include_role:
-            name: cowrie
-        async: 3600
-        poll: 0
-        register: cowrie_result
 
+- hosts: "{{ ip_address }}"
+  become: true
+  strategy: free
+  gather_facts: false
+  tasks:
       - name: deploy dionaea honeypot
-        when: honeypot_list is search("dionaea")
         include_role:
             name: dionaea
-        async: 3600
-        poll: 0
-        register: dionaea_result
+        when: honeypot_list is search("dionaea")
+# - hosts: "{{ ip_address }}"
+#   gather_facts: false
+#   become: true
+#   tasks:
+#       - name: stop cowrie docker image
+#         docker_container:
+#             name: cowrie
+#             state: stopped
+#         when: not honeypot_list is search("cowrie")
+#   tags: [honeypot]
 
-- hosts: "{{ ip_address }}"
-  become: true
-  gather_facts: false
-  tasks:
-      - name: wait for cowrie honeypot
-        async_status:
-            jid: "{{ cowrie_result.ansible_job_id }}"
-        register: cowrie_result
-        until: cowrie_result.finished
-        retries: 3600
-        delay: 1
-
-      - name: wait for dionaea honeypot
-        async_status:
-            jid: "{{ dionaea_result.ansible_job_id }}"
-        register: dionaea_result
-        until: dionaea_result.finished
-        retries: 3600
-        delay: 1
-
-- hosts: "{{ ip_address }}"
-  gather_facts: false
-  become: true
-  tasks:
-      - name: stop cowrie docker image
-        docker_container:
-            name: cowrie
-            state: stopped
-        when: not honeypot_list is search("cowrie")
-  tags: [honeypot]
-
-- hosts: "{{ ip_address }}"
-  gather_facts: false
-  become: true
-  tasks:
-      - name: stop dionaea docker image
-        docker_container:
-            name: dionaea
-            state: stopped
-        when: not honeypot_list is search("dionaea")
-  tags: [honeypot]
+# - hosts: "{{ ip_address }}"
+#   gather_facts: false
+#   become: true
+#   tasks:
+#       - name: stop dionaea docker image
+#         docker_container:
+#             name: dionaea
+#             state: stopped
+#         when: not honeypot_list is search("dionaea")
+#   tags: [honeypot]
