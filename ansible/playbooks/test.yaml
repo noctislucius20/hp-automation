@@ -18,16 +18,42 @@
 - hosts: "{{ ip_address }}"
   become: true
   gather_facts: false
-  roles:
-      - role: cowrie
-        async: 3600
-        poll: 0
+  tasks:
+      - name: deploy cowrie honeypot
         when: honeypot_list is search("cowrie")
-
-      - role: dionaea
+        include_role:
+            name: cowrie
         async: 3600
         poll: 0
+        register: cowrie_result
+
+      - name: deploy dionaea honeypot
         when: honeypot_list is search("dionaea")
+        include_role:
+            name: dionaea
+        async: 3600
+        poll: 0
+        register: dionaea_result
+
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  tasks:
+      - name: wait for cowrie honeypot
+        async_status:
+            jid: "{{ cowrie_result.ansible_job_id }}"
+        register: cowrie_result
+        until: cowrie_result.finished
+        retries: 3600
+        delay: 1
+
+      - name: wait for dionaea honeypot
+        async_status:
+            jid: "{{ dionaea_result.ansible_job_id }}"
+        register: dionaea_result
+        until: dionaea_result.finished
+        retries: 3600
+        delay: 1
 
 - hosts: "{{ ip_address }}"
   gather_facts: false
