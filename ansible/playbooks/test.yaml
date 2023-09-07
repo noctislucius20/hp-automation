@@ -1,0 +1,52 @@
+---
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  pre_tasks:
+      - name: set ansible_port
+        set_fact:
+            ansible_port: 22888
+
+      - name: set installed honeypot
+        set_fact:
+            honeypot_list: "{{ hp_list }}"
+
+      - name: show facts
+        debug:
+            msg: "{{ ansible_facts }}"
+
+- hosts: "{{ ip_address }}"
+  become: true
+  gather_facts: false
+  roles:
+      - role: cowrie
+        async: 3600
+        poll: 0
+        when: honeypot_list is search("cowrie")
+
+      - role: dionaea
+        async: 3600
+        poll: 0
+        when: honeypot_list is search("dionaea")
+
+- hosts: "{{ ip_address }}"
+  gather_facts: false
+  become: true
+  tasks:
+      - name: stop cowrie docker image
+        docker_container:
+            name: cowrie
+            state: stopped
+        when: not honeypot_list is search("cowrie")
+  tags: [honeypot]
+
+- hosts: "{{ ip_address }}"
+  gather_facts: false
+  become: true
+  tasks:
+      - name: stop dionaea docker image
+        docker_container:
+            name: dionaea
+            state: stopped
+        when: not honeypot_list is search("dionaea")
+  tags: [honeypot]
