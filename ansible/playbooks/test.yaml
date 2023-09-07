@@ -17,7 +17,6 @@
 
 - hosts: "{{ ip_address }}"
   become: true
-  strategy: free
   gather_facts: false
   tasks:
       - name: deploy cowrie honeypot
@@ -27,7 +26,6 @@
 
 - hosts: "{{ ip_address }}"
   become: true
-  strategy: free
   gather_facts: false
   tasks:
       - name: deploy dionaea honeypot
