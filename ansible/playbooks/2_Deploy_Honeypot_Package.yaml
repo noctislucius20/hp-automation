@@ -13,12 +13,14 @@
         changed_when: false
 
 - hosts: "{{ ip_address }}"
+  gather_facts: false
   become: true
   roles:
       - base
   tags: [honeypot]
 
 - hosts: "{{ ip_address }}"
+  gather_facts: false
   become: true
   roles:
       - package
