@@ -1,30 +1,30 @@
-- name: clone git cowrie honeypot
-  git:
-      repo: https://github.com/yevonnaelandrew/cowrie.git
-      dest: /home/ansigent/cowrie
+# - name: clone git cowrie honeypot
+#   git:
+#       repo: https://github.com/yevonnaelandrew/cowrie.git
+#       dest: /home/ansigent/cowrie
 
-- name: copy Dockerfile to root folder
-  copy:
-      remote_src: true
-      src: /home/ansigent/cowrie/docker/Dockerfile
-      dest: /home/ansigent/cowrie/
-      owner: root
-      group: root
-      mode: "0644"
+# - name: copy Dockerfile to root folder
+#   copy:
+#       remote_src: true
+#       src: /home/ansigent/cowrie/docker/Dockerfile
+#       dest: /home/ansigent/cowrie/
+#       owner: root
+#       group: root
+#       mode: "0644"
 
-- name: build cowrie docker image
-  docker_image:
-      name: isif/cowrie
-      tag: cowrie_hp
-      build:
-          path: /home/ansigent/cowrie
-          pull: yes
-      source: build
+# - name: build cowrie docker image
+#   docker_image:
+#       name: isif/cowrie
+#       tag: cowrie_hp
+#       build:
+#           path: /home/ansigent/cowrie
+#           pull: yes
+#       source: build
 
 - name: run cowrie docker image
   docker_container:
       name: cowrie
-      image: isif/cowrie:cowrie_hp
+      image: quay.io/noctislucius20/cowrie-hp:latest
       ports:
           - 22:2222
           - 23:2223

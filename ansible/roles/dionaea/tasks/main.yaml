@@ -1,20 +1,20 @@
-- name: clone git dionaea honeypot
-  git:
-      repo: https://github.com/yevonnaelandrew/dionaea.git
-      dest: /home/ansigent/dionaea
+# - name: clone git dionaea honeypot
+#   git:
+#       repo: https://github.com/yevonnaelandrew/dionaea.git
+#       dest: /home/ansigent/dionaea
 
-- name: build dionaea docker image
-  docker_image:
-      name: isif/dionaea
-      tag: dionaea_hp
-      build:
-          path: /home/ansigent/dionaea
-      source: build
+# - name: build dionaea docker image
+#   docker_image:
+#       name: isif/dionaea
+#       tag: dionaea_hp
+#       build:
+#           path: /home/ansigent/dionaea
+#       source: build
 
 - name: run dionaea docker image
   docker_container:
       name: dionaea
-      image: isif/dionaea:dionaea_hp
+      image: quay.io/noctislucius20/dionaea-hp:latest
       ports:
           - "21:21"
           - "42:42"
