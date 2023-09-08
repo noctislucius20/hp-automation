@@ -19,6 +19,7 @@
   command: cat /proc/sys/fs/binfmt_misc/status
   async: 3600
   poll: 0
+  register: qemu_status
 
 - name: activate QEMU when disabled
   command: mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
