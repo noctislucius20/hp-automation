@@ -13,26 +13,17 @@
       state: latest
   async: 3600
   poll: 0
-  register: packages_task_result
 
 # QEMU installation
 - name: check QEMU status
   command: cat /proc/sys/fs/binfmt_misc/status
   async: 3600
   poll: 0
-  until: packages_task_result.finished
-  retries: 120
-  delay: 1
-  register: check_qemu_task_status
 
 - name: activate QEMU when disabled
   command: mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
   async: 3600
   poll: 0
-  until: check_qemu_task_status.finished
-  retries: 120
-  delay: 1
-  register: activate_qemu_task
   when: qemu_status.stdout != "enabled"
 
 - name: register QEMU interpreters
@@ -49,9 +40,6 @@
   ignore_errors: true
   async: 3600
   poll: 0
-  until: activate_qemu_task.finished
-  retries: 120
-  delay: 1
 
 # install docker engine
 - name: install dependencies (Docker)
