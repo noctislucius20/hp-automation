@@ -60,7 +60,6 @@
   apt:
       name: ["docker-ce", "docker-ce-cli", "containerd.io"]
       state: latest
-      update_cache: yes
   notify: restart_docker
 
 - name: install python module
@@ -78,6 +77,8 @@
           - "27017:27017"
       volumes:
           - MongoDockerData:/data/db
+  async: 3600
+  poll: 0
 
 - name: install psycopg2 module
   pip:
