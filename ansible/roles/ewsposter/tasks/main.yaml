@@ -1,20 +1,22 @@
 - name: clone git ewsposter
   git:
-    repo: https://github.com/yevonnaelandrew/ewsposter.git
-    dest: /home/ansigent/ewsposter
-    version: mongodb
+      repo: https://github.com/yevonnaelandrew/ewsposter.git
+      dest: /home/ansigent/ewsposter
+      version: mongodb
 
 - name: create data directory
   file:
-    path: "{{ item }}"
-    state: directory
+      path: "{{ item }}"
+      state: directory
   loop:
-    - ewsposter/ewsposter_data
-    - ewsposter/ewsposter_data/log
-    - ewsposter/ewsposter_data/spool
-    - ewsposter/ewsposter_data/json
+      - ewsposter/ewsposter_data
+      - ewsposter/ewsposter_data/log
+      - ewsposter/ewsposter_data/spool
+      - ewsposter/ewsposter_data/json
 
 - name: install module from requirements.txt & influxdb
   pip:
-    requirements: /home/ansigent/ewsposter/requirements.txt
-    extra_args: influxdb
+      requirements: /home/ansigent/ewsposter/requirements.txt
+      extra_args: influxdb
+  async: 3600
+  poll: 0
