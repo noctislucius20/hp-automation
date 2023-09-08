@@ -1,15 +1,15 @@
-- name: clone git honeytrap honeypot
-  git:
-      repo: https://github.com/yevonnaelandrew/honeytrap.git
-      dest: /home/ansigent/honeytrap
+# - name: clone git honeytrap honeypot
+#   git:
+#       repo: https://github.com/yevonnaelandrew/honeytrap.git
+#       dest: /home/ansigent/honeytrap
 
-- name: build honeytrap docker image
-  shell: cd /home/ansigent/honeytrap && bash /home/ansigent/honeytrap/dockerize.sh
+# - name: build honeytrap docker image
+#   shell: cd /home/ansigent/honeytrap && bash /home/ansigent/honeytrap/dockerize.sh
 
 - name: run honeytrap docker image
   docker_container:
       name: honeytrap
-      image: honeytrap_test:latest
+      image: quay.io/noctislucius20/honeytrap-hp:latest
       ports:
           - "2222:2222"
           - "8545:8545"
