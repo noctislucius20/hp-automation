@@ -21,11 +21,6 @@
             name: cowrie
         when: honeypot_list is search("cowrie")
 
-- hosts: "{{ ip_address }}"
-  become: true
-  strategy: free
-  gather_facts: false
-  tasks:
       - name: deploy dionaea honeypot
         include_role:
             name: dionaea
