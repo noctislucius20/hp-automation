@@ -1,5 +1,6 @@
 ---
 - hosts: "{{ ip_address }}"
+  gather_facts: false
   become: true
   pre_tasks:
       - name: install updates
@@ -8,6 +9,7 @@
             update_cache: yes
 
 - hosts: " {{ ip_address }}"
+  gather_facts: false
   become: true
   roles:
       - base

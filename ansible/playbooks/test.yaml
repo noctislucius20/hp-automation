@@ -11,12 +11,9 @@
         set_fact:
             honeypot_list: "{{ hp_list }}"
 
-      - name: show facts
-        debug:
-            msg: "{{ ansible_facts }}"
-
 - hosts: "{{ ip_address }}"
   become: true
+  strategy: free
   gather_facts: false
   tasks:
       - name: deploy cowrie honeypot
@@ -26,6 +23,7 @@
 
 - hosts: "{{ ip_address }}"
   become: true
+  strategy: free
   gather_facts: false
   tasks:
       - name: deploy dionaea honeypot
