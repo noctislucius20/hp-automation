@@ -12,19 +12,202 @@
             honeypot_list: "{{ hp_list }}"
 
 - hosts: "{{ ip_address }}"
+  name: run honeypot deployment tasks
   become: true
-  strategy: free
   gather_facts: false
   tasks:
-      - name: deploy cowrie honeypot
-        include_role:
+      - name: cowrie deployment
+        docker_container:
             name: cowrie
+            image: quay.io/noctislucius20/cowrie-hp:latest
+            ports:
+                - 22:2222
+                - 23:2223
+            volumes:
+                - cowrie-etc:/cowrie/cowrie-git/etc
+                - cowrie-var:/cowrie/cowrie-git/var
+            cap_drop:
+                - all
+            read_only: true
+            state: started
+            detach: true
+        when: honeypot_list is search("cowrie")
+        async: 1000
+        poll: 0
+        register: cowrie_deploy
+
+      - name: dionaea deployment
+        docker_container:
+            name: dionaea
+            image: quay.io/noctislucius20/dionaea-hp:latest
+            ports:
+                - "21:21"
+                - "42:42"
+                - "69:69/udp"
+                - "80:80"
+                - "135:135"
+                - "443:443"
+                - "445:445"
+                - "1433:1433"
+                - "1723:1723"
+                - "1883:1883"
+                - "1900:1900/udp"
+                - "3306:3306"
+                - "5060:5060"
+                - "5060:5060/udp"
+                - "5061:5061"
+                - "11211:11211"
+            volumes:
+                - dionaea:/opt/dionaea
+            auto_remove: true
+            state: started
+            tty: true
+            interactive: true
+            detach: true
+        when: honeypot_list is search("dionaea")
+        async: 1000
+        poll: 0
+        register: dionaea_deploy
+
+      - name: elasticpot deployment
+        docker_container:
+            name: elasticpot
+            image: isif/elasticpot:elasticpot_hp
+            ports:
+                - 9200:9200/tcp
+            volumes:
+                - elasticpot:/elasticpot/log
+            tty: true
+            interactive: true
+            state: started
+            detach: true
+            command: /bin/sh -c "cd elasticpot; python3 elasticpot.py"
+        when: honeypot_list is search("elasticpot")
+        async: 1000
+        poll: 0
+        register: elasticpot_deploy
+
+      - name: gridpot deployment
+        docker_container:
+            name: gridpot
+            image: isif/gridpot:gridpot_hp
+            ports:
+                - 102:102
+                - 8000:80
+                - 161:161
+                - 502:502
+            volumes:
+                - gridpot:/gridpot
+            tty: true
+            interactive: true
+            state: started
+            detach: true
+            command: /bin/bash -c "cd gridpot; gridlabd -D run_realtime=1 --server ./gridpot/gridlabd/3.1/models/IEEE_13_Node_With_Houses.glm; conpot -t gridpot"
+        when: honeypot_list is search("gridpot")
+        async: 1000
+        poll: 0
+        register: gridpot_deploy
+
+      - name: honeytrap deployment
+        docker_container:
+            name: honeytrap
+            image: quay.io/noctislucius20/honeytrap-hp:latest
+            ports:
+                - "2222:2222"
+                - "8545:8545"
+                - "5900:5900"
+                - "25:25"
+                - "5037:5037"
+                - "631:631"
+                - "389:389"
+                - "6379:6379"
+            volumes:
+                - honeytrap:/home
+            state: started
+            tty: true
+            interactive: true
+            detach: true
+        when: honeypot_list is search("honeytrap")
+        async: 1000
+        poll: 0
+        register: honeytrap_deploy
+
+      - name: rdpy deployment
+        docker_container:
+            name: rdpy
+            image: isif/rdpy:rdpy_hp
+            ports:
+                - 3389:3389
+            volumes:
+                - rdpy:/var/log
+            tty: true
+            interactive: true
+            detach: true
+            state: started
+            command: /bin/bash -c "python /rdpy/bin/rdpy-rdphoneypot.py -l 3389 /rdpy/bin/1 >> /var/log/rdpy.log"
+        when: honeypot_list is search("rdpy")
+        async: 1000
+        poll: 0
+        register: rdpy_deploy
+
+- hosts: "{{ ip_address }}"
+  name: wait for honeypot deployment tasks to complete
+  become: true
+  gather_facts: false
+  tasks:
+      - name: wait for cowrie deployment
+        async_status:
+            jid: "{{ cowrie_deploy.ansible_job_id }}"
+        register: cowrie_deploy_status
+        until: cowrie_deploy_status.finished
+        retries: 1000
+        delay: 1
         when: honeypot_list is search("cowrie")
 
-      - name: deploy dionaea honeypot
-        include_role:
-            name: dionaea
+      - name: wait for dionaea deployment
+        async_status:
+            jid: "{{ dionaea_deploy.ansible_job_id }}"
+        register: dionaea_deploy_status
+        until: dionaea_deploy_status.finished
+        retries: 1000
+        delay: 1
         when: honeypot_list is search("dionaea")
+
+      - name: wait for elasticpot deployment
+        async_status:
+            jid: "{{ elasticpot_deploy.ansible_job_id }}"
+        register: elasticpot_deploy_status
+        until: elasticpot_deploy_status.finished
+        retries: 1000
+        delay: 1
+        when: honeypot_list is search("elasticpot")
+
+      - name: wait for gridpot deployment
+        async_status:
+            jid: "{{ gridpot_deploy.ansible_job_id }}"
+        register: gridpot_deploy_status
+        until: gridpot_deploy_status.finished
+        retries: 1000
+        delay: 1
+        when: honeypot_list is search("gridpot")
+
+      - name: wait for honeytrap deployment
+        async_status:
+            jid: "{{ honeytrap_deploy.ansible_job_id }}"
+        register: honeytrap_deploy_status
+        until: honeytrap_deploy_status.finished
+        retries: 1000
+        delay: 1
+        when: honeypot_list is search("honeytrap")
+
+      - name: wait for rdpy deployment
+        async_status:
+            jid: "{{ rdpy_deploy.ansible_job_id }}"
+        register: rdpy_deploy_status
+        until: rdpy_deploy_status.finished
+        retries: 1000
+        delay: 1
+        when: honeypot_list is search("rdpy")
 # - hosts: "{{ ip_address }}"
 #   gather_facts: false
 #   become: true
