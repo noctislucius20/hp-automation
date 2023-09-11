@@ -85,3 +85,5 @@
 - name: install psycopg2 module
   pip:
       name: psycopg2-binary
+  async: 3600
+  poll: 0
