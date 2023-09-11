@@ -1,16 +1,18 @@
 - name: install prerequesite packages
   apt:
-      name: ["curl", "nano", "wget", "git", "python3-pip", "net-tools"]
+      name:
+          [
+              "curl",
+              "nano",
+              "wget",
+              "git",
+              "python3-pip",
+              "net-tools",
+              "qemu-user-static",
+          ]
       state: latest
-  async: 3600
-  poll: 0
 
 # QEMU installation
-- name: install QEMU
-  apt:
-      name: qemu-user-static
-      state: latest
-
 - name: check QEMU status
   command: cat /proc/sys/fs/binfmt_misc/status
   register: qemu_status
@@ -83,3 +85,5 @@
 - name: install psycopg2 module
   pip:
       name: psycopg2-binary
+  async: 3600
+  poll: 0
