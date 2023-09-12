@@ -63,8 +63,6 @@
       name: ["docker-ce", "docker-ce-cli", "containerd.io"]
       state: latest
   notify: restart_docker
-  async: 3600
-  poll: 0
 
 - name: install python module
   pip:
