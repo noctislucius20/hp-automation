@@ -25,6 +25,7 @@
         async: 60
         poll: 0
         when: honeypot_list is search("cowrie")
+        register: cowrie_status
 
       - name: checking dionaea opened ports
         wait_for:
@@ -35,6 +36,7 @@
         async: 60
         poll: 0
         when: honeypot_list is search("dionaea")
+        register: dionaea_status
 
       - name: checking elasticpot opened ports
         wait_for:
@@ -45,6 +47,7 @@
         async: 60
         poll: 0
         when: honeypot_list is search("elasticpot")
+        register: elasticpot_status
 
       - name: checking gridpot opened ports
         wait_for:
@@ -55,6 +58,7 @@
         async: 60
         poll: 0
         when: honeypot_list is search("gridpot")
+        register: gridpot_status
 
       - name: checking honeytrap opened ports
         wait_for:
@@ -65,6 +69,7 @@
         async: 60
         poll: 0
         when: honeypot_list is search("honeytrap")
+        register: honeytrap_status
 
       - name: checking rdpy opened ports
         wait_for:
@@ -74,4 +79,99 @@
             timeout: 4
         async: 60
         poll: 0
+        when: honeypot_list is search("rdpy")
+        register: rdpy_status
+
+- hosts: "{{ ip_address }}"
+  name: wait for the check to finish
+  become: true
+  gather_facts: false
+  tasks:
+      - name: cowrie deployment result
+        async_status:
+            jid: "{{ cowrie_status.ansible_job_id }}"
+        when: honeypot_list is search("cowrie")
+        register: cowrie_result
+        until: cowrie_status.finished
+        retries: 30
+        delay: 1
+
+      - name: dionaea deployment result
+        async_status:
+            jid: "{{ dionaea_status.ansible_job_id }}"
+        when: honeypot_list is search("dionaea")
+        register: dionaea_result
+        until: dionaea_status.finished
+        retries: 30
+        delay: 1
+
+      - name: elasticpot deployment result
+        async_status:
+            jid: "{{ elasticpot_status.ansible_job_id }}"
+        when: honeypot_list is search("elasticpot")
+        register: elasticpot_result
+        until: elasticpot_status.finished
+        retries: 30
+        delay: 1
+
+      - name: gridpot deployment result
+        async_status:
+            jid: "{{ gridpot_status.ansible_job_id }}"
+        when: honeypot_list is search("gridpot")
+        register: gridpot_result
+        until: gridpot_status.finished
+        retries: 30
+        delay: 1
+
+      - name: honeytrap deployment result
+        async_status:
+            jid: "{{ honeytrap_status.ansible_job_id }}"
+        when: honeypot_list is search("honeytrap")
+        register: honeytrap_result
+        until: honeytrap_status.finished
+        retries: 30
+        delay: 1
+
+      - name: rdpy deployment result
+        async_status:
+            jid: "{{ rdpy_status.ansible_job_id }}"
+        when: honeypot_list is search("rdpy")
+        register: rdpy_result
+        until: rdpy_status.finished
+        retries: 30
+        delay: 1
+
+- hosts: "{{ ip_address }}"
+  name: print the result
+  become: true
+  gather_facts: false
+  tasks:
+      - name: print cowrie deployment result
+        debug:
+            msg: "{{ cowrie_result.result.stdout_lines }}"
+        when: honeypot_list is search("cowrie")
+
+      - name: print dionaea deployment result
+        debug:
+            msg: "{{ dionaea_result.result.stdout_lines }}"
+        when: honeypot_list is search("dionaea")
+
+      - name: print elasticpot deployment result
+        debug:
+            msg: "{{ elasticpot_result.result.stdout_lines }}"
+        when: honeypot_list is search("elasticpot")
+
+      - name: print gridpot deployment result
+        debug:
+            msg: "{{ gridpot_result.result.stdout_lines }}"
+        when: honeypot_list is search("gridpot")
+
+      - name: print honeytrap deployment result
+        debug:
+            msg: "{{ honeytrap_result.result.stdout_lines }}"
+        when: honeypot_list is search("honeytrap")
+
+      - name: print rdpy deployment result
+        debug:
+            msg: "{{ rdpy_result.result.stdout_lines }}"
         when: honeypot_list is search("rdpy")
