@@ -158,11 +158,11 @@
       - name: Wait for honeypot deployment
         async_status:
             jid: "{{ item.ansible_job_id }}"
+        when: honeypot_list is search(item.name)
         register: deploy_status
         until: deploy_status.finished
         retries: 1000
         delay: 1
-        when: honeypot_list is search(item.name)
         ignore_errors: true
         loop:
             - {
