@@ -17,5 +17,4 @@
   become: true
   roles:
       - package
-      - ewsposter
   tags: [honeypot]
