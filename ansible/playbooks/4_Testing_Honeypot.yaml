@@ -21,64 +21,60 @@
             host: "{{ ip_address }}"
             port: 22
             state: started
-            timeout: 4
+            timeout: 1
+            delay: 0
         when: honeypot_list is search("cowrie")
-        register: cowrie_status
+        ignore_errors: true
 
-      # - name: checking dionaea opened ports
-      #   wait_for:
-      #       host: "{{ ip_address }}"
-      #       port: 21
-      #       state: started
-      #       timeout: 4
-      #   async: 60
-      #   poll: 0
-      #   when: honeypot_list is search("dionaea")
-      #   register: dionaea_status
+      - name: checking dionaea opened ports
+        wait_for:
+            host: "{{ ip_address }}"
+            port: 21
+            state: started
+            timeout: 1
+            delay: 0
+        when: honeypot_list is search("dionaea")
+        ignore_errors: true
 
-      # - name: checking elasticpot opened ports
-      #   wait_for:
-      #       host: "{{ ip_address }}"
-      #       port: 9200
-      #       state: started
-      #       timeout: 4
-      #   async: 60
-      #   poll: 0
-      #   when: honeypot_list is search("elasticpot")
-      #   register: elasticpot_status
+      - name: checking elasticpot opened ports
+        wait_for:
+            host: "{{ ip_address }}"
+            port: 9200
+            state: started
+            timeout: 1
+            delay: 0
+        when: honeypot_list is search("elasticpot")
+        ignore_errors: true
 
-      # - name: checking gridpot opened ports
-      #   wait_for:
-      #       host: "{{ ip_address }}"
-      #       port: 8000
-      #       state: started
-      #       timeout: 4
-      #   async: 60
-      #   poll: 0
-      #   when: honeypot_list is search("gridpot")
-      #   register: gridpot_status
+      - name: checking gridpot opened ports
+        wait_for:
+            host: "{{ ip_address }}"
+            port: 8000
+            state: started
+            timeout: 1
+            delay: 0
+        when: honeypot_list is search("gridpot")
+        ignore_errors: true
 
-      # - name: checking honeytrap opened ports
-      #   wait_for:
-      #       host: "{{ ip_address }}"
-      #       port: 631
-      #       state: started
-      #       timeout: 4
-      #   async: 60
-      #   poll: 0
-      #   when: honeypot_list is search("honeytrap")
-      #   register: honeytrap_status
+      - name: checking honeytrap opened ports
+        wait_for:
+            host: "{{ ip_address }}"
+            port: 631
+            state: started
+            timeout: 1
+            delay: 0
+        when: honeypot_list is search("honeytrap")
+        ignore_errors: true
 
-      # - name: checking rdpy opened ports
-      #   wait_for:
-      #       host: "{{ ip_address }}"
-      #       port: 3389
-      #       state: started
-      #       timeout: 4
-      #   async: 60
-      #   poll: 0
-      #   when: honeypot_list is search("rdpy")
-      #   register: rdpy_status
+      - name: checking rdpy opened ports
+        wait_for:
+            host: "{{ ip_address }}"
+            port: 3389
+            state: started
+            timeout: 1
+            delay: 0
+        when: honeypot_list is search("rdpy")
+        ignore_errors: true
 # - hosts: "{{ ip_address }}"
 #   name: wait for the check to finish
 #   become: true
