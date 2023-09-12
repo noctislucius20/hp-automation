@@ -15,9 +15,8 @@
   become: true
   gather_facts: false
   tasks:
-    - name: checking cowrie opened ports
-      plugin: community.general.nmap
-      address: "{{ ip_address }}"/32
-      port: 22
-      when: honeypot_list is search("cowrie")
-      
+      - name: checking cowrie opened ports
+        plugin: community.general.nmap
+        address: "{{ ip_address }}/32"
+        port: 22
+        when: honeypot_list is search("cowrie")
