@@ -216,27 +216,21 @@
   tasks:
       - name: debug
         debug:
-            msg: "{{ item.job_name }}"
+            msg: "{{ item.ansible_job_id }}"
         when: honeypot_list is search(item.name)
         loop:
-            - { job_name: "{{ cowrie_deploy.ansible_job_id }}", name: "cowrie" }
+            - { ansible_job_id: cowrie_deploy.ansible_job_id, name: "cowrie" }
+            - { ansible_job_id: dionaea_deploy.ansible_job_id, name: "dionaea" }
             - {
-                  job_name: "{{ dionaea_deploy.ansible_job_id }}",
-                  name: "dionaea",
-              }
-            - {
-                  job_name: "{{ elasticpot_deploy.ansible_job_id }}",
+                  ansible_job_id: elasticpot_deploy.ansible_job_id,
                   name: "elasticpot",
               }
+            - { ansible_job_id: gridpot_deploy.ansible_job_id, name: "gridpot" }
             - {
-                  job_name: "{{ gridpot_deploy.ansible_job_id }}",
-                  name: "gridpot",
-              }
-            - {
-                  job_name: "{{ honeytrap_deploy.ansible_job_id }}",
+                  ansible_job_id: honeytrap_deploy.ansible_job_id,
                   name: "honeytrap",
               }
-            - { job_name: "{{ rdpy_deploy.ansible_job_id }}", name: "rdpy" }
+            - { ansible_job_id: rdpy_deploy.ansible_job_id, name: "rdpy" }
 
 # - hosts: "{{ ip_address }}"
 #   name: wait for honeypot deployment tasks to complete
