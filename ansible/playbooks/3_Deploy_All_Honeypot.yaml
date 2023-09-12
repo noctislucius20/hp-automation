@@ -209,49 +209,49 @@
 # retries: 1000
 # delay: 1
 
-- hosts: "{{ ip_address }}"
-  name: wait for honeypot deployment tasks to complete
-  become: true
-  gather_facts: false
-  tasks:
-      - name: debug
-        debug:
-            msg: "{{ item.ansible_job_id }}"
-        when: honeypot_list is search(item.name)
-        loop:
-            - { ansible_job_id: cowrie_deploy.ansible_job_id, name: "cowrie" }
-            - { ansible_job_id: dionaea_deploy.ansible_job_id, name: "dionaea" }
-            - {
-                  ansible_job_id: elasticpot_deploy.ansible_job_id,
-                  name: "elasticpot",
-              }
-            - { ansible_job_id: gridpot_deploy.ansible_job_id, name: "gridpot" }
-            - {
-                  ansible_job_id: honeytrap_deploy.ansible_job_id,
-                  name: "honeytrap",
-              }
-            - { ansible_job_id: rdpy_deploy.ansible_job_id, name: "rdpy" }
-
 # - hosts: "{{ ip_address }}"
 #   name: wait for honeypot deployment tasks to complete
 #   become: true
 #   gather_facts: false
 #   tasks:
-#       - name: Wait for honeypot deployment
-#         async_status:
-#             jid: "{{ item.job_name.ansible_job_id }}"
+#       - name: debug
+#         debug:
+#             msg: "{{ item.ansible_job_id }}"
 #         when: honeypot_list is search(item.name)
-#         register: deploy_status
-#         until: deploy_status.finished
-#         retries: 1000
-#         delay: 1
 #         loop:
-#             - { job_name: cowrie_deploy, name: "cowrie" }
-#             - { job_name: dionaea_deploy, name: "dionaea" }
-#             - { job_name: elasticpot_deploy, name: "elasticpot" }
-#             - { job_name: gridpot_deploy, name: "gridpot" }
-#             - { job_name: honeytrap_deploy, name: "honeytrap" }
-#             - { job_name: rdpy_deploy, name: "rdpy" }
+#             - { ansible_job_id: cowrie_deploy.ansible_job_id, name: "cowrie" }
+#             - { ansible_job_id: dionaea_deploy.ansible_job_id, name: "dionaea" }
+#             - {
+#                   ansible_job_id: elasticpot_deploy.ansible_job_id,
+#                   name: "elasticpot",
+#               }
+#             - { ansible_job_id: gridpot_deploy.ansible_job_id, name: "gridpot" }
+#             - {
+#                   ansible_job_id: honeytrap_deploy.ansible_job_id,
+#                   name: "honeytrap",
+#               }
+#             - { ansible_job_id: rdpy_deploy.ansible_job_id, name: "rdpy" }
+
+- hosts: "{{ ip_address }}"
+  name: wait for honeypot deployment tasks to complete
+  become: true
+  gather_facts: false
+  tasks:
+      - name: Wait for honeypot deployment
+        async_status:
+            jid: "{{ item.job_name }}"
+        when: honeypot_list is search(item.name)
+        register: deploy_status
+        until: deploy_status.finished
+        retries: 1000
+        delay: 1
+        loop:
+            - { job_name: cowrie_deploy.ansible_job_id, name: "cowrie" }
+            - { job_name: dionaea_deploy.ansible_job_id, name: "dionaea" }
+            - { job_name: elasticpot_deploy.ansible_job_id, name: "elasticpot" }
+            - { job_name: gridpot_deploy.ansible_job_id, name: "gridpot" }
+            - { job_name: honeytrap_deploy.ansible_job_id, name: "honeytrap" }
+            - { job_name: rdpy_deploy.ansible_job_id, name: "rdpy" }
 
 - hosts: "{{ ip_address }}"
   gather_facts: false
