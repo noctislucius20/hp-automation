@@ -10,7 +10,7 @@
               "net-tools",
               "qemu-user-static",
           ]
-      state: latest
+      state: present
 
 # QEMU installation
 - name: check QEMU status
@@ -61,7 +61,7 @@
 - name: install Docker
   apt:
       name: ["docker-ce", "docker-ce-cli", "containerd.io"]
-      state: latest
+      state: present
   notify: restart_docker
 
 - name: install python module
