@@ -163,6 +163,7 @@
         retries: 1000
         delay: 1
         when: honeypot_list is search(item.name)
+        ignore_errors: true
         loop:
             - {
                   ansible_job_id: "{{ cowrie_deploy.ansible_job_id }}",
