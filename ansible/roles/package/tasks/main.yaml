@@ -63,24 +63,28 @@
       name: ["docker-ce", "docker-ce-cli", "containerd.io"]
       state: latest
   notify: restart_docker
+  async: 3600
+  poll: 0
 
 - name: install python module
   pip:
       name: [docker, urllib3==1.26.5]
-
-# install mongodb
-- name: install mongodb docker
-  docker_container:
-      name: mongodb
-      image: mongo:4.4.6
-      auto_remove: true
-      state: started
-      ports:
-          - "27017:27017"
-      volumes:
-          - MongoDockerData:/data/db
   async: 3600
   poll: 0
+
+# install mongodb
+# - name: install mongodb docker
+#   docker_container:
+#       name: mongodb
+#       image: mongo:4.4.6
+#       auto_remove: true
+#       state: started
+#       ports:
+#           - "27017:27017"
+#       volumes:
+#           - MongoDockerData:/data/db
+#   async: 3600
+#   poll: 0
 
 - name: install psycopg2 module
   pip:
