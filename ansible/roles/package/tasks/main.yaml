@@ -21,20 +21,20 @@
   command: mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
   when: qemu_status.stdout != "enabled"
 
-- name: register QEMU interpreters
-  command: "{{ item }}"
-  with_items:
-      - update-binfmts --enable qemu-arm
-      - update-binfmts --enable qemu-aarch64
-      - update-binfmts --enable qemu-ppc64le
-      - update-binfmts --enable qemu-mips64
-      - update-binfmts --enable qemu-mips64el
-      - update-binfmts --enable qemu-mips
-      - update-binfmts --enable qemu-mipsel
-      - update-binfmts --enable qemu-s390x
-  ignore_errors: true
-  async: 3600
-  poll: 0
+# - name: register QEMU interpreters
+#   command: "{{ item }}"
+#   with_items:
+#       - update-binfmts --enable qemu-arm
+#       - update-binfmts --enable qemu-aarch64
+#       - update-binfmts --enable qemu-ppc64le
+#       - update-binfmts --enable qemu-mips64
+#       - update-binfmts --enable qemu-mips64el
+#       - update-binfmts --enable qemu-mips
+#       - update-binfmts --enable qemu-mipsel
+#       - update-binfmts --enable qemu-s390x
+#   ignore_errors: true
+#   async: 3600
+#   poll: 0
 
 # install docker engine
 - name: install dependencies (Docker)
