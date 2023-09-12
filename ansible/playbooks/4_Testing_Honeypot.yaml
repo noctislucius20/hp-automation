@@ -12,6 +12,7 @@
             honeypot_list: "{{ hp_list }}"
 
 - hosts: "{{ ip_address }}"
+  name: checking honeypot deployment status
   become: true
   gather_facts: false
   tasks:
@@ -30,7 +31,7 @@
             host: "{{ ip_address }}"
             port: 21
             state: started
-            timeout: 1
+            timeout: 4
         async: 60
         poll: 0
         when: honeypot_list is search("dionaea")
@@ -40,7 +41,7 @@
             host: "{{ ip_address }}"
             port: 9200
             state: started
-            timeout: 1
+            timeout: 4
         async: 60
         poll: 0
         when: honeypot_list is search("elasticpot")
@@ -50,7 +51,7 @@
             host: "{{ ip_address }}"
             port: 8000
             state: started
-            timeout: 1
+            timeout: 4
         async: 60
         poll: 0
         when: honeypot_list is search("gridpot")
@@ -60,7 +61,7 @@
             host: "{{ ip_address }}"
             port: 631
             state: started
-            timeout: 1
+            timeout: 4
         async: 60
         poll: 0
         when: honeypot_list is search("honeytrap")
@@ -70,7 +71,7 @@
             host: "{{ ip_address }}"
             port: 3389
             state: started
-            timeout: 1
+            timeout: 4
         async: 60
         poll: 0
         when: honeypot_list is search("rdpy")
