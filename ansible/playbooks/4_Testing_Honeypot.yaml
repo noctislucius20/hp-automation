@@ -130,30 +130,30 @@
   tasks:
       - name: print cowrie deployment result
         debug:
-            msg: "{{ cowrie_result.result.stdout_lines }}"
+            msg: "{{ cowrie_result.stderr }}"
         when: honeypot_list is search("cowrie")
 
       - name: print dionaea deployment result
         debug:
-            msg: "{{ dionaea_result.result.stdout_lines }}"
+            msg: "{{ dionaea_result.stderr }}"
         when: honeypot_list is search("dionaea")
 
       - name: print elasticpot deployment result
         debug:
-            msg: "{{ elasticpot_result.result.stdout_lines }}"
+            msg: "{{ elasticpot_result.stderr }}"
         when: honeypot_list is search("elasticpot")
 
       - name: print gridpot deployment result
         debug:
-            msg: "{{ gridpot_result.result.stdout_lines }}"
+            msg: "{{ gridpot_result.stderr }}"
         when: honeypot_list is search("gridpot")
 
       - name: print honeytrap deployment result
         debug:
-            msg: "{{ honeytrap_result.result.stdout_lines }}"
+            msg: "{{ honeytrap_result.stderr }}"
         when: honeypot_list is search("honeytrap")
 
       - name: print rdpy deployment result
         debug:
-            msg: "{{ rdpy_result.result.stdout_lines }}"
+            msg: "{{ rdpy_result.stderr }}"
         when: honeypot_list is search("rdpy")
