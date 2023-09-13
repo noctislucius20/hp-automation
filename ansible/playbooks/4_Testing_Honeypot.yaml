@@ -74,8 +74,8 @@
             jid: "{{ cowrie_status.ansible_job_id }}"
         when: honeypot_list is search("cowrie")
         register: cowrie_result
-        until: cowrie_status.finished
-        retries: 30
+        until: cowrie_result.finished
+        retries: 60
         delay: 1
 
       - name: dionaea deployment result
@@ -83,8 +83,8 @@
             jid: "{{ dionaea_status.ansible_job_id }}"
         when: honeypot_list is search("dionaea")
         register: dionaea_result
-        until: dionaea_status.finished
-        retries: 30
+        until: dionaea_result.finished
+        retries: 60
         delay: 1
 
       - name: elasticpot deployment result
@@ -92,8 +92,8 @@
             jid: "{{ elasticpot_status.ansible_job_id }}"
         when: honeypot_list is search("elasticpot")
         register: elasticpot_result
-        until: elasticpot_status.finished
-        retries: 30
+        until: elasticpot_result.finished
+        retries: 60
         delay: 1
 
       - name: gridpot deployment result
@@ -101,8 +101,8 @@
             jid: "{{ gridpot_status.ansible_job_id }}"
         when: honeypot_list is search("gridpot")
         register: gridpot_result
-        until: gridpot_status.finished
-        retries: 30
+        until: gridpot_result.finished
+        retries: 60
         delay: 1
 
       - name: honeytrap deployment result
@@ -110,8 +110,8 @@
             jid: "{{ honeytrap_status.ansible_job_id }}"
         when: honeypot_list is search("honeytrap")
         register: honeytrap_result
-        until: honeytrap_status.finished
-        retries: 30
+        until: honeytrap_result.finished
+        retries: 60
         delay: 1
 
       - name: rdpy deployment result
@@ -119,8 +119,8 @@
             jid: "{{ rdpy_status.ansible_job_id }}"
         when: honeypot_list is search("rdpy")
         register: rdpy_result
-        until: rdpy_status.finished
-        retries: 30
+        until: rdpy_result.finished
+        retries: 60
         delay: 1
 
 - hosts: "{{ ip_address }}"
